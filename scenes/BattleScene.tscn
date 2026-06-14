@@ -3,8 +3,8 @@
 [ext_resource type="Script" uid="uid://l22r5yb4on2k" path="res://scripts/battle/BattleScene.gd" id="1"]
 [ext_resource type="Script" uid="uid://cne86khh3pdob" path="res://scripts/battle/BattleManager.gd" id="2"]
 [ext_resource type="Script" uid="uid://ccvdd1um1bmx7" path="res://scripts/ui/BattleUI.gd" id="3"]
-[ext_resource type="Script" uid="uid://dd1djit0j14i2" path="res://scripts/ui/QuestionPanel.gd" id="4"]
-[ext_resource type="Script" uid="uid://d34cebkhslibe" path="res://scripts/ui/ResultPanel.gd" id="5"]
+[ext_resource type="PackedScene" path="res://scenes/ui/QuestionPanel.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://scenes/ui/ResultPanel.tscn" id="5"]
 
 [node name="BattleScene" type="Node2D" unique_id=808680317]
 script = ExtResource("1")
@@ -23,13 +23,9 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("3")
 
-[node name="QuestionPanel" type="PanelContainer" parent="CanvasLayer" unique_id=1869777140]
-visible = false
-script = ExtResource("4")
+[node name="QuestionPanel" parent="CanvasLayer" unique_id=1869777140 instance=ExtResource("4")]
 
-[node name="ResultPanel" type="PanelContainer" parent="CanvasLayer" unique_id=1322894633]
-visible = false
-script = ExtResource("5")
+[node name="ResultPanel" parent="CanvasLayer" unique_id=1322894633 instance=ExtResource("5")]
 
 [node name="PlayerTeam" type="Node2D" parent="." unique_id=930007036]
 

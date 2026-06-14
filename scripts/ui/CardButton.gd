@@ -7,8 +7,12 @@ signal drag_moved(global_position: Vector2)
 signal drag_released(card_index: int, global_position: Vector2)
 signal hover_changed(card_index: int, hovered: bool)
 
-const CARD_BACK_PATH: String = "res://assets/cards/card_base_paper.png"
-const LOCK_ICON_PATH: String = "res://assets/ui/skill_lock.png"
+@onready var background: TextureRect = $Background
+@onready var art_texture: TextureRect = $ArtTexture
+@onready var title_label: Label = $TitleLabel
+@onready var body_label: Label = $BodyLabel
+@onready var lock_overlay: TextureRect = $LockOverlay
+@onready var lock_icon: TextureRect = $LockIcon
 
 var card_index: int = -1
 var drag_origin: Vector2 = Vector2.ZERO
@@ -18,29 +22,11 @@ var suppress_next_click: bool = false
 var pose_tween: Tween
 var focus_tween: Tween
 
-var background: TextureRect
-var art_texture: TextureRect
-var title_label: Label
-var body_label: Label
-var lock_overlay: TextureRect
-var lock_icon: TextureRect
 var locked_by_ap: bool = false
+var interaction_locked: bool = false
 
 
 func _ready() -> void:
-	_ensure_visuals()
-
-
-func setup(card: CardData, index: int, current_ap: float, enabled: bool) -> void:
-	_ensure_visuals()
-	card_index = index
-	text = ""
-	locked_by_ap = card.is_skill() and current_ap < card.skill_ap_cost
-	disabled = not enabled or not card.can_use(current_ap)
-	tooltip_text = card.description
-	_update_text(card, current_ap)
-	_update_art(card)
-	_update_lock_state()
 	_setup_style()
 	if not pressed.is_connected(_on_pressed):
 		pressed.connect(_on_pressed)
@@ -50,8 +36,19 @@ func setup(card: CardData, index: int, current_ap: float, enabled: bool) -> void
 		mouse_exited.connect(_on_mouse_exited)
 
 
+func setup(card: CardData, index: int, current_ap: float, enabled: bool) -> void:
+	card_index = index
+	text = ""
+	locked_by_ap = card.is_skill() and current_ap < card.skill_ap_cost
+	disabled = not enabled or not card.can_use(current_ap)
+	tooltip_text = card.description
+	_update_text(card, current_ap)
+	_update_art(card)
+	_update_lock_state()
+
+
 func _gui_input(event: InputEvent) -> void:
-	if disabled:
+	if disabled or interaction_locked:
 		return
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.pressed:
@@ -76,7 +73,7 @@ func _gui_input(event: InputEvent) -> void:
 
 
 func _on_pressed() -> void:
-	if dragging or suppress_next_click:
+	if interaction_locked or dragging or suppress_next_click:
 		suppress_next_click = false
 		return
 	card_selected.emit(card_index)
@@ -127,88 +124,20 @@ func reset_drag_state() -> void:
 	suppress_next_click = false
 
 
+func set_interaction_locked(locked: bool) -> void:
+	interaction_locked = locked
+	if interaction_locked:
+		reset_drag_state()
+
+
 func _on_mouse_entered() -> void:
-	if not dragging:
+	if not dragging and not interaction_locked:
 		hover_changed.emit(card_index, true)
 
 
 func _on_mouse_exited() -> void:
-	if not dragging:
+	if not dragging and not interaction_locked:
 		hover_changed.emit(card_index, false)
-
-
-func _ensure_visuals() -> void:
-	if background != null:
-		return
-
-	clip_contents = false
-	mouse_filter = Control.MOUSE_FILTER_STOP
-
-	background = TextureRect.new()
-	background.texture = load(CARD_BACK_PATH)
-	background.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	background.set_anchors_preset(Control.PRESET_FULL_RECT)
-	background.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	background.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	add_child(background)
-
-	art_texture = TextureRect.new()
-	art_texture.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	art_texture.anchor_left = 0.18
-	art_texture.anchor_top = 0.10
-	art_texture.anchor_right = 0.82
-	art_texture.anchor_bottom = 0.56
-	art_texture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	art_texture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	add_child(art_texture)
-
-	title_label = Label.new()
-	title_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	title_label.anchor_left = 0.10
-	title_label.anchor_top = 0.58
-	title_label.anchor_right = 0.90
-	title_label.anchor_bottom = 0.73
-	title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	title_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	title_label.add_theme_font_size_override("font_size", 15)
-	title_label.add_theme_color_override("font_color", Color(0.10, 0.08, 0.06))
-	add_child(title_label)
-
-	body_label = Label.new()
-	body_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	body_label.anchor_left = 0.10
-	body_label.anchor_top = 0.72
-	body_label.anchor_right = 0.90
-	body_label.anchor_bottom = 0.92
-	body_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	body_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	body_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	body_label.add_theme_font_size_override("font_size", 13)
-	body_label.add_theme_color_override("font_color", Color(0.12, 0.10, 0.08))
-	add_child(body_label)
-
-	lock_overlay = TextureRect.new()
-	lock_overlay.visible = false
-	lock_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	lock_overlay.texture = load(CARD_BACK_PATH)
-	lock_overlay.modulate = Color(0.08, 0.08, 0.08, 0.38)
-	lock_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
-	lock_overlay.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	lock_overlay.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	add_child(lock_overlay)
-
-	lock_icon = TextureRect.new()
-	lock_icon.visible = false
-	lock_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	lock_icon.texture = load(LOCK_ICON_PATH)
-	lock_icon.anchor_left = 0.31
-	lock_icon.anchor_top = 0.22
-	lock_icon.anchor_right = 0.69
-	lock_icon.anchor_bottom = 0.48
-	lock_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	lock_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	add_child(lock_icon)
 
 
 func _update_text(card: CardData, current_ap: float) -> void:

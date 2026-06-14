@@ -13,10 +13,11 @@ func _ready() -> void:
 	question_panel.answer_submitted.connect(battle_manager.submit_answer)
 	result_panel.retry_requested.connect(battle_manager.retry_battle)
 	result_panel.menu_requested.connect(_go_to_menu)
+	result_panel.dismissed.connect(_on_result_panel_dismissed)
 
 	battle_manager.state_changed.connect(battle_ui.refresh)
-	battle_manager.question_requested.connect(question_panel.show_question)
-	battle_manager.result_requested.connect(result_panel.show_result)
+	battle_manager.question_requested.connect(_on_question_requested)
+	battle_manager.result_requested.connect(_on_result_requested)
 	battle_manager.log_added.connect(battle_ui.add_log)
 
 	await get_tree().process_frame
@@ -26,3 +27,17 @@ func _ready() -> void:
 
 func _go_to_menu() -> void:
 	get_tree().change_scene_to_file("res://scenes/MainMenu.tscn")
+
+
+func _on_question_requested(question: QuestionData) -> void:
+	battle_ui.set_card_interaction_locked(true)
+	question_panel.show_question(question)
+
+
+func _on_result_requested(title: String, message: String, battle_over: bool, victory: bool) -> void:
+	battle_ui.set_card_interaction_locked(true)
+	result_panel.show_result(title, message, battle_over, victory)
+
+
+func _on_result_panel_dismissed() -> void:
+	battle_ui.set_card_interaction_locked(false)

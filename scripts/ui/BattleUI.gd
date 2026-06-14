@@ -21,28 +21,22 @@ const HAND_BOTTOM_PADDING: float = 6.0
 const HAND_HOVER_LIFT: float = 38.0
 const HAND_HOVER_NEIGHBOR_PUSH: float = 14.0
 const HAND_HOVER_SECONDARY_PUSH: float = 6.0
-const LOG_COLLAPSED_WIDTH: float = 64.0
-const LOG_EXPANDED_WIDTH: float = 250.0
-const LOG_COLLAPSED_SIZE: Vector2 = Vector2(64, 64)
-const LOG_EXPANDED_SIZE: Vector2 = Vector2(250, 190)
 const TEAM_GENERAL_CARD_INDEX_OFFSET: int = 1000
 const CANCEL_DROP_SIZE: Vector2 = Vector2(142, 52)
+const BATTLE_TOP_BAR_SCENE: PackedScene = preload("res://scenes/ui/BattleTopBar.tscn")
+const BATTLE_INFO_PANEL_SCENE: PackedScene = preload("res://scenes/ui/BattleInfoPanel.tscn")
+const BATTLE_LOG_PANEL_SCENE: PackedScene = preload("res://scenes/ui/BattleLogPanel.tscn")
+const CARD_BUTTON_SCENE: PackedScene = preload("res://scenes/CardButton.tscn")
 
 var state: BattleState
-var status_label: Label
-var shop_button: Button
-var ap_bar: ProgressBar
-var ap_label: Label
+var top_bar: BattleTopBar
 var battlefield: Control
 var player_layer: Control
 var enemy_layer: Control
 var exclusive_cards: Control
 var general_cards: Control
-var log_panel: PanelContainer
-var log_collapsed_label: Label
-var log_close_button: Button
-var log_label: RichTextLabel
-var selected_hint: Label
+var log_panel: BattleLogPanel
+var selected_hint: BattleInfoPanel
 var shop_panel: PanelContainer
 var shop_balance_label: Label
 var shop_cards_row: HBoxContainer
@@ -50,14 +44,12 @@ var shop_refresh_button: Button
 var arrow_layer: ArrowLayer
 var cancel_drop_area: PanelContainer
 var cancel_drop_label: Label
-var log_tween: Tween
 
 var selected_character_index: int = 0
 var selected_enemy_index: int = 0
 var previous_character_index: int = -1
 var rendered_character_index: int = -1
 var showing_enemy_info: bool = false
-var log_expanded: bool = false
 var selection_transition_pending: bool = false
 var dragging_card_index: int = -1
 var hovered_card_index: int = -1
@@ -65,6 +57,7 @@ var hovered_player_target_index: int = -1
 var hovered_enemy_target_index: int = -1
 var hover_restore_time_left: float = 0.0
 var cancel_drop_hovered: bool = false
+var cards_interaction_locked: bool = false
 var player_hit_rects: Array[Rect2] = []
 var enemy_hit_rects: Array[Rect2] = []
 
@@ -97,7 +90,7 @@ func _input(event: InputEvent) -> void:
 
 func refresh(new_state: BattleState) -> void:
 	state = new_state
-	if status_label == null:
+	if top_bar == null:
 		return
 	_clamp_selection()
 	_select_next_ready_character_if_needed()
@@ -138,7 +131,10 @@ func _build_ui() -> void:
 	root.add_theme_constant_override("separation", 8)
 	add_child(root)
 
-	root.add_child(_make_top_bar())
+	top_bar = BATTLE_TOP_BAR_SCENE.instantiate() as BattleTopBar
+	top_bar.menu_requested.connect(func() -> void: get_tree().change_scene_to_file("res://scenes/MainMenu.tscn"))
+	top_bar.shop_requested.connect(_toggle_shop_panel)
+	root.add_child(top_bar)
 
 	battlefield = Control.new()
 	battlefield.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -163,7 +159,8 @@ func _build_ui() -> void:
 	battlefield.add_child(cancel_drop_area)
 
 	root.add_child(_make_bottom_panel())
-	add_child(_make_floating_info_panel())
+	selected_hint = BATTLE_INFO_PANEL_SCENE.instantiate() as BattleInfoPanel
+	add_child(selected_hint)
 	add_child(_make_shop_panel())
 
 
@@ -194,82 +191,6 @@ func _make_cancel_drop_area() -> PanelContainer:
 	return panel
 
 
-func _make_top_bar() -> Control:
-	var top := HBoxContainer.new()
-	top.custom_minimum_size = Vector2(1, 72)
-	top.add_theme_constant_override("separation", 14)
-
-	var menu_button := Button.new()
-	menu_button.text = "II"
-	menu_button.custom_minimum_size = Vector2(62, 58)
-	menu_button.add_theme_font_size_override("font_size", 24)
-	menu_button.add_theme_stylebox_override("normal", _style(PAPER, 28, 4))
-	menu_button.add_theme_stylebox_override("hover", _style(Color(0.94, 0.87, 0.72), 28, 4))
-	menu_button.pressed.connect(func() -> void: get_tree().change_scene_to_file("res://scenes/MainMenu.tscn"))
-	top.add_child(menu_button)
-
-	var ap_box := HBoxContainer.new()
-	ap_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	ap_box.add_theme_constant_override("separation", 8)
-	top.add_child(ap_box)
-
-	var ap_title := Label.new()
-	ap_title.text = "AP"
-	ap_title.add_theme_font_size_override("font_size", 26)
-	ap_title.add_theme_color_override("font_color", INK)
-	ap_box.add_child(ap_title)
-
-	var ap_wrap := Control.new()
-	ap_wrap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	ap_wrap.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	ap_wrap.custom_minimum_size = Vector2(1, 42)
-	ap_box.add_child(ap_wrap)
-
-	ap_bar = ProgressBar.new()
-	ap_bar.min_value = 0.0
-	ap_bar.max_value = 5.0
-	ap_bar.show_percentage = false
-	ap_bar.set_anchors_preset(Control.PRESET_FULL_RECT)
-	ap_bar.offset_top = 5
-	ap_bar.offset_bottom = -5
-	ap_bar.add_theme_stylebox_override("background", _style(Color(0.40, 0.36, 0.29, 0.98), 16, 4))
-	ap_bar.add_theme_stylebox_override("fill", _style(Color(0.24, 0.58, 0.90), 14, 1))
-	ap_wrap.add_child(ap_bar)
-
-	ap_label = Label.new()
-	ap_label.set_anchors_preset(Control.PRESET_FULL_RECT)
-	ap_label.offset_top = 5
-	ap_label.offset_bottom = -5
-	ap_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	ap_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	ap_label.add_theme_font_size_override("font_size", 22)
-	ap_label.add_theme_color_override("font_color", Color.WHITE)
-	ap_label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.42))
-	ap_label.add_theme_constant_override("shadow_offset_x", 1)
-	ap_label.add_theme_constant_override("shadow_offset_y", 2)
-	ap_wrap.add_child(ap_label)
-
-	status_label = Label.new()
-	status_label.custom_minimum_size = Vector2(210, 58)
-	status_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	status_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	status_label.add_theme_font_size_override("font_size", 20)
-	status_label.add_theme_color_override("font_color", INK)
-	status_label.add_theme_stylebox_override("normal", _style(PAPER, 16, 3))
-	top.add_child(status_label)
-
-	shop_button = Button.new()
-	shop_button.text = "商店"
-	shop_button.custom_minimum_size = Vector2(86, 58)
-	shop_button.add_theme_font_size_override("font_size", 20)
-	shop_button.add_theme_color_override("font_color", INK)
-	shop_button.add_theme_stylebox_override("normal", _style(Color(0.91, 0.78, 0.54), 16, 3))
-	shop_button.add_theme_stylebox_override("hover", _style(Color(1.0, 0.86, 0.60), 16, 3))
-	shop_button.pressed.connect(_toggle_shop_panel)
-	top.add_child(shop_button)
-	return top
-
-
 func _make_bottom_panel() -> Control:
 	var bottom := HBoxContainer.new()
 	bottom.custom_minimum_size = Vector2(1, 220)
@@ -297,83 +218,9 @@ func _make_bottom_panel() -> Control:
 	general_cards.custom_minimum_size = Vector2(310, 205)
 	cards_area.add_child(general_cards)
 
-	log_panel = PanelContainer.new()
-	log_panel.custom_minimum_size = LOG_COLLAPSED_SIZE
-	log_panel.size_flags_vertical = Control.SIZE_SHRINK_END
-	log_panel.clip_contents = true
-	log_panel.mouse_filter = Control.MOUSE_FILTER_STOP
-	log_panel.add_theme_stylebox_override("panel", _style(Color(0.91, 0.84, 0.70, 0.92), 8, 2))
-	log_panel.gui_input.connect(_on_log_panel_gui_input)
+	log_panel = BATTLE_LOG_PANEL_SCENE.instantiate() as BattleLogPanel
 	bottom.add_child(log_panel)
-
-	var log_stack := Control.new()
-	log_stack.mouse_filter = Control.MOUSE_FILTER_PASS
-	log_stack.set_anchors_preset(Control.PRESET_FULL_RECT)
-	log_panel.add_child(log_stack)
-
-	log_collapsed_label = Label.new()
-	log_collapsed_label.text = "日志"
-	log_collapsed_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	log_collapsed_label.set_anchors_preset(Control.PRESET_FULL_RECT)
-	log_collapsed_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	log_collapsed_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	log_collapsed_label.add_theme_font_size_override("font_size", 18)
-	log_collapsed_label.add_theme_color_override("font_color", INK)
-	log_stack.add_child(log_collapsed_label)
-
-	log_close_button = Button.new()
-	log_close_button.visible = false
-	log_close_button.text = "X"
-	log_close_button.custom_minimum_size = Vector2(28, 28)
-	log_close_button.anchor_left = 0.0
-	log_close_button.anchor_top = 0.0
-	log_close_button.anchor_right = 0.0
-	log_close_button.anchor_bottom = 0.0
-	log_close_button.offset_left = 6
-	log_close_button.offset_top = 6
-	log_close_button.offset_right = 34
-	log_close_button.offset_bottom = 34
-	log_close_button.add_theme_font_size_override("font_size", 14)
-	log_close_button.add_theme_stylebox_override("normal", _style(Color(0.94, 0.87, 0.72), 10, 2))
-	log_close_button.add_theme_stylebox_override("hover", _style(Color(1.0, 0.78, 0.68), 10, 2))
-	log_close_button.add_theme_color_override("font_color", INK)
-	log_close_button.pressed.connect(_collapse_log_panel)
-	log_stack.add_child(log_close_button)
-
-	log_label = RichTextLabel.new()
-	log_label.visible = false
-	log_label.set_anchors_preset(Control.PRESET_FULL_RECT)
-	log_label.offset_left = 8
-	log_label.offset_top = 38
-	log_label.offset_right = -8
-	log_label.offset_bottom = -6
-	log_label.fit_content = false
-	log_label.scroll_active = true
-	log_label.scroll_following = true
-	log_label.mouse_filter = Control.MOUSE_FILTER_STOP
-	log_label.add_theme_stylebox_override("normal", StyleBoxEmpty.new())
-	log_stack.add_child(log_label)
 	return bottom
-
-
-func _make_floating_info_panel() -> Control:
-	selected_hint = Label.new()
-	selected_hint.text = "点击左侧角色切换出牌者"
-	selected_hint.custom_minimum_size = Vector2(190, 102)
-	selected_hint.anchor_left = 0.0
-	selected_hint.anchor_top = 1.0
-	selected_hint.anchor_right = 0.0
-	selected_hint.anchor_bottom = 1.0
-	selected_hint.offset_left = 26
-	selected_hint.offset_top = -118
-	selected_hint.offset_right = 216
-	selected_hint.offset_bottom = -16
-	selected_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	selected_hint.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	selected_hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	selected_hint.add_theme_color_override("font_color", INK)
-	selected_hint.add_theme_stylebox_override("normal", _style(PAPER, 8, 2))
-	return selected_hint
 
 
 func _make_shop_panel() -> Control:
@@ -456,28 +303,7 @@ func _make_shop_panel() -> Control:
 
 
 func _refresh_status() -> void:
-	ap_bar.value = state.ap
-	ap_label.text = "%.1f / 5.0" % state.ap
-	if state.ap >= 5.0:
-		ap_bar.add_theme_stylebox_override("fill", _style(Color(0.96, 0.70, 0.22), 14, 1))
-		ap_label.add_theme_color_override("font_color", Color(0.18, 0.12, 0.04))
-	else:
-		ap_bar.add_theme_stylebox_override("fill", _style(Color(0.24, 0.58, 0.90), 14, 1))
-		ap_label.add_theme_color_override("font_color", Color.WHITE)
-
-	var phase_text := "准备"
-	match state.phase:
-		BattleState.Phase.PLAYER_TURN:
-			phase_text = "玩家回合"
-		BattleState.Phase.QUESTION:
-			phase_text = "答题中"
-		BattleState.Phase.ENEMY_TURN:
-			phase_text = "敌方回合"
-		BattleState.Phase.VICTORY:
-			phase_text = "胜利"
-		BattleState.Phase.DEFEAT:
-			phase_text = "失败"
-	status_label.text = "%s\n第 %d 回合" % [phase_text, state.turn_count]
+	top_bar.refresh(state.ap, state.phase, state.turn_count)
 	_refresh_info_hint()
 	_refresh_shop_panel()
 
@@ -701,17 +527,16 @@ func _refresh_cards() -> void:
 
 
 func _layout_card_fan(parent: Control, character: CharacterData, indices: Array[int], animate: bool, entry_offset: Vector2 = Vector2.ZERO) -> void:
-	var can_click: bool = state.phase == BattleState.Phase.PLAYER_TURN and character.is_alive() and not character.has_acted
+	var can_click: bool = state.phase == BattleState.Phase.PLAYER_TURN and character.is_alive() and not character.has_acted and not cards_interaction_locked
 	var count := indices.size()
 	for slot in count:
 		var card_index: int = indices[slot]
 		var card_data: CardData = _get_card_for_ui_index(character, card_index)
 		if card_data == null:
 			continue
-		var card_button := CardButton.new()
+		var card_button: CardButton = CARD_BUTTON_SCENE.instantiate() as CardButton
 		card_button.custom_minimum_size = CARD_SIZE
 		card_button.size = card_button.custom_minimum_size
-		card_button.setup(card_data, card_index, state.ap, can_click)
 		card_button.pivot_offset = Vector2(CARD_SIZE.x * 0.5, CARD_SIZE.y * HAND_PIVOT_Y_OFFSET_FACTOR)
 		card_button.card_selected.connect(_on_card_clicked)
 		card_button.drag_started.connect(_on_card_drag_started)
@@ -719,52 +544,60 @@ func _layout_card_fan(parent: Control, character: CharacterData, indices: Array[
 		card_button.drag_released.connect(_on_card_drag_released)
 		card_button.hover_changed.connect(_on_card_hover_changed)
 		parent.add_child(card_button)
+		card_button.setup(card_data, card_index, state.ap, can_click)
+		card_button.set_interaction_locked(cards_interaction_locked)
 
 		_apply_card_arc_pose(parent, card_button, slot, count, animate, entry_offset)
 
 
+func set_card_interaction_locked(locked: bool) -> void:
+	if cards_interaction_locked == locked:
+		return
+	cards_interaction_locked = locked
+	if cards_interaction_locked:
+		_cancel_current_card_interaction()
+	else:
+		hovered_card_index = -1
+		if state != null:
+			_select_next_ready_character_if_needed()
+			_refresh_status()
+			_refresh_battlefield()
+			_refresh_cards()
+			return
+	_apply_card_interaction_lock_to_group(exclusive_cards)
+	_apply_card_interaction_lock_to_group(general_cards)
+
+
+func _cancel_current_card_interaction() -> void:
+	if dragging_card_index != -1:
+		arrow_layer.end_arrow()
+		_reset_card_drag_state(dragging_card_index)
+		dragging_card_index = -1
+		_set_cancel_drop_visible(false)
+		_clear_drag_target_highlight()
+	hover_restore_time_left = 0.0
+	if hovered_card_index != -1:
+		hovered_card_index = -1
+		_relayout_existing_cards()
+
+
+func _apply_card_interaction_lock_to_group(parent: Control) -> void:
+	if parent == null:
+		return
+	for child: Node in parent.get_children():
+		if child is CardButton:
+			var card_button: CardButton = child
+			card_button.set_interaction_locked(cards_interaction_locked)
+
+
 func _refresh_logs() -> void:
-	log_label.clear()
-	for message: String in state.battle_log:
-		log_label.append_text(message + "\n")
-
-
-func _on_log_panel_gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-		_expand_log_panel()
-		accept_event()
-
-
-func _expand_log_panel() -> void:
-	if log_panel == null or log_expanded:
-		return
-	log_expanded = true
-	log_collapsed_label.visible = false
-	log_close_button.visible = true
-	log_label.visible = true
-	_tween_log_panel_size(LOG_EXPANDED_SIZE)
-
-
-func _collapse_log_panel() -> void:
-	if log_panel == null or not log_expanded:
-		return
-	log_expanded = false
-	log_label.visible = false
-	log_close_button.visible = false
-	log_collapsed_label.visible = true
-	_tween_log_panel_size(LOG_COLLAPSED_SIZE)
-
-
-func _tween_log_panel_size(target_size: Vector2) -> void:
-	if log_tween != null and log_tween.is_running():
-		log_tween.kill()
-	log_tween = create_tween()
-	log_tween.set_ease(Tween.EASE_OUT)
-	log_tween.set_trans(Tween.TRANS_CUBIC)
-	log_tween.tween_property(log_panel, "custom_minimum_size", target_size, 0.16)
+	if log_panel != null and state != null:
+		log_panel.set_messages(state.battle_log)
 
 
 func _on_card_clicked(card_index: int) -> void:
+	if cards_interaction_locked:
+		return
 	var character := _get_selected_character()
 	if character == null:
 		return
@@ -893,6 +726,9 @@ func _decode_team_general_card_index(card_index: int) -> int:
 
 
 func _on_card_drag_started(card_index: int, global_position: Vector2) -> void:
+	if cards_interaction_locked:
+		_reset_card_drag_state(card_index)
+		return
 	dragging_card_index = card_index
 	hovered_card_index = -1
 	hovered_player_target_index = -1
@@ -903,11 +739,16 @@ func _on_card_drag_started(card_index: int, global_position: Vector2) -> void:
 
 
 func _on_card_drag_moved(global_position: Vector2) -> void:
+	if cards_interaction_locked:
+		return
 	arrow_layer.update_arrow(global_position)
 	_update_drag_target_highlight(global_position)
 
 
 func _on_card_drag_released(card_index: int, global_position: Vector2) -> void:
+	if cards_interaction_locked:
+		_reset_card_drag_state(card_index)
+		return
 	_release_dragging_card(card_index, global_position)
 
 
@@ -945,7 +786,7 @@ func _is_over_cancel_drop_area(global_position: Vector2) -> bool:
 
 
 func _release_dragging_card(card_index: int, global_position: Vector2) -> void:
-	if dragging_card_index == -1:
+	if cards_interaction_locked or dragging_card_index == -1:
 		return
 	var cancelled_by_drop_area: bool = _is_over_cancel_drop_area(global_position)
 	arrow_layer.end_arrow()
@@ -989,7 +830,7 @@ func _release_dragging_card(card_index: int, global_position: Vector2) -> void:
 
 
 func _on_card_hover_changed(card_index: int, hovered: bool) -> void:
-	if dragging_card_index != -1:
+	if cards_interaction_locked or dragging_card_index != -1:
 		return
 	if hovered:
 		if hovered_card_index == card_index:
@@ -1197,7 +1038,7 @@ func _refresh_info_hint() -> void:
 
 	var character: CharacterData = _get_selected_character()
 	if character == null:
-		selected_hint.text = "点击左侧角色切换出牌者"
+		selected_hint.text = ""
 		return
 	selected_hint.text = "出牌者：%s\n属性：%s\n状态：%s\n被动：%s" % [
 		character.display_name,
@@ -1244,12 +1085,12 @@ func _refresh_shop_panel() -> void:
 		item.add_theme_constant_override("separation", 8)
 		shop_cards_row.add_child(item)
 
-		var preview := CardButton.new()
+		var preview: CardButton = CARD_BUTTON_SCENE.instantiate() as CardButton
 		preview.custom_minimum_size = Vector2(116, 152)
 		preview.size = preview.custom_minimum_size
+		item.add_child(preview)
 		preview.setup(offer_card, i, state.ap, true)
 		preview.disabled = true
-		item.add_child(preview)
 
 		var price := Label.new()
 		price.text = "%.1f TOEFL" % offer_card.shop_price
