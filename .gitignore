@@ -1,0 +1,34 @@
+# Godot generated files
+.godot/
+.import/
+imported/
+export_presets.cfg
+
+# Godot import sidecar files are generated from source assets.
+*.import
+
+# Export builds and packaged artifacts
+builds/
+exports/
+*.pck
+*.zip
+*.tar
+*.tar.gz
+*.7z
+
+# Local engine binaries
+Godot_*.exe
+Godot_*.console.exe
+
+# OS and editor noise
+.DS_Store
+Thumbs.db
+desktop.ini
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+
+# Logs
+*.log
