@@ -12,7 +12,7 @@
       "attribute": "culture",
       "max_hp": 110,
       "defense": 4,
-      "portrait_path": "res://images/βudding.png",
+      "portrait_path": "res://assets/characters/βudding.png",
       "cards": [
         "budding_attack",
         "budding_defense",
@@ -25,7 +25,7 @@
       "attribute": "pinyin",
       "max_hp": 95,
       "defense": 3,
-      "portrait_path": "res://images/天才兔.png",
+      "portrait_path": "res://assets/characters/天才兔.png",
       "cards": [
         "rabbit_attack",
         "rabbit_defense",
@@ -38,7 +38,7 @@
       "attribute": "vocabulary",
       "max_hp": 100,
       "defense": 3,
-      "portrait_path": "res://images/Lawilim.png",
+      "portrait_path": "res://assets/characters/Lawilim.png",
       "cards": [
         "lawilim_attack",
         "lawilim_defense",

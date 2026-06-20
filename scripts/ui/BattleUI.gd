@@ -8,8 +8,6 @@ signal shop_buy_requested(offer_index: int, character_index: int)
 signal developer_add_culture_mask_requested()
 signal developer_add_general_card_requested()
 
-const PAPER: Color = Color(0.86, 0.78, 0.64, 0.96)
-const INK: Color = Color(0.12, 0.10, 0.08)
 const CARD_SIZE: Vector2 = Vector2(144, 188)
 const HOVERED_HAND_Z_INDEX: int = 100
 const HAND_ARC_ANGLE_MIN_DEGREES: float = 9.0
@@ -792,23 +790,6 @@ func _select_next_ready_character_if_needed() -> void:
 func _selected_difficulty() -> String:
 	# 当前非技能卡暂时默认简单；技能会在 CardData 中自动改为困难。
 	return "easy"
-
-
-func _style(color: Color, radius: int, border_width: int) -> StyleBoxFlat:
-	var style := StyleBoxFlat.new()
-	style.bg_color = color
-	style.corner_radius_top_left = radius
-	style.corner_radius_top_right = radius
-	style.corner_radius_bottom_left = radius
-	style.corner_radius_bottom_right = radius
-	style.border_width_left = border_width
-	style.border_width_right = border_width
-	style.border_width_top = border_width
-	style.border_width_bottom = border_width
-	style.border_color = Color(0.13, 0.10, 0.08)
-	style.shadow_color = Color(0, 0, 0, 0.20)
-	style.shadow_size = 5
-	return style
 
 
 func _clear_children(node: Node) -> void:

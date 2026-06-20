@@ -52,7 +52,7 @@ key,zh_CN,en
 "CHARACTER_RABBIT","天才兔","Genius Rabbit"
 "CHARACTER_LAWILIM","Lawilim","Lawilim"
 "ENEMY_PINYIN_BUN","拼音包子","Pinyin Bun"
-"ENEMY_VOCABULARY_SLIME","词汇史莱姆","Vocabulary Slime"
+"ENEMY_VOCAB_SLIME","词汇史莱姆","Vocabulary Slime"
 "ENEMY_CULTURE_MASK","文化面具","Culture Mask"
 "CARD_BUDDING_ATTACK","文化纸牌","Culture Card"
 "CARD_BUDDING_ATTACK_DESC","回答文化题，造成伤害。答对按难度提高伤害并获得 AP。","Answer a culture question to deal damage. A correct answer increases damage by difficulty and grants AP."

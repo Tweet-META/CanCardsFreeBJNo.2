@@ -8,6 +8,8 @@ signal enemy_selected(enemy_index: int)
 const CHARACTER_STANDEE_SCENE: PackedScene = preload("res://scenes/ui/CharacterStandee.tscn")
 const ENEMY_STANDEE_SCENE: PackedScene = preload("res://scenes/ui/EnemyStandee.tscn")
 const DEFAULT_FIELD_SIZE: Vector2 = Vector2(1228, 395)
+const ENEMY_STANDEE_SIZE: Vector2 = Vector2(220, 210)
+const ENEMY_BASE_Z_INDEX: int = 100
 
 var host: Control
 var battlefield: Control
@@ -78,34 +80,23 @@ func enemy_index_at(global_position: Vector2) -> int:
 	return -1
 
 
-func first_alive_enemy_index() -> int:
-	if state == null:
-		return -1
-	for i in state.enemy_team.size():
-		if state.enemy_team[i].is_alive():
-			return i
-	return -1
-
-
 func enemy_layout_for_count(count: int, field_size: Vector2) -> Array[Dictionary]:
-	# 使用归一化槽位穷举 1～8 只敌人的阵型，并按数量统一缩放。
+	# 所有数量都保持原始尺寸，通过斜向错落和适度重叠容纳最多八只敌人。
 	var layouts: Array[Dictionary] = []
 	if count <= 0:
 		return layouts
 
 	var normalized_slots: Array[Vector2] = _enemy_slot_pattern(count)
-	var scale_value: float = _enemy_scale_for_count(count)
 	var enemy_region := Rect2(
 		Vector2(field_size.x * 0.55, field_size.y * 0.02),
 		Vector2(field_size.x * 0.43, field_size.y * 0.86)
 	)
-	var visual_size: Vector2 = Vector2(220, 210) * scale_value
 
 	for normalized_slot: Vector2 in normalized_slots:
 		var center: Vector2 = enemy_region.position + enemy_region.size * normalized_slot
 		layouts.append({
-			"position": center - visual_size * 0.5,
-			"scale": Vector2.ONE * scale_value
+			"position": center - ENEMY_STANDEE_SIZE * 0.5,
+			"scale": Vector2.ONE
 		})
 	return layouts
 
@@ -177,59 +168,36 @@ func _refresh_enemies(
 		enemy_standee.position = layout["position"] as Vector2
 		enemy_standee.size = enemy_standee.custom_minimum_size
 		enemy_standee.scale = layout["scale"] as Vector2
-		enemy_standee.z_index = slot
+		# 固定基础层级保证顶部单位也在背景遮罩前；纵向位置只负责单位间的纵深。
+		enemy_standee.z_index = ENEMY_BASE_Z_INDEX + maxi(0, roundi(enemy_standee.position.y))
 		enemy_standees[enemy_index] = enemy_standee
 
 
 func _enemy_slot_pattern(count: int) -> Array[Vector2]:
+	# 3～8 只使用累计槽位：新增敌人只占用右侧新位置，不改变已有相对站位。
+	var mirrored_three: Array[Vector2] = [
+		Vector2(0.52, 0.285),
+		Vector2(0.08, 0.56),
+		Vector2(0.50, 0.83)
+	]
+	var expansion_slots: Array[Vector2] = [
+		Vector2(0.45, 0.51),
+		Vector2(0.70, 0.82),
+		Vector2(0.72, 0.29),
+		Vector2(0.82, 0.52),
+		Vector2(0.83, 0.80)
+	]
 	match count:
 		1:
 			return [Vector2(0.58, 0.50)]
 		2:
 			return [Vector2(0.38, 0.32), Vector2(0.70, 0.66)]
-		3:
-			return [Vector2(0.58, 0.22), Vector2(0.30, 0.68), Vector2(0.76, 0.68)]
-		4:
-			return [
-				Vector2(0.30, 0.28), Vector2(0.72, 0.28),
-				Vector2(0.30, 0.70), Vector2(0.72, 0.70)
-			]
-		5:
-			return [
-				Vector2(0.17, 0.28), Vector2(0.50, 0.28), Vector2(0.83, 0.28),
-				Vector2(0.33, 0.70), Vector2(0.67, 0.70)
-			]
-		6:
-			return [
-				Vector2(0.17, 0.28), Vector2(0.50, 0.28), Vector2(0.83, 0.28),
-				Vector2(0.17, 0.70), Vector2(0.50, 0.70), Vector2(0.83, 0.70)
-			]
-		7:
-			return [
-				Vector2(0.10, 0.28), Vector2(0.37, 0.28), Vector2(0.63, 0.28), Vector2(0.90, 0.28),
-				Vector2(0.23, 0.70), Vector2(0.50, 0.70), Vector2(0.77, 0.70)
-			]
 		_:
-			return [
-				Vector2(0.10, 0.28), Vector2(0.37, 0.28), Vector2(0.63, 0.28), Vector2(0.90, 0.28),
-				Vector2(0.10, 0.70), Vector2(0.37, 0.70), Vector2(0.63, 0.70), Vector2(0.90, 0.70)
-			]
-
-
-func _enemy_scale_for_count(count: int) -> float:
-	match count:
-		1:
-			return 1.0
-		2:
-			return 0.92
-		3:
-			return 0.84
-		4:
-			return 0.74
-		5, 6:
-			return 0.62
-		_:
-			return 0.54
+			var slots: Array[Vector2] = mirrored_three.duplicate()
+			var additional_count: int = mini(maxi(count - 3, 0), expansion_slots.size())
+			for i in additional_count:
+				slots.append(expansion_slots[i])
+			return slots
 
 
 func _control_contains_global_point(control: Control, global_position: Vector2) -> bool:

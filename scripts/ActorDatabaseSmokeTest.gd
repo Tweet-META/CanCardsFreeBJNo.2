@@ -34,7 +34,7 @@ func _test_characters() -> void:
 	var lawilim: CharacterData = CharacterDatabase.create_character("lawilim")
 	assert(lawilim != null)
 	assert(lawilim.attribute == LearningAttribute.VOCABULARY)
-	assert(lawilim.portrait_path == "res://images/Lawilim.png")
+	assert(lawilim.portrait_path == "res://assets/characters/Lawilim.png")
 
 
 func _test_enemies() -> void:
@@ -48,6 +48,11 @@ func _test_enemies() -> void:
 	assert(pinyin_bun.max_hp == 70)
 	assert(pinyin_bun.attack == 11)
 	assert(pinyin_bun.defense == 1)
+
+	var vocab_slime: EnemyData = team[1]
+	assert(vocab_slime.id == "vocab_slime")
+	assert(vocab_slime.display_name == "ENEMY_VOCAB_SLIME")
+	assert(vocab_slime.portrait_path == "res://assets/enemies/vocab_slime.png")
 
 	var culture_mask: EnemyData = EnemyDatabase.create_enemy("culture_mask")
 	assert(culture_mask != null)

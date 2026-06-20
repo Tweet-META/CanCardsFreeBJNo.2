@@ -101,12 +101,6 @@ func submit_answer(answer_index: int) -> void:
 	_finish_player_action()
 
 
-func end_player_turn() -> void:
-	if state.phase != BattleState.Phase.PLAYER_TURN:
-		return
-	_run_enemy_turn()
-
-
 func retry_battle() -> void:
 	start_new_battle()
 

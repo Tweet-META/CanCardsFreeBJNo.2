@@ -2,7 +2,7 @@
   "version": 1,
   "enemy_team": [
     "pinyin_bun",
-    "vocabulary_slime",
+    "vocab_slime",
     "culture_mask"
   ],
   "enemies": [
@@ -14,17 +14,17 @@
       "attack": 11,
       "defense": 1,
       "toefl_reward": 1.0,
-      "portrait_path": "res://assets/enemies/tone_blob.png"
+      "portrait_path": "res://assets/enemies/pinyin_bun.png"
     },
     {
-      "id": "vocabulary_slime",
-      "display_name": "ENEMY_VOCABULARY_SLIME",
+      "id": "vocab_slime",
+      "display_name": "ENEMY_VOCAB_SLIME",
       "attribute": "vocabulary",
       "max_hp": 80,
       "attack": 12,
       "defense": 2,
       "toefl_reward": 1.0,
-      "portrait_path": "res://assets/enemies/word_slime.png"
+      "portrait_path": "res://assets/enemies/vocab_slime.png"
     },
     {
       "id": "culture_mask",
@@ -34,7 +34,7 @@
       "attack": 13,
       "defense": 2,
       "toefl_reward": 1.5,
-      "portrait_path": "res://assets/enemies/festival_mask.png"
+      "portrait_path": "res://assets/enemies/culture_mask.png"
     }
   ]
 }
