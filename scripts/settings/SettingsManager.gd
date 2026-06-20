@@ -1,4 +1,5 @@
 extends Node
+## 保存全局设置并广播开发者模式变化。
 
 signal developer_mode_changed(enabled: bool)
 
@@ -14,6 +15,7 @@ func _ready() -> void:
 
 
 func set_developer_mode(enabled: bool) -> void:
+	# 只有实际变化时才写盘和发信号，避免 UI 同步造成重复回调。
 	if developer_mode == enabled:
 		return
 	developer_mode = enabled

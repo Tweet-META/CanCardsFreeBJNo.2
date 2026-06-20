@@ -1,4 +1,5 @@
 extends Node2D
+## 战斗场景的信号接线层，只连接 BattleManager 与各 UI 面板。
 
 @onready var battle_manager: BattleManager = $BattleManager
 @onready var battle_ui: BattleUI = $CanvasLayer/BattleUI
@@ -10,7 +11,7 @@ func _ready() -> void:
 	battle_ui.card_use_requested.connect(battle_manager.request_use_card)
 	battle_ui.shop_refresh_requested.connect(battle_manager.request_refresh_shop)
 	battle_ui.shop_buy_requested.connect(battle_manager.request_buy_shop_card)
-	battle_ui.developer_add_festival_mask_requested.connect(battle_manager.developer_add_festival_mask)
+	battle_ui.developer_add_culture_mask_requested.connect(battle_manager.developer_add_culture_mask)
 	battle_ui.developer_add_general_card_requested.connect(battle_manager.developer_add_general_card)
 	question_panel.answer_submitted.connect(battle_manager.submit_answer)
 	result_panel.retry_requested.connect(battle_manager.retry_battle)
@@ -32,6 +33,7 @@ func _go_to_menu() -> void:
 
 
 func _on_question_requested(question: QuestionData) -> void:
+	# 答题期间锁定卡牌交互，防止重复出牌。
 	battle_ui.set_card_interaction_locked(true)
 	question_panel.show_question(question)
 
@@ -42,4 +44,5 @@ func _on_result_requested(title: String, message: String, battle_over: bool, vic
 
 
 func _on_result_panel_dismissed() -> void:
+	# 普通答题反馈关闭后恢复出牌。
 	battle_ui.set_card_interaction_locked(false)

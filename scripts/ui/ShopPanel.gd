@@ -1,4 +1,5 @@
 extends PanelContainer
+## 商店弹窗，展示随机通用卡并管理刷新与购买入口。
 class_name ShopPanel
 
 signal refresh_requested
@@ -37,6 +38,7 @@ func close() -> void:
 
 
 func refresh(balance: float, offers: Array[CardData], current_ap: float) -> void:
+	# 每次商店状态变化都重建报价项，避免旧价格和禁用状态残留。
 	balance_label.text = tr("UI_BALANCE_FORMAT") % balance
 	refresh_button.disabled = balance + 0.001 < 0.5
 	if not visible:

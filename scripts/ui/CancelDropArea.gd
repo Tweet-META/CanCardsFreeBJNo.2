@@ -1,4 +1,5 @@
 extends PanelContainer
+## 拖牌期间显示的取消投放区，并负责自身悬停视觉。
 class_name CancelDropArea
 
 const INK: Color = Color(0.12, 0.10, 0.08)

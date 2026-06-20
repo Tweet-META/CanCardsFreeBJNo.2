@@ -1,4 +1,5 @@
 extends SceneTree
+## 验证三种属性被动按属性而非角色 ID 统计，并支持同属性叠加。
 
 
 func _init() -> void:
@@ -9,6 +10,7 @@ func _init() -> void:
 
 
 func _test_pinyin_stacking() -> void:
+	# 生命按开战总人数计算，战斗中的伤害倍率按存活人数计算。
 	var players: Array[CharacterData] = [
 		_make_character("pinyin_one", BattleState.ATTRIBUTE_PINYIN, 100),
 		_make_character("pinyin_two", BattleState.ATTRIBUTE_PINYIN, 80),

@@ -1,4 +1,5 @@
 extends SceneTree
+## 验证中英文 UI、卡牌与题目翻译键均可由 LanguageManager 解析。
 
 
 func _init() -> void:

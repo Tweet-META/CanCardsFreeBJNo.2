@@ -1,4 +1,5 @@
 extends RefCounted
+## 管理战场立绘实例、1～8 敌人站位、选择动画和坐标命中检测。
 class_name BattlefieldController
 
 signal character_selected(character_index: int)
@@ -34,6 +35,7 @@ func refresh(
 	hovered_player_target_index: int,
 	hovered_enemy_target_index: int
 ) -> void:
+	# 每次刷新重建立绘，确保死亡敌人立即消失且高亮状态不会残留。
 	state = new_state
 	_clear_children(player_layer)
 	_clear_children(enemy_layer)
@@ -86,6 +88,7 @@ func first_alive_enemy_index() -> int:
 
 
 func enemy_layout_for_count(count: int, field_size: Vector2) -> Array[Dictionary]:
+	# 使用归一化槽位穷举 1～8 只敌人的阵型，并按数量统一缩放。
 	var layouts: Array[Dictionary] = []
 	if count <= 0:
 		return layouts
@@ -114,6 +117,7 @@ func _refresh_players(
 	selection_transition_pending: bool,
 	hovered_player_target_index: int
 ) -> void:
+	# 我方当前固定三人阵型；切换选中角色时通过补间上下移动。
 	var player_positions: Array[Vector2] = [
 		Vector2(70, field_size.y * 0.08),
 		Vector2(210, field_size.y * 0.27),
@@ -150,6 +154,7 @@ func _refresh_enemies(
 	showing_enemy_info: bool,
 	hovered_enemy_target_index: int
 ) -> void:
+	# 保留 enemy_team 原始索引，确保 UI 目标与战斗状态一致。
 	var alive_enemy_indices: Array[int] = []
 	for i in state.enemy_team.size():
 		if state.enemy_team[i].is_alive():

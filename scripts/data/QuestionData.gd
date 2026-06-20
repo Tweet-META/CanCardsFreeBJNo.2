@@ -1,4 +1,5 @@
 extends Resource
+## 一道题目的内容、选项和正确答案索引。
 class_name QuestionData
 
 @export var id: String = ""

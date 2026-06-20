@@ -1,4 +1,5 @@
 extends Control
+## 主菜单控制器，负责开始游戏、语言切换、设置与退出。
 
 @onready var start_button: Button = $CenterBox/StartButton
 @onready var language_option: OptionButton = $CenterBox/LanguageRow/LanguageOption

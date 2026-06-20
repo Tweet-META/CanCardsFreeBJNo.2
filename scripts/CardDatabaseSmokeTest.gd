@@ -1,4 +1,5 @@
 extends SceneTree
+## 验证 cards.json 映射、自动通用牌池、重复抽取和关键卡牌数值。
 
 
 func _init() -> void:
@@ -63,6 +64,7 @@ func _init() -> void:
 
 
 func _can_draw_duplicates(count: int, starting_hand: bool) -> bool:
+	# 扫描一组固定种子，证明抽取是有放回而不是仅凭某一次随机结果。
 	for seed_value in 100:
 		var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 		rng.seed = seed_value

@@ -1,4 +1,5 @@
 extends Node
+## 战斗规则与回合状态机；通过 signal 通知 UI，不直接操作界面节点。
 class_name BattleManager
 
 signal state_changed(state: BattleState)
@@ -19,6 +20,7 @@ func _ready() -> void:
 
 
 func start_new_battle() -> void:
+	# 每局都从数据库创建全新角色、敌人和卡牌实例。
 	state.setup(GameDataFactory.create_player_team(), GameDataFactory.create_enemy_team(), rng)
 	_roll_shop_offers()
 	state.push_log(tr("LOG_BATTLE_START"))
@@ -28,6 +30,7 @@ func start_new_battle() -> void:
 
 
 func request_use_card(character_index: int, card_index: int, enemy_index: int, ally_index: int, difficulty: String) -> void:
+	# 所有出牌请求的唯一入口：先验证阶段、行动资格、AP 和目标。
 	if state.phase != BattleState.Phase.PLAYER_TURN:
 		_emit_log(tr("LOG_CANNOT_USE_CARD"))
 		return
@@ -62,6 +65,7 @@ func request_use_card(character_index: int, card_index: int, enemy_index: int, a
 	state.selected_ally = target_ally
 	state.selected_enemy = target_enemy
 	state.pending_card = card
+	# 技能自动固定困难，其余卡牌沿用玩家选择的难度。
 	state.pending_difficulty = card.get_question_difficulty(difficulty)
 
 	if not card.requires_question:
@@ -77,6 +81,7 @@ func request_use_card(character_index: int, card_index: int, enemy_index: int, a
 
 
 func submit_answer(answer_index: int) -> void:
+	# 答错不受处罚；词汇被动可能让本次仍按“加成触发”结算。
 	if state.phase != BattleState.Phase.QUESTION or state.pending_question == null:
 		return
 
@@ -117,6 +122,7 @@ func request_refresh_shop() -> void:
 
 
 func request_buy_shop_card(offer_index: int, character_index: int) -> void:
+	# character_index 当前只验证有存活角色；购买结果属于整个队伍。
 	if offer_index < 0 or offer_index >= state.shop_offer_cards.size():
 		return
 	if character_index < 0 or character_index >= state.player_team.size():
@@ -141,14 +147,14 @@ func request_buy_shop_card(offer_index: int, character_index: int) -> void:
 	state_changed.emit(state)
 
 
-func developer_add_festival_mask() -> void:
+func developer_add_culture_mask() -> void:
 	if not SettingsManager.developer_mode:
 		return
 	if state.get_alive_enemies().size() >= 8:
 		_emit_log(tr("DEV_LOG_ENEMY_LIMIT"))
 		return
 
-	var enemy: EnemyData = GameDataFactory.create_festival_mask_enemy()
+	var enemy: EnemyData = GameDataFactory.create_culture_mask_enemy()
 	enemy.id = "%s_dev_%d" % [enemy.id, Time.get_ticks_msec()]
 	enemy.setup_runtime()
 	state.enemy_team.append(enemy)
@@ -168,6 +174,7 @@ func developer_add_general_card() -> void:
 
 
 func _apply_card_effect(_answer_correct: bool, bonus_triggered: bool) -> void:
+	# effect_id 决定行为；card_type 只负责 UI 分类和技能通用规则。
 	var character: CharacterData = state.selected_character
 	var card: CardData = state.pending_card
 	if character == null or card == null:
@@ -212,6 +219,7 @@ func _apply_attack_card(character: CharacterData, card: CardData, bonus_triggere
 
 
 func _apply_skill_card(character: CharacterData, card: CardData, bonus_triggered: bool) -> void:
+	# 当前技能答对统一获得 25% 伤害倍率，范围由 target_type 决定。
 	var extra_bonus: float = 0.25 if bonus_triggered else 0.0
 	if card.target_type == CardData.TargetType.ALL_ENEMIES:
 		for enemy: EnemyData in state.enemy_team:
@@ -230,6 +238,7 @@ func _apply_skill_card(character: CharacterData, card: CardData, bonus_triggered
 
 
 func _calculate_damage(character: CharacterData, enemy: EnemyData, base_damage: int, card_bonus: float) -> int:
+	# 我方没有角色攻击值：卡牌伤害叠加拼音、同属性和答题倍率。
 	var multiplier: float = state.get_team_stat_multiplier()
 	if character.attribute == enemy.attribute:
 		multiplier += 0.20
@@ -244,6 +253,7 @@ func _gain_answer_ap(character: CharacterData, card: CardData) -> void:
 
 
 func _finish_player_action() -> void:
+	# 通用卡使用后移除；所有存活角色行动完毕后自动进入敌方回合。
 	if state.selected_character != null:
 		state.selected_character.mark_acted()
 		if state.pending_card != null and state.pending_card.is_general():
@@ -264,6 +274,7 @@ func _finish_player_action() -> void:
 
 
 func _run_enemy_turn() -> void:
+	# 当前敌人只会依次对随机存活角色进行基础单体攻击。
 	state.phase = BattleState.Phase.ENEMY_TURN
 	state_changed.emit(state)
 	_emit_log(tr("LOG_ENEMY_TURN_START"))
@@ -299,6 +310,7 @@ func _check_battle_end() -> bool:
 
 
 func _collect_reward_if_dead(enemy: EnemyData) -> void:
+	# 奖励清零可确保同一敌人只结算一次 TOEFL。
 	if not enemy.is_alive() and enemy.toefl_reward > 0.0:
 		state.add_new_toefl(enemy.toefl_reward)
 		_emit_log(tr("LOG_ENEMY_REWARD") % [tr(enemy.display_name), enemy.toefl_reward])
@@ -345,6 +357,7 @@ func _roll_shop_offers() -> void:
 
 
 func _get_card_for_request(character: CharacterData, card_index: int) -> CardData:
+	# 负数编码区分队伍通用卡与角色 cards 数组，保持现有 UI 信号格式。
 	if _is_team_general_card_index(card_index):
 		var team_card_index: int = _decode_team_general_card_index(card_index)
 		if team_card_index >= 0 and team_card_index < state.team_general_cards.size():

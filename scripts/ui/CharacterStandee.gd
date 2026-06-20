@@ -1,4 +1,5 @@
 extends Button
+## 我方角色立绘组件，显示生命、行动状态、选中标记和目标高亮。
 class_name CharacterStandee
 
 signal standee_selected(character_index: int)
@@ -25,6 +26,7 @@ func _ready() -> void:
 
 
 func setup(character: CharacterData, index: int, selected: bool, target_highlighted: bool) -> void:
+	# 已行动角色变灰，但仍保留点击能力以切换并查看信息。
 	character_index = index
 	disabled = not character.is_alive()
 

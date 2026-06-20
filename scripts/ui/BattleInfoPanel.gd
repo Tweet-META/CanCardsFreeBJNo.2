@@ -1,4 +1,5 @@
 extends Label
+## 左下角角色/敌人信息面板，并根据当前语言调整字号。
 class_name BattleInfoPanel
 
 const PAPER: Color = Color(0.86, 0.78, 0.64, 0.96)

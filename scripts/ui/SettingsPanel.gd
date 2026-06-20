@@ -1,4 +1,5 @@
 extends PanelContainer
+## 主菜单设置面板，目前用于切换并同步开发者模式。
 class_name SettingsPanel
 
 @onready var developer_mode_checkbox: CheckBox = $Box/DeveloperModeCheckBox

@@ -1,4 +1,5 @@
 extends SceneTree
+## 验证 1～8 只敌人的站位、缩放和死亡后从战场移除。
 
 
 func _init() -> void:
@@ -33,7 +34,7 @@ func _run() -> void:
 	for i in 8:
 		var enemy := EnemyData.new()
 		enemy.id = "layout_enemy_%d" % i
-		enemy.display_name = "ENEMY_TONE_BLOB"
+		enemy.display_name = "ENEMY_PINYIN_BUN"
 		enemy.attribute = BattleState.ATTRIBUTE_PINYIN
 		enemy.max_hp = 10
 		enemy.portrait_path = "res://assets/enemies/tone_blob.png"

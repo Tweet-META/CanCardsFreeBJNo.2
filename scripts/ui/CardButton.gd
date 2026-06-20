@@ -1,4 +1,5 @@
 extends Button
+## 单张卡牌的显示和输入组件；手牌布局由 BattleUI 控制。
 class_name CardButton
 
 signal card_selected(card_index: int)
@@ -49,6 +50,7 @@ func setup(card: CardData, index: int, current_ap: float, enabled: bool) -> void
 
 
 func _gui_input(event: InputEvent) -> void:
+	# 未超过移动阈值时仍按普通点击处理，超过后才进入拖动流程。
 	if disabled or interaction_locked:
 		return
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
@@ -98,6 +100,7 @@ func set_focus_state(focused: bool, dimmed: bool) -> void:
 
 
 func set_hand_pose(target_position: Vector2, target_rotation_degrees: float, target_scale: Vector2, target_z_index: int, animate: bool, duration: float = 0.14, delay: float = 0.0) -> void:
+	# 所有姿态恢复走同一入口，避免取消拖动后悬停动画丢失。
 	z_index = target_z_index
 	if pose_tween != null and pose_tween.is_running():
 		pose_tween.kill()
@@ -120,6 +123,7 @@ func set_hand_pose(target_position: Vector2, target_rotation_degrees: float, tar
 
 
 func reset_drag_state() -> void:
+	# 取消或完成拖动后重置点击抑制，保证下一次输入正常。
 	drag_ready = false
 	dragging = false
 	suppress_next_click = false
@@ -167,6 +171,7 @@ func _update_art(card: CardData) -> void:
 
 
 func _update_lock_state() -> void:
+	# 技能 AP 不足时只改变视觉和交互，不修改卡牌数据。
 	lock_overlay.visible = locked_by_ap
 	lock_icon.visible = locked_by_ap
 	if locked_by_ap:

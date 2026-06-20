@@ -39,10 +39,10 @@ theme_override_font_sizes/font_size = 16
 text = "DEV_TITLE"
 horizontal_alignment = 1
 
-[node name="AddFestivalMaskButton" type="Button" parent="Box"]
+[node name="AddCultureMaskButton" type="Button" parent="Box"]
 custom_minimum_size = Vector2(240, 40)
 layout_mode = 2
-text = "DEV_ADD_FESTIVAL_MASK"
+text = "DEV_ADD_CULTURE_MASK"
 
 [node name="AddGeneralCardButton" type="Button" parent="Box"]
 custom_minimum_size = Vector2(240, 40)

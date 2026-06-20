@@ -1,10 +1,11 @@
 extends Control
+## 战斗界面协调器；负责手牌交互、面板刷新，并把出牌意图发送给 BattleManager。
 class_name BattleUI
 
 signal card_use_requested(character_index: int, card_index: int, enemy_index: int, ally_index: int, difficulty: String)
 signal shop_refresh_requested()
 signal shop_buy_requested(offer_index: int, character_index: int)
-signal developer_add_festival_mask_requested()
+signal developer_add_culture_mask_requested()
 signal developer_add_general_card_requested()
 
 const PAPER: Color = Color(0.86, 0.78, 0.64, 0.96)
@@ -22,6 +23,7 @@ const HAND_HOVER_NEIGHBOR_PUSH: float = 14.0
 const HAND_HOVER_SECONDARY_PUSH: float = 6.0
 const GENERAL_HAND_LEFT_SHIFT: float = 24.0
 const TEAM_GENERAL_CARD_INDEX_OFFSET: int = 1000
+# 通用卡使用负数索引编码，避免和角色 cards 数组的非负索引冲突。
 const CARD_BUTTON_SCENE: PackedScene = preload("res://scenes/CardButton.tscn")
 
 var state: BattleState
@@ -46,6 +48,7 @@ var rendered_character_index: int = -1
 var showing_enemy_info: bool = false
 var selection_transition_pending: bool = false
 var dragging_card_index: int = -1
+# 悬停、拖动和目标高亮独立保存，取消拖动时才能完整恢复视觉状态。
 var hovered_card_index: int = -1
 var hovered_player_target_index: int = -1
 var hovered_enemy_target_index: int = -1
@@ -65,7 +68,7 @@ func _ready() -> void:
 	top_bar.shop_requested.connect(_toggle_shop_panel)
 	shop_panel.refresh_requested.connect(func() -> void: shop_refresh_requested.emit())
 	shop_panel.buy_requested.connect(_buy_shop_card)
-	developer_controls.add_festival_mask_requested.connect(func() -> void: developer_add_festival_mask_requested.emit())
+	developer_controls.add_culture_mask_requested.connect(func() -> void: developer_add_culture_mask_requested.emit())
 	developer_controls.add_general_card_requested.connect(func() -> void: developer_add_general_card_requested.emit())
 	LanguageManager.language_changed.connect(_on_language_changed)
 
@@ -91,6 +94,7 @@ func _input(event: InputEvent) -> void:
 
 
 func refresh(new_state: BattleState) -> void:
+	# BattleManager 每次状态变化都走此入口，UI 不直接修改战斗数据。
 	state = new_state
 	if top_bar == null:
 		return
@@ -120,6 +124,7 @@ func _refresh_status() -> void:
 
 
 func _refresh_selects() -> void:
+	# 难度选择控件已从当前 MVP 移除；保留入口等待后续重新接入。
 	pass
 
 
@@ -138,6 +143,7 @@ func _refresh_battlefield() -> void:
 
 
 func _refresh_cards() -> void:
+	# 角色专属牌与队伍通用牌分组重建，保留两套独立扇形布局。
 	_clear_children(exclusive_cards)
 	_clear_children(general_cards)
 	var character := _get_selected_character()
@@ -159,6 +165,7 @@ func _refresh_cards() -> void:
 
 
 func _layout_card_fan(parent: Control, character: CharacterData, indices: Array[int], animate: bool, entry_offset: Vector2 = Vector2.ZERO) -> void:
+	# CardButton 只管理自身姿态，卡牌数量与扇形槽位统一在这里计算。
 	var can_click: bool = state.phase == BattleState.Phase.PLAYER_TURN and character.is_alive() and not character.has_acted and not cards_interaction_locked
 	var count := indices.size()
 	for slot in count:
@@ -255,6 +262,7 @@ func _on_card_clicked(card_index: int) -> void:
 
 
 func _play_general_card_consume_animation(card_index: int) -> void:
+	# 通用卡淡出并向上散成轻量粒子，之后由状态刷新重排剩余牌。
 	var card_button: CardButton = _find_card_button(general_cards, card_index)
 	if card_button == null:
 		return
@@ -335,6 +343,7 @@ func _control_contains_global_point(control: Control, global_position: Vector2) 
 
 
 func _get_card_for_ui_index(character: CharacterData, card_index: int) -> CardData:
+	# 解码 UI 索引并返回角色专属卡或队伍共享通用卡。
 	if _is_team_general_card_index(card_index):
 		var team_card_index: int = _decode_team_general_card_index(card_index)
 		if state != null and team_card_index >= 0 and team_card_index < state.team_general_cards.size():
@@ -358,6 +367,7 @@ func _decode_team_general_card_index(card_index: int) -> int:
 
 
 func _on_card_drag_started(card_index: int, global_position: Vector2) -> void:
+	# 卡牌本体保持在手牌位置，只抬高视觉并由 ArrowLayer 绘制指向。
 	if cards_interaction_locked:
 		_reset_card_drag_state(card_index)
 		return
@@ -419,6 +429,7 @@ func _is_over_cancel_drop_area(global_position: Vector2) -> bool:
 
 
 func _release_dragging_card(card_index: int, global_position: Vector2) -> void:
+	# 需要目标的卡牌若没有落在合法对象上，会按取消处理并恢复悬停。
 	if cards_interaction_locked or dragging_card_index == -1:
 		return
 	var cancelled_by_drop_area: bool = _is_over_cancel_drop_area(global_position)
@@ -494,6 +505,7 @@ func _relayout_card_group(parent: Control, animate: bool) -> void:
 
 
 func _apply_card_arc_pose(parent: Control, card_button: CardButton, slot: int, count: int, animate: bool, entry_offset: Vector2 = Vector2.ZERO) -> void:
+	# 扇形角度随数量增加；悬停牌抬升，同时轻推相邻卡牌。
 	var parent_size: Vector2 = parent.size
 	if parent_size.x <= 1.0 or parent_size.y <= 1.0:
 		parent_size = parent.custom_minimum_size
@@ -592,6 +604,7 @@ func _player_index_at(global_position: Vector2) -> int:
 
 
 func _update_drag_target_highlight(global_position: Vector2) -> void:
+	# 只高亮当前卡牌允许的目标类型。
 	var character: CharacterData = _get_selected_character()
 	if character == null or dragging_card_index == -1:
 		_clear_drag_target_highlight()
@@ -632,6 +645,7 @@ func _card_targets_ally(card: CardData) -> bool:
 
 
 func _select_character(index: int) -> void:
+	# 记录前后索引，战场立绘与专属牌堆据此播放切换动画。
 	if index < 0 or index >= state.player_team.size():
 		return
 	if not state.player_team[index].is_alive():
@@ -735,6 +749,7 @@ func _get_selected_character() -> CharacterData:
 
 
 func _clamp_selection() -> void:
+	# 状态刷新后修正越界或死亡目标，避免拖牌引用失效索引。
 	if state.player_team.is_empty():
 		selected_character_index = -1
 	else:
@@ -775,6 +790,7 @@ func _select_next_ready_character_if_needed() -> void:
 
 
 func _selected_difficulty() -> String:
+	# 当前非技能卡暂时默认简单；技能会在 CardData 中自动改为困难。
 	return "easy"
 
 

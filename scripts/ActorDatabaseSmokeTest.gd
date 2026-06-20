@@ -1,4 +1,5 @@
 extends SceneTree
+## 验证 characters.json、enemies.json、默认阵容与专属牌组映射。
 
 
 func _init() -> void:
@@ -40,16 +41,17 @@ func _test_enemies() -> void:
 	var team: Array[EnemyData] = EnemyDatabase.create_default_team()
 	assert(team.size() == 3)
 
-	var tone_blob: EnemyData = team[0]
-	assert(tone_blob.id == "tone_blob")
-	assert(tone_blob.attribute == LearningAttribute.PINYIN)
-	assert(tone_blob.max_hp == 70)
-	assert(tone_blob.attack == 11)
-	assert(tone_blob.defense == 1)
+	var pinyin_bun: EnemyData = team[0]
+	assert(pinyin_bun.id == "pinyin_bun")
+	assert(pinyin_bun.display_name == "ENEMY_PINYIN_BUN")
+	assert(pinyin_bun.attribute == LearningAttribute.PINYIN)
+	assert(pinyin_bun.max_hp == 70)
+	assert(pinyin_bun.attack == 11)
+	assert(pinyin_bun.defense == 1)
 
-	var festival_mask: EnemyData = EnemyDatabase.create_enemy("festival_mask")
-	assert(festival_mask != null)
-	assert(festival_mask.display_name == "ENEMY_FESTIVAL_MASK")
-	assert(festival_mask.attribute == LearningAttribute.CULTURE)
-	assert(festival_mask.max_hp == 90)
-	assert(is_equal_approx(festival_mask.toefl_reward, 1.5))
+	var culture_mask: EnemyData = EnemyDatabase.create_enemy("culture_mask")
+	assert(culture_mask != null)
+	assert(culture_mask.display_name == "ENEMY_CULTURE_MASK")
+	assert(culture_mask.attribute == LearningAttribute.CULTURE)
+	assert(culture_mask.max_hp == 90)
+	assert(is_equal_approx(culture_mask.toefl_reward, 1.5))

@@ -1,4 +1,5 @@
 extends VBoxContainer
+## 商店中的单张卡牌报价项，负责预览、价格和购买信号。
 class_name ShopCardItem
 
 signal buy_requested(offer_index: int)

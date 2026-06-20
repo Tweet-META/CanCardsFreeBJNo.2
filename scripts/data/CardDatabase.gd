@@ -1,9 +1,11 @@
 extends RefCounted
+## 从 cards.json 延迟加载卡牌定义，并为每次请求创建独立 CardData 实例。
 class_name CardDatabase
 
 const DATA_PATH: String = "res://data/cards.json"
 
 static var _loaded: bool = false
+# 缓存原始 Dictionary 而不是 CardData，避免不同战斗共享可变 Resource 状态。
 static var _root_data: Dictionary = {}
 static var _definitions: Dictionary = {}
 
@@ -45,6 +47,7 @@ static func create_cards(card_ids: Array[String]) -> Array[CardData]:
 
 
 static func get_general_pool_ids() -> Array[String]:
+	# 所有 type=general 的卡牌自动进入开局与商店随机池。
 	_ensure_loaded()
 	var general_ids: Array[String] = []
 	for card_id_value: Variant in _definitions:
@@ -59,6 +62,7 @@ static func get_general_pool_ids() -> Array[String]:
 
 
 static func reload() -> void:
+	# 主要供测试和编辑器热更新使用；正常游戏只加载一次 JSON。
 	_loaded = false
 	_root_data.clear()
 	_definitions.clear()
@@ -66,6 +70,7 @@ static func reload() -> void:
 
 
 static func _ensure_loaded() -> void:
+	# 首次访问时解析并按 ID 建立索引，后续创建卡牌无需重复读取磁盘。
 	if _loaded:
 		return
 	_loaded = true

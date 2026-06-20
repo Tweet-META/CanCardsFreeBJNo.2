@@ -1,4 +1,5 @@
 extends SceneTree
+## 验证开发者工具显隐、添加文化面具、添加通用卡与八敌人上限。
 
 
 func _init() -> void:
@@ -19,9 +20,9 @@ func _run() -> void:
 	assert(battle_ui.developer_controls.visible)
 
 	var initial_enemy_count: int = manager.state.enemy_team.size()
-	manager.developer_add_festival_mask()
+	manager.developer_add_culture_mask()
 	assert(manager.state.enemy_team.size() == initial_enemy_count + 1)
-	assert(manager.state.enemy_team[-1].display_name == "ENEMY_FESTIVAL_MASK")
+	assert(manager.state.enemy_team[-1].display_name == "ENEMY_CULTURE_MASK")
 
 	var initial_card_count: int = manager.state.team_general_cards.size()
 	manager.developer_add_general_card()
@@ -29,9 +30,9 @@ func _run() -> void:
 	assert(manager.state.team_general_cards[-1].display_name == "CARD_GENERAL_1")
 
 	while manager.state.get_alive_enemies().size() < 8:
-		manager.developer_add_festival_mask()
+		manager.developer_add_culture_mask()
 	var capped_count: int = manager.state.enemy_team.size()
-	manager.developer_add_festival_mask()
+	manager.developer_add_culture_mask()
 	assert(manager.state.enemy_team.size() == capped_count)
 
 	SettingsManager.set_developer_mode(false)

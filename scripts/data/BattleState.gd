@@ -1,4 +1,5 @@
 extends RefCounted
+## 一局战斗的唯一可变状态容器，不负责 UI，也不主动推进回合。
 class_name BattleState
 
 enum Phase {
@@ -15,6 +16,7 @@ const ATTRIBUTE_VOCABULARY: String = LearningAttribute.VOCABULARY
 const ATTRIBUTE_CULTURE: String = LearningAttribute.CULTURE
 
 var phase: Phase = Phase.SETUP
+# 选择目标与 pending_* 字段共同描述一张正在结算的卡牌。
 var turn_count: int = 0
 var player_team: Array[CharacterData] = []
 var enemy_team: Array[EnemyData] = []
@@ -32,6 +34,7 @@ var battle_log: Array[String] = []
 
 
 func setup(players: Array[CharacterData], enemies: Array[EnemyData], rng: RandomNumberGenerator = null) -> void:
+	# 拼音生命被动按开战阵容计算一次；角色倒下不会缩减已经获得的最大生命。
 	player_team = players
 	enemy_team = enemies
 	phase = Phase.SETUP
@@ -51,6 +54,7 @@ func setup(players: Array[CharacterData], enemies: Array[EnemyData], rng: Random
 
 
 func start_player_turn() -> void:
+	# 新回合会清空临时选择，并恢复存活角色的行动资格与回合减伤。
 	phase = Phase.PLAYER_TURN
 	turn_count += 1
 	selected_character = null
@@ -109,6 +113,7 @@ func get_culture_passive_count() -> int:
 
 
 func get_attribute_count(attribute: String, alive_only: bool = true) -> int:
+	# 所有属性被动都通过这个入口统计，因此新增同属性角色会自然叠加。
 	var count: int = 0
 	for character: CharacterData in player_team:
 		if character.attribute != attribute:
@@ -119,14 +124,17 @@ func get_attribute_count(attribute: String, alive_only: bool = true) -> int:
 	return count
 
 func get_team_stat_multiplier() -> float:
+	# 每名存活拼音角色让伤害卡效果提高 20%。
 	return 1.0 + float(get_pinyin_passive_count()) * 0.20
 
 
 func get_wrong_answer_bonus_chance() -> float:
+	# 每名存活词汇角色提供 25% 错题补偿概率，最高不超过 100%。
 	return clampf(float(get_vocabulary_passive_count()) * 0.25, 0.0, 1.0)
 
 
 func get_ap_growth_bonus() -> float:
+	# 每名存活文化角色为每次 AP 增长额外提供 0.25。
 	return float(get_culture_passive_count()) * 0.25
 
 
@@ -156,6 +164,7 @@ func push_log(message: String) -> void:
 
 
 func clear_pending_action() -> void:
+	# 结算完成后整体清理，避免下一次行动复用旧目标或旧题目。
 	selected_character = null
 	selected_ally = null
 	selected_enemy = null

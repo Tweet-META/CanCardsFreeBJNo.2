@@ -1,4 +1,5 @@
 extends PanelContainer
+## 答题面板，显示题目并提交选项索引，不自行判断正确答案。
 class_name QuestionPanel
 
 signal answer_submitted(answer_index: int)
@@ -20,6 +21,7 @@ func _ready() -> void:
 
 
 func show_question(question: QuestionData) -> void:
+	# 题目内容使用翻译键解析，本面板只负责显示与提交。
 	prompt_label.text = tr("QUESTION_HEADER_FORMAT").replace("\\n", "\n") % [
 		_category_label(question.category),
 		_difficulty_label(question.difficulty),

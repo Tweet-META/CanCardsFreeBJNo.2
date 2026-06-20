@@ -1,4 +1,5 @@
 extends Resource
+## 单张卡牌的静态数据与通用规则；具体效果由 BattleManager 根据 effect_id 执行。
 class_name CardData
 
 enum CardType {
@@ -47,10 +48,12 @@ func can_use(current_ap: float) -> bool:
 
 
 func get_question_difficulty(default_difficulty: String) -> String:
+	# 技能始终使用困难题，其余卡牌沿用玩家选择的难度。
 	return "hard" if is_skill() else default_difficulty
 
 
 func get_damage_bonus_for_difficulty(difficulty: String) -> float:
+	# 普通攻击卡答对后的倍率加成。
 	match difficulty:
 		"easy":
 			return 0.05
@@ -63,6 +66,7 @@ func get_damage_bonus_for_difficulty(difficulty: String) -> float:
 
 
 func get_block_bonus_for_difficulty(difficulty: String) -> float:
+	# 防御卡答对后叠加到基础减伤上的比例。
 	match difficulty:
 		"easy":
 			return 0.10
@@ -75,6 +79,7 @@ func get_block_bonus_for_difficulty(difficulty: String) -> float:
 
 
 func get_correct_answer_ap_bonus(difficulty: String) -> float:
+	# 答对后获得的额外队伍 AP，不包含卡牌基础 AP 与文化被动。
 	match difficulty:
 		"easy":
 			return 0.5

@@ -1,4 +1,5 @@
 extends Node
+## 从单个 CSV 构建运行时翻译资源，并持久化当前语言。
 
 signal language_changed(locale: String)
 
@@ -14,6 +15,7 @@ func _ready() -> void:
 
 
 func set_language(locale: String, save: bool = true) -> void:
+	# 不支持的语言统一回退到中文，避免 TranslationServer 进入未知状态。
 	var resolved_locale: String = locale if locale in SUPPORTED_LOCALES else DEFAULT_LOCALE
 	TranslationServer.set_locale(resolved_locale)
 	if save:
@@ -37,6 +39,7 @@ func _load_saved_locale() -> String:
 
 
 func _load_translations() -> void:
+	# CSV 第一列是 key，后续每列对应表头中的 locale。
 	var file: FileAccess = FileAccess.open(TRANSLATIONS_PATH, FileAccess.READ)
 	if file == null:
 		push_error("Unable to open localization file: %s" % TRANSLATIONS_PATH)

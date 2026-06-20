@@ -1,4 +1,5 @@
 extends PanelContainer
+## 同时承载答题反馈和战斗胜负结算。
 class_name ResultPanel
 
 signal retry_requested

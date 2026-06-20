@@ -1,4 +1,5 @@
 extends SceneTree
+## 覆盖开局、通用卡、答题攻击、自动换回合、技能困难题与 AP 清零的主流程。
 
 
 func _init() -> void:
@@ -6,6 +7,7 @@ func _init() -> void:
 
 
 func _run() -> void:
+	# 实例化真实 BattleScene，避免只测试孤立数据类而漏掉信号接线问题。
 	var file := FileAccess.open("res://smoke_test_result.txt", FileAccess.WRITE)
 	if file != null:
 		file.store_line("SmokeTest started")

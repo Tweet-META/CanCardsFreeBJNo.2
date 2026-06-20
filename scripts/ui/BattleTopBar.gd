@@ -1,4 +1,5 @@
 extends HBoxContainer
+## 顶部 AP 条、回合状态、暂停入口和商店入口。
 class_name BattleTopBar
 
 signal menu_requested
@@ -21,6 +22,7 @@ func _ready() -> void:
 
 
 func refresh(ap: float, phase: BattleState.Phase, turn_count: int) -> void:
+	# AP 满时整条切换为金色，与技能卡解锁状态保持一致。
 	ap_bar.value = ap
 	ap_label.text = "%.1f / 5.0" % ap
 	if ap >= 5.0:
