@@ -1,0 +1,128 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" uid="uid://ccvdd1um1bmx7" path="res://scripts/ui/BattleUI.gd" id="1"]
+[ext_resource type="Texture2D" path="res://images/ui参考.png" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/ui/BattleTopBar.tscn" id="3"]
+[ext_resource type="Script" path="res://scripts/ui/ArrowLayer.gd" id="4"]
+[ext_resource type="PackedScene" path="res://scenes/ui/CancelDropArea.tscn" id="5"]
+[ext_resource type="PackedScene" path="res://scenes/ui/BattleLogPanel.tscn" id="6"]
+[ext_resource type="PackedScene" path="res://scenes/ui/BattleInfoPanel.tscn" id="7"]
+[ext_resource type="PackedScene" path="res://scenes/ui/ShopPanel.tscn" id="8"]
+[ext_resource type="PackedScene" path="res://scenes/ui/DeveloperControls.tscn" id="9"]
+
+[node name="BattleUI" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1")
+
+[node name="Background" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+modulate = Color(1, 1, 1, 0.36)
+texture = ExtResource("2")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Wash" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.1, 0.09, 0.07, 0.18)
+
+[node name="Root" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 26.0
+offset_top = 18.0
+offset_right = -26.0
+offset_bottom = -16.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 8
+
+[node name="BattleTopBar" parent="Root" instance=ExtResource("3")]
+layout_mode = 2
+
+[node name="Battlefield" type="Control" parent="Root"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="PlayerLayer" type="Control" parent="Root/Battlefield"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+
+[node name="EnemyLayer" type="Control" parent="Root/Battlefield"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="ArrowLayer" type="Control" parent="Root/Battlefield"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("4")
+
+[node name="CancelDropArea" parent="Root/Battlefield" instance=ExtResource("5")]
+
+[node name="Bottom" type="HBoxContainer" parent="Root"]
+custom_minimum_size = Vector2(1, 220)
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="InfoSpace" type="Control" parent="Root/Bottom"]
+custom_minimum_size = Vector2(190, 1)
+layout_mode = 2
+
+[node name="CardsArea" type="HBoxContainer" parent="Root/Bottom"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ExclusiveCards" type="Control" parent="Root/Bottom/CardsArea"]
+custom_minimum_size = Vector2(310, 205)
+layout_mode = 2
+
+[node name="CardGroupGap" type="Control" parent="Root/Bottom/CardsArea"]
+custom_minimum_size = Vector2(90, 1)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="GeneralCards" type="Control" parent="Root/Bottom/CardsArea"]
+custom_minimum_size = Vector2(310, 205)
+layout_mode = 2
+
+[node name="BattleLogPanel" parent="Root/Bottom" instance=ExtResource("6")]
+layout_mode = 2
+
+[node name="BattleInfoPanel" parent="." instance=ExtResource("7")]
+
+[node name="ShopPanel" parent="." instance=ExtResource("8")]
+
+[node name="DeveloperControls" parent="." instance=ExtResource("9")]

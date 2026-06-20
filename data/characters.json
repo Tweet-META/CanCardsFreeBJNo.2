@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "player_team": [
+    "budding",
+    "tiancaitu",
+    "lawilim"
+  ],
+  "characters": [
+    {
+      "id": "budding",
+      "display_name": "CHARACTER_BUDDING",
+      "attribute": "culture",
+      "max_hp": 110,
+      "defense": 4,
+      "portrait_path": "res://images/βudding.png",
+      "cards": [
+        "budding_attack",
+        "budding_defense",
+        "budding_skill"
+      ]
+    },
+    {
+      "id": "tiancaitu",
+      "display_name": "CHARACTER_RABBIT",
+      "attribute": "pinyin",
+      "max_hp": 95,
+      "defense": 3,
+      "portrait_path": "res://images/天才兔.png",
+      "cards": [
+        "rabbit_attack",
+        "rabbit_defense",
+        "rabbit_skill"
+      ]
+    },
+    {
+      "id": "lawilim",
+      "display_name": "CHARACTER_LAWILIM",
+      "attribute": "vocabulary",
+      "max_hp": 100,
+      "defense": 3,
+      "portrait_path": "res://images/Lawilim.png",
+      "cards": [
+        "lawilim_attack",
+        "lawilim_defense",
+        "lawilim_skill"
+      ]
+    }
+  ]
+}

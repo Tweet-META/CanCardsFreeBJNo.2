@@ -1,0 +1,59 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/SettingsPanel.gd" id="1"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.88, 0.8, 0.66, 0.98)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.13, 0.1, 0.08, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+shadow_color = Color(0, 0, 0, 0.28)
+shadow_size = 8
+
+[node name="SettingsPanel" type="PanelContainer"]
+visible = false
+z_index = 1000
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -220.0
+offset_top = -135.0
+offset_right = 220.0
+offset_bottom = 135.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+script = ExtResource("1")
+
+[node name="Box" type="VBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="TitleLabel" type="Label" parent="Box"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "SETTINGS_TITLE"
+horizontal_alignment = 1
+
+[node name="DeveloperModeCheckBox" type="CheckBox" parent="Box"]
+custom_minimum_size = Vector2(360, 48)
+layout_mode = 2
+text = "SETTINGS_DEVELOPER_MODE"
+
+[node name="DeveloperModeDescription" type="Label" parent="Box"]
+layout_mode = 2
+text = "SETTINGS_DEVELOPER_DESCRIPTION"
+autowrap_mode = 3
+
+[node name="CloseButton" type="Button" parent="Box"]
+custom_minimum_size = Vector2(180, 44)
+layout_mode = 2
+text = "UI_CLOSE"

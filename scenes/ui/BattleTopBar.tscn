@@ -58,10 +58,10 @@ vertical_alignment = 1
 custom_minimum_size = Vector2(210, 58)
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
-horizontal_alignment = 2
+horizontal_alignment = 0
 vertical_alignment = 1
 
 [node name="ShopButton" type="Button" parent="."]
 custom_minimum_size = Vector2(86, 58)
 layout_mode = 2
-text = "商店"
+text = "UI_SHOP"

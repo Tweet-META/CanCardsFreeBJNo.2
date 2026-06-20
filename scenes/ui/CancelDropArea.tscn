@@ -1,0 +1,26 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/CancelDropArea.gd" id="1"]
+
+[node name="CancelDropArea" type="PanelContainer"]
+visible = false
+custom_minimum_size = Vector2(142, 52)
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -71.0
+offset_top = -92.0
+offset_right = 71.0
+offset_bottom = -40.0
+mouse_filter = 2
+script = ExtResource("1")
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 22
+text = "UI_CANCEL"
+horizontal_alignment = 1
+vertical_alignment = 1

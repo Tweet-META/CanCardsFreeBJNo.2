@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://l22r5yb4on2k" path="res://scripts/battle/BattleScene.gd" id="1"]
 [ext_resource type="Script" uid="uid://cne86khh3pdob" path="res://scripts/battle/BattleManager.gd" id="2"]
-[ext_resource type="Script" uid="uid://ccvdd1um1bmx7" path="res://scripts/ui/BattleUI.gd" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/ui/BattleUI.tscn" id="3"]
 [ext_resource type="PackedScene" path="res://scenes/ui/QuestionPanel.tscn" id="4"]
 [ext_resource type="PackedScene" path="res://scenes/ui/ResultPanel.tscn" id="5"]
 
@@ -14,18 +14,14 @@ script = ExtResource("2")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1123448973]
 
-[node name="BattleUI" type="Control" parent="CanvasLayer" unique_id=711404731]
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-script = ExtResource("3")
+[node name="BattleUI" parent="CanvasLayer" unique_id=711404731 instance=ExtResource("3")]
 
-[node name="QuestionPanel" parent="CanvasLayer" unique_id=1869777140 instance=ExtResource("4")]
+[node name="QuestionLayer" type="CanvasLayer" parent="."]
+layer = 100
 
-[node name="ResultPanel" parent="CanvasLayer" unique_id=1322894633 instance=ExtResource("5")]
+[node name="QuestionPanel" parent="QuestionLayer" unique_id=1869777140 instance=ExtResource("4")]
+
+[node name="ResultPanel" parent="QuestionLayer" unique_id=1322894633 instance=ExtResource("5")]
 
 [node name="PlayerTeam" type="Node2D" parent="." unique_id=930007036]
 

@@ -8,6 +8,17 @@ const INK: Color = Color(0.12, 0.10, 0.08)
 func _ready() -> void:
 	add_theme_color_override("font_color", INK)
 	add_theme_stylebox_override("normal", _style(PAPER, 8, 2))
+	_update_typography()
+	LanguageManager.language_changed.connect(_on_language_changed)
+
+
+func _on_language_changed(_locale: String) -> void:
+	_update_typography()
+
+
+func _update_typography() -> void:
+	var english: bool = TranslationServer.get_locale().begins_with("en")
+	add_theme_font_size_override("font_size", 13 if english else 16)
 
 
 func _style(color: Color, radius: int, border_width: int) -> StyleBoxFlat:

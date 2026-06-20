@@ -2,14 +2,16 @@ extends Node2D
 
 @onready var battle_manager: BattleManager = $BattleManager
 @onready var battle_ui: BattleUI = $CanvasLayer/BattleUI
-@onready var question_panel: QuestionPanel = $CanvasLayer/QuestionPanel
-@onready var result_panel: ResultPanel = $CanvasLayer/ResultPanel
+@onready var question_panel: QuestionPanel = $QuestionLayer/QuestionPanel
+@onready var result_panel: ResultPanel = $QuestionLayer/ResultPanel
 
 
 func _ready() -> void:
 	battle_ui.card_use_requested.connect(battle_manager.request_use_card)
 	battle_ui.shop_refresh_requested.connect(battle_manager.request_refresh_shop)
 	battle_ui.shop_buy_requested.connect(battle_manager.request_buy_shop_card)
+	battle_ui.developer_add_festival_mask_requested.connect(battle_manager.developer_add_festival_mask)
+	battle_ui.developer_add_general_card_requested.connect(battle_manager.developer_add_general_card)
 	question_panel.answer_submitted.connect(battle_manager.submit_answer)
 	result_panel.retry_requested.connect(battle_manager.retry_battle)
 	result_panel.menu_requested.connect(_go_to_menu)

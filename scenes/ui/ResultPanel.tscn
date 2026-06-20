@@ -39,12 +39,12 @@ alignment = 1
 
 [node name="CloseButton" type="Button" parent="Box/ButtonRow"]
 layout_mode = 2
-text = "继续"
+text = "UI_CONTINUE"
 
 [node name="RetryButton" type="Button" parent="Box/ButtonRow"]
 layout_mode = 2
-text = "重新挑战"
+text = "UI_RETRY"
 
 [node name="MenuButton" type="Button" parent="Box/ButtonRow"]
 layout_mode = 2
-text = "回主菜单"
+text = "UI_MAIN_MENU"

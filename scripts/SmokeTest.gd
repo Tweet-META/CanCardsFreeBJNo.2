@@ -17,6 +17,13 @@ func _run() -> void:
 	await process_frame
 
 	var manager: BattleManager = scene.get_node("BattleManager")
+	assert(manager.state.player_team[0].max_hp == 132)
+	assert(manager.state.player_team[0].current_hp == 132)
+	assert(manager.state.player_team[1].max_hp == 114)
+	assert(manager.state.player_team[1].current_hp == 114)
+	assert(manager.state.player_team[2].max_hp == 120)
+	assert(manager.state.player_team[2].current_hp == 120)
+
 	manager.request_use_card(0, -1000, -1, -1, "easy")
 	assert(manager.state.player_team[0].has_acted)
 	assert(manager.state.ap > 0.0)
@@ -25,6 +32,7 @@ func _run() -> void:
 	assert(manager.state.phase == BattleState.Phase.QUESTION)
 	manager.submit_answer(manager.state.pending_question.correct_index)
 	assert(manager.state.player_team[1].has_acted)
+	assert(manager.state.enemy_team[0].current_hp == 33)
 
 	manager.request_use_card(2, -1000, -1, -1, "easy")
 	assert(manager.state.turn_count >= 2 or manager.state.phase == BattleState.Phase.VICTORY)
@@ -33,8 +41,10 @@ func _run() -> void:
 	manager.state.ap = 5.0
 	manager.request_use_card(0, 2, -1, -1, "easy")
 	assert(manager.state.phase == BattleState.Phase.QUESTION)
+	assert(manager.state.pending_difficulty == "hard")
 	manager.submit_answer(manager.state.pending_question.correct_index)
 	assert(manager.state.player_team[0].has_acted)
+	assert(is_zero_approx(manager.state.ap))
 
 	if file != null:
 		file.store_line("SmokeTest passed")

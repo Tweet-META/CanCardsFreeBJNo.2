@@ -7,18 +7,21 @@ const MAX_AP: float = 5.0
 @export var display_name: String = ""
 @export var attribute: String = ""
 @export var max_hp: int = 100
-@export var attack: int = 20
 @export var defense: int = 4
 @export var portrait_path: String = ""
 @export var cards: Array[CardData] = []
 
+var base_max_hp: int = 0
 var current_hp: int = 100
 var ap: float = 0.0
 var has_acted: bool = false
 var turn_damage_reduction: float = 0.0
 
 
-func setup_runtime() -> void:
+func setup_runtime(max_hp_multiplier: float = 1.0) -> void:
+	if base_max_hp <= 0:
+		base_max_hp = max_hp
+	max_hp = maxi(1, roundi(float(base_max_hp) * maxf(max_hp_multiplier, 0.0)))
 	current_hp = max_hp
 	ap = 0.0
 	has_acted = false

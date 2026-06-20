@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "enemy_team": [
+    "tone_blob",
+    "word_slime",
+    "festival_mask"
+  ],
+  "enemies": [
+    {
+      "id": "tone_blob",
+      "display_name": "ENEMY_TONE_BLOB",
+      "attribute": "pinyin",
+      "max_hp": 70,
+      "attack": 11,
+      "defense": 1,
+      "toefl_reward": 1.0,
+      "portrait_path": "res://assets/enemies/tone_blob.png"
+    },
+    {
+      "id": "word_slime",
+      "display_name": "ENEMY_WORD_SLIME",
+      "attribute": "vocabulary",
+      "max_hp": 80,
+      "attack": 12,
+      "defense": 2,
+      "toefl_reward": 1.0,
+      "portrait_path": "res://assets/enemies/word_slime.png"
+    },
+    {
+      "id": "festival_mask",
+      "display_name": "ENEMY_FESTIVAL_MASK",
+      "attribute": "culture",
+      "max_hp": 90,
+      "attack": 13,
+      "defense": 2,
+      "toefl_reward": 1.5,
+      "portrait_path": "res://assets/enemies/festival_mask.png"
+    }
+  ]
+}

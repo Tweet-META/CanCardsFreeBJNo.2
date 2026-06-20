@@ -1,0 +1,67 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/EnemyStandee.gd" id="1"]
+
+[node name="EnemyStandee" type="Button"]
+flat = true
+custom_minimum_size = Vector2(220, 210)
+offset_right = 220.0
+offset_bottom = 210.0
+mouse_filter = 0
+script = ExtResource("1")
+
+[node name="Content" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/separation = 4
+alignment = 2
+
+[node name="HpWrap" type="Control" parent="Content"]
+custom_minimum_size = Vector2(160, 26)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="HpBar" type="ProgressBar" parent="Content/HpWrap"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+show_percentage = false
+
+[node name="HpLabel" type="Label" parent="Content/HpWrap"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.12, 0.1, 0.08, 1)
+theme_override_font_sizes/font_size = 15
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Portrait" type="TextureRect" parent="Content"]
+custom_minimum_size = Vector2(200, 135)
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TargetHighlight" type="Panel" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2

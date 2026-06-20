@@ -41,7 +41,8 @@ func setup(card: CardData, index: int, current_ap: float, enabled: bool) -> void
 	text = ""
 	locked_by_ap = card.is_skill() and current_ap < card.skill_ap_cost
 	disabled = not enabled or not card.can_use(current_ap)
-	tooltip_text = card.description
+	tooltip_text = tr(card.description)
+	_update_typography()
 	_update_text(card, current_ap)
 	_update_art(card)
 	_update_lock_state()
@@ -141,17 +142,23 @@ func _on_mouse_exited() -> void:
 
 
 func _update_text(card: CardData, current_ap: float) -> void:
-	title_label.text = card.display_name
+	title_label.text = tr(card.display_name)
 	if card.is_skill():
-		body_label.text = "消耗 AP %.0f\n基础技能效果" % card.skill_ap_cost
+		body_label.text = "%s\n%s" % [tr("CARD_SKILL_COST") % card.skill_ap_cost, tr("CARD_SKILL_BASE_EFFECT")]
 	elif card.is_general():
-		body_label.text = "全队获得\n+%.1f AP" % card.base_ap_gain
+		body_label.text = "%s\n%s" % [tr("CARD_GENERAL_TEAM_GAIN"), tr("CARD_AP_FORMAT") % card.base_ap_gain]
 	elif card.card_type == CardData.CardType.ATTACK:
-		body_label.text = "造成 %d 伤害\n答对强化" % card.base_damage
+		body_label.text = "%s\n%s" % [tr("CARD_ATTACK_DAMAGE") % card.base_damage, tr("CARD_ANSWER_ENHANCE")]
 	elif card.card_type == CardData.CardType.DEFENSE:
-		body_label.text = "获得 %.0f%% 减伤\n答对强化" % (card.base_block * 100.0)
+		body_label.text = "%s\n%s" % [tr("CARD_DEFENSE_REDUCTION") % (card.base_block * 100.0), tr("CARD_ANSWER_ENHANCE")]
 	else:
-		body_label.text = card.description
+		body_label.text = tr(card.description)
+
+
+func _update_typography() -> void:
+	var english: bool = TranslationServer.get_locale().begins_with("en")
+	title_label.add_theme_font_size_override("font_size", 12 if english else 15)
+	body_label.add_theme_font_size_override("font_size", 10 if english else 13)
 
 
 func _update_art(card: CardData) -> void:

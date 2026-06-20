@@ -17,4 +17,4 @@ func is_answer_correct(index: int) -> bool:
 func get_correct_answer_text() -> String:
 	if correct_index < 0 or correct_index >= options.size():
 		return ""
-	return options[correct_index]
+	return tr(options[correct_index])

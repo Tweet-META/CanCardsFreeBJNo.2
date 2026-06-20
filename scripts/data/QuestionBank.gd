@@ -83,6 +83,8 @@ func _setup_default_questions() -> void:
 		_make_question("cul_hard_1", "文化", "hard", "“中文社”最可能推广的是？", ["中文学习和中国文化", "化学实验", "足球训练", "机器人维修"], 0, "中文社围绕中文学习和文化交流。"),
 		_make_question("cul_hard_2", "文化", "hard", "春节贴春联通常表达什么？", ["祝福和新年愿望", "考试答案", "地图路线", "购物清单"], 0, "春联常表达祝福与新年愿望。")
 	]
+	for question: QuestionData in questions:
+		_assign_translation_keys(question)
 
 
 func _question_from_dictionary(data: Dictionary) -> QuestionData:
@@ -90,9 +92,7 @@ func _question_from_dictionary(data: Dictionary) -> QuestionData:
 	question.id = str(data.get("id", ""))
 	question.category = str(data.get("category", ""))
 	question.difficulty = str(data.get("difficulty", "easy"))
-	question.prompt = str(data.get("prompt", ""))
 	question.correct_index = int(data.get("correct_index", 0))
-	question.explanation = str(data.get("explanation", ""))
 
 	var raw_options_value: Variant = data.get("options", [])
 	if not raw_options_value is Array:
@@ -109,7 +109,16 @@ func _question_from_dictionary(data: Dictionary) -> QuestionData:
 	if question.correct_index < 0 or question.correct_index >= question.options.size():
 		return null
 
+	_assign_translation_keys(question)
 	return question
+
+
+func _assign_translation_keys(question: QuestionData) -> void:
+	var translation_prefix: String = "Q_%s" % question.id.to_upper()
+	question.prompt = "%s_PROMPT" % translation_prefix
+	question.explanation = "%s_EXPLANATION" % translation_prefix
+	for option_index in question.options.size():
+		question.options[option_index] = "%s_O%d" % [translation_prefix, option_index]
 
 
 func _make_question(id: String, category: String, difficulty: String, prompt: String, options: Array, correct_index: int, explanation: String) -> QuestionData:

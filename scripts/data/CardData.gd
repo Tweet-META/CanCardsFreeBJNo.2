@@ -23,12 +23,11 @@ enum TargetType {
 @export var target_type: TargetType = TargetType.SINGLE_ENEMY
 @export var required_attribute: String = ""
 @export var requires_question: bool = true
-@export var fixed_difficulty: String = ""
 @export var base_damage: int = 0
 @export var base_block: float = 0.0
 @export var base_ap_gain: float = 0.5
 @export var skill_ap_cost: float = 5.0
-@export var clears_ap_on_use: bool = false
+@export var effect_id: String = ""
 @export var art_path: String = ""
 @export var shop_price: float = 0.0
 
@@ -48,9 +47,7 @@ func can_use(current_ap: float) -> bool:
 
 
 func get_question_difficulty(default_difficulty: String) -> String:
-	if fixed_difficulty != "":
-		return fixed_difficulty
-	return default_difficulty
+	return "hard" if is_skill() else default_difficulty
 
 
 func get_damage_bonus_for_difficulty(difficulty: String) -> float:

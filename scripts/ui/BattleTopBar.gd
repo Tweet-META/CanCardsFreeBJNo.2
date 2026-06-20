@@ -30,7 +30,7 @@ func refresh(ap: float, phase: BattleState.Phase, turn_count: int) -> void:
 		ap_bar.add_theme_stylebox_override("fill", _style(Color(0.24, 0.58, 0.90), 14, 1))
 		ap_label.add_theme_color_override("font_color", Color.WHITE)
 
-	status_label.text = "%s\n第 %d 回合" % [_phase_text(phase), turn_count]
+	status_label.text = "%s\n%s" % [_phase_text(phase), tr("ROUND_FORMAT") % turn_count]
 
 
 func _apply_styles() -> void:
@@ -46,7 +46,9 @@ func _apply_styles() -> void:
 	ap_label.add_theme_constant_override("shadow_offset_y", 2)
 
 	status_label.add_theme_color_override("font_color", INK)
-	status_label.add_theme_stylebox_override("normal", _style(PAPER, 16, 3))
+	var status_style: StyleBoxFlat = _style(PAPER, 16, 3)
+	status_style.content_margin_left = 14.0
+	status_label.add_theme_stylebox_override("normal", status_style)
 
 	shop_button.add_theme_stylebox_override("normal", _style(Color(0.91, 0.78, 0.54), 16, 3))
 	shop_button.add_theme_stylebox_override("hover", _style(Color(1.0, 0.86, 0.60), 16, 3))
@@ -57,17 +59,17 @@ func _apply_styles() -> void:
 func _phase_text(phase: BattleState.Phase) -> String:
 	match phase:
 		BattleState.Phase.PLAYER_TURN:
-			return "玩家回合"
+			return tr("PHASE_PLAYER")
 		BattleState.Phase.QUESTION:
-			return "答题中"
+			return tr("PHASE_QUESTION")
 		BattleState.Phase.ENEMY_TURN:
-			return "敌方回合"
+			return tr("PHASE_ENEMY")
 		BattleState.Phase.VICTORY:
-			return "胜利"
+			return tr("PHASE_VICTORY")
 		BattleState.Phase.DEFEAT:
-			return "失败"
+			return tr("PHASE_DEFEAT")
 		_:
-			return "准备"
+			return tr("PHASE_READY")
 
 
 func _style(color: Color, radius: int, border_width: int) -> StyleBoxFlat:

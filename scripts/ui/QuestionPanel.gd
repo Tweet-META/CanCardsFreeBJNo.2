@@ -20,10 +20,14 @@ func _ready() -> void:
 
 
 func show_question(question: QuestionData) -> void:
-	prompt_label.text = "[%s / %s]\n%s" % [_category_label(question.category), _difficulty_label(question.difficulty), question.prompt]
+	prompt_label.text = tr("QUESTION_HEADER_FORMAT").replace("\\n", "\n") % [
+		_category_label(question.category),
+		_difficulty_label(question.difficulty),
+		tr(question.prompt)
+	]
 	for i in option_buttons.size():
 		var button: Button = option_buttons[i]
-		button.text = question.options[i] if i < question.options.size() else "-"
+		button.text = tr(question.options[i]) if i < question.options.size() else "-"
 		button.disabled = i >= question.options.size()
 	show()
 
@@ -34,17 +38,25 @@ func _submit_answer(index: int) -> void:
 
 
 func _category_label(category: String) -> String:
-	return category
+	match category:
+		"拼音":
+			return tr("ATTRIBUTE_PINYIN")
+		"词汇":
+			return tr("ATTRIBUTE_VOCABULARY")
+		"文化":
+			return tr("ATTRIBUTE_CULTURE")
+		_:
+			return category
 
 
 func _difficulty_label(difficulty: String) -> String:
 	match difficulty:
 		"easy":
-			return "简单"
+			return tr("DIFFICULTY_EASY")
 		"medium":
-			return "中等"
+			return tr("DIFFICULTY_MEDIUM")
 		"hard":
-			return "困难"
+			return tr("DIFFICULTY_HARD")
 		_:
 			return difficulty
 

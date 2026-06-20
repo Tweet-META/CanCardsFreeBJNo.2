@@ -4,12 +4,11 @@ class_name BattleUI
 signal card_use_requested(character_index: int, card_index: int, enemy_index: int, ally_index: int, difficulty: String)
 signal shop_refresh_requested()
 signal shop_buy_requested(offer_index: int, character_index: int)
+signal developer_add_festival_mask_requested()
+signal developer_add_general_card_requested()
 
 const PAPER: Color = Color(0.86, 0.78, 0.64, 0.96)
 const INK: Color = Color(0.12, 0.10, 0.08)
-const BLUE: Color = Color(0.20, 0.55, 0.87)
-const GREEN: Color = Color(0.50, 0.82, 0.25)
-const RED: Color = Color(0.93, 0.25, 0.20)
 const CARD_SIZE: Vector2 = Vector2(144, 188)
 const HOVERED_HAND_Z_INDEX: int = 100
 const HAND_ARC_ANGLE_MIN_DEGREES: float = 9.0
@@ -21,29 +20,24 @@ const HAND_BOTTOM_PADDING: float = 6.0
 const HAND_HOVER_LIFT: float = 38.0
 const HAND_HOVER_NEIGHBOR_PUSH: float = 14.0
 const HAND_HOVER_SECONDARY_PUSH: float = 6.0
+const GENERAL_HAND_LEFT_SHIFT: float = 24.0
 const TEAM_GENERAL_CARD_INDEX_OFFSET: int = 1000
-const CANCEL_DROP_SIZE: Vector2 = Vector2(142, 52)
-const BATTLE_TOP_BAR_SCENE: PackedScene = preload("res://scenes/ui/BattleTopBar.tscn")
-const BATTLE_INFO_PANEL_SCENE: PackedScene = preload("res://scenes/ui/BattleInfoPanel.tscn")
-const BATTLE_LOG_PANEL_SCENE: PackedScene = preload("res://scenes/ui/BattleLogPanel.tscn")
 const CARD_BUTTON_SCENE: PackedScene = preload("res://scenes/CardButton.tscn")
 
 var state: BattleState
-var top_bar: BattleTopBar
-var battlefield: Control
-var player_layer: Control
-var enemy_layer: Control
-var exclusive_cards: Control
-var general_cards: Control
-var log_panel: BattleLogPanel
-var selected_hint: BattleInfoPanel
-var shop_panel: PanelContainer
-var shop_balance_label: Label
-var shop_cards_row: HBoxContainer
-var shop_refresh_button: Button
-var arrow_layer: ArrowLayer
-var cancel_drop_area: PanelContainer
-var cancel_drop_label: Label
+
+@onready var top_bar: BattleTopBar = $Root/BattleTopBar
+@onready var battlefield: Control = $Root/Battlefield
+@onready var player_layer: Control = $Root/Battlefield/PlayerLayer
+@onready var enemy_layer: Control = $Root/Battlefield/EnemyLayer
+@onready var arrow_layer: ArrowLayer = $Root/Battlefield/ArrowLayer
+@onready var cancel_drop_area: CancelDropArea = $Root/Battlefield/CancelDropArea
+@onready var exclusive_cards: Control = $Root/Bottom/CardsArea/ExclusiveCards
+@onready var general_cards: Control = $Root/Bottom/CardsArea/GeneralCards
+@onready var log_panel: BattleLogPanel = $Root/Bottom/BattleLogPanel
+@onready var selected_hint: BattleInfoPanel = $BattleInfoPanel
+@onready var shop_panel: ShopPanel = $ShopPanel
+@onready var developer_controls: DeveloperControls = $DeveloperControls
 
 var selected_character_index: int = 0
 var selected_enemy_index: int = 0
@@ -58,14 +52,22 @@ var hovered_enemy_target_index: int = -1
 var hover_restore_time_left: float = 0.0
 var cancel_drop_hovered: bool = false
 var cards_interaction_locked: bool = false
-var player_hit_rects: Array[Rect2] = []
-var enemy_hit_rects: Array[Rect2] = []
+var battlefield_controller: BattlefieldController = BattlefieldController.new()
 
 
 func _ready() -> void:
 	set_process(true)
 	set_process_input(true)
-	_build_ui()
+	battlefield_controller.setup(self, battlefield, player_layer, enemy_layer)
+	battlefield_controller.character_selected.connect(_select_character)
+	battlefield_controller.enemy_selected.connect(_select_enemy)
+	top_bar.menu_requested.connect(func() -> void: get_tree().change_scene_to_file("res://scenes/MainMenu.tscn"))
+	top_bar.shop_requested.connect(_toggle_shop_panel)
+	shop_panel.refresh_requested.connect(func() -> void: shop_refresh_requested.emit())
+	shop_panel.buy_requested.connect(_buy_shop_card)
+	developer_controls.add_festival_mask_requested.connect(func() -> void: developer_add_festival_mask_requested.emit())
+	developer_controls.add_general_card_requested.connect(func() -> void: developer_add_general_card_requested.emit())
+	LanguageManager.language_changed.connect(_on_language_changed)
 
 
 func _process(delta: float) -> void:
@@ -106,200 +108,9 @@ func add_log(_message: String) -> void:
 		_refresh_logs()
 
 
-func _build_ui() -> void:
-	set_anchors_preset(Control.PRESET_FULL_RECT)
-
-	var background := TextureRect.new()
-	background.texture = load("res://images/ui参考.png")
-	background.set_anchors_preset(Control.PRESET_FULL_RECT)
-	background.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	background.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
-	background.modulate = Color(1, 1, 1, 0.36)
-	add_child(background)
-
-	var wash := ColorRect.new()
-	wash.color = Color(0.10, 0.09, 0.07, 0.18)
-	wash.set_anchors_preset(Control.PRESET_FULL_RECT)
-	add_child(wash)
-
-	var root := VBoxContainer.new()
-	root.set_anchors_preset(Control.PRESET_FULL_RECT)
-	root.offset_left = 26
-	root.offset_top = 18
-	root.offset_right = -26
-	root.offset_bottom = -16
-	root.add_theme_constant_override("separation", 8)
-	add_child(root)
-
-	top_bar = BATTLE_TOP_BAR_SCENE.instantiate() as BattleTopBar
-	top_bar.menu_requested.connect(func() -> void: get_tree().change_scene_to_file("res://scenes/MainMenu.tscn"))
-	top_bar.shop_requested.connect(_toggle_shop_panel)
-	root.add_child(top_bar)
-
-	battlefield = Control.new()
-	battlefield.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	root.add_child(battlefield)
-
-	player_layer = Control.new()
-	player_layer.mouse_filter = Control.MOUSE_FILTER_PASS
-	player_layer.set_anchors_preset(Control.PRESET_FULL_RECT)
-	battlefield.add_child(player_layer)
-
-	enemy_layer = Control.new()
-	enemy_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	enemy_layer.set_anchors_preset(Control.PRESET_FULL_RECT)
-	battlefield.add_child(enemy_layer)
-
-	arrow_layer = ArrowLayer.new()
-	arrow_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	arrow_layer.set_anchors_preset(Control.PRESET_FULL_RECT)
-	battlefield.add_child(arrow_layer)
-
-	cancel_drop_area = _make_cancel_drop_area()
-	battlefield.add_child(cancel_drop_area)
-
-	root.add_child(_make_bottom_panel())
-	selected_hint = BATTLE_INFO_PANEL_SCENE.instantiate() as BattleInfoPanel
-	add_child(selected_hint)
-	add_child(_make_shop_panel())
-
-
-func _make_cancel_drop_area() -> PanelContainer:
-	var panel := PanelContainer.new()
-	panel.visible = false
-	panel.z_index = 250
-	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	panel.anchor_left = 0.5
-	panel.anchor_top = 1.0
-	panel.anchor_right = 0.5
-	panel.anchor_bottom = 1.0
-	panel.offset_left = -CANCEL_DROP_SIZE.x * 0.5
-	panel.offset_top = -92.0
-	panel.offset_right = CANCEL_DROP_SIZE.x * 0.5
-	panel.offset_bottom = -40.0
-	panel.add_theme_stylebox_override("panel", _cancel_drop_style(false))
-
-	cancel_drop_label = Label.new()
-	cancel_drop_label.text = "取消"
-	cancel_drop_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	cancel_drop_label.set_anchors_preset(Control.PRESET_FULL_RECT)
-	cancel_drop_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	cancel_drop_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	cancel_drop_label.add_theme_font_size_override("font_size", 22)
-	cancel_drop_label.add_theme_color_override("font_color", INK)
-	panel.add_child(cancel_drop_label)
-	return panel
-
-
-func _make_bottom_panel() -> Control:
-	var bottom := HBoxContainer.new()
-	bottom.custom_minimum_size = Vector2(1, 220)
-	bottom.add_theme_constant_override("separation", 10)
-
-	var info_space := Control.new()
-	info_space.custom_minimum_size = Vector2(190, 1)
-	bottom.add_child(info_space)
-
-	var cards_area := HBoxContainer.new()
-	cards_area.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	cards_area.add_theme_constant_override("separation", 0)
-	bottom.add_child(cards_area)
-
-	exclusive_cards = Control.new()
-	exclusive_cards.custom_minimum_size = Vector2(310, 205)
-	cards_area.add_child(exclusive_cards)
-
-	var card_group_gap := Control.new()
-	card_group_gap.custom_minimum_size = Vector2(90, 1)
-	card_group_gap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	cards_area.add_child(card_group_gap)
-
-	general_cards = Control.new()
-	general_cards.custom_minimum_size = Vector2(310, 205)
-	cards_area.add_child(general_cards)
-
-	log_panel = BATTLE_LOG_PANEL_SCENE.instantiate() as BattleLogPanel
-	bottom.add_child(log_panel)
-	return bottom
-
-
-func _make_shop_panel() -> Control:
-	shop_panel = PanelContainer.new()
-	shop_panel.visible = false
-	shop_panel.z_index = 1000
-	shop_panel.top_level = true
-	shop_panel.mouse_filter = Control.MOUSE_FILTER_STOP
-	shop_panel.anchor_left = 0.5
-	shop_panel.anchor_top = 0.5
-	shop_panel.anchor_right = 0.5
-	shop_panel.anchor_bottom = 0.5
-	shop_panel.offset_left = -370
-	shop_panel.offset_top = -210
-	shop_panel.offset_right = 370
-	shop_panel.offset_bottom = 210
-	shop_panel.add_theme_stylebox_override("panel", _style(Color(0.88, 0.80, 0.66, 0.98), 10, 3))
-
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 10)
-	shop_panel.add_child(box)
-
-	var header := HBoxContainer.new()
-	header.custom_minimum_size = Vector2(1, 42)
-	box.add_child(header)
-
-	var title := Label.new()
-	title.text = "商店"
-	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 24)
-	title.add_theme_color_override("font_color", INK)
-	header.add_child(title)
-
-	shop_balance_label = Label.new()
-	shop_balance_label.custom_minimum_size = Vector2(180, 1)
-	shop_balance_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	shop_balance_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	shop_balance_label.add_theme_font_size_override("font_size", 18)
-	shop_balance_label.add_theme_color_override("font_color", INK)
-	header.add_child(shop_balance_label)
-
-	var close_button := Button.new()
-	close_button.text = "X"
-	close_button.custom_minimum_size = Vector2(38, 34)
-	close_button.add_theme_stylebox_override("normal", _style(Color(0.94, 0.87, 0.72), 10, 2))
-	close_button.add_theme_stylebox_override("hover", _style(Color(1.0, 0.78, 0.68), 10, 2))
-	close_button.add_theme_color_override("font_color", INK)
-	close_button.pressed.connect(func() -> void: shop_panel.visible = false)
-	header.add_child(close_button)
-
-	shop_cards_row = HBoxContainer.new()
-	shop_cards_row.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	shop_cards_row.alignment = BoxContainer.ALIGNMENT_CENTER
-	shop_cards_row.add_theme_constant_override("separation", 14)
-	box.add_child(shop_cards_row)
-
-	var footer := HBoxContainer.new()
-	footer.custom_minimum_size = Vector2(1, 48)
-	box.add_child(footer)
-
-	var hint := Label.new()
-	hint.text = "购买后加入队伍通用卡牌。"
-	hint.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	hint.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	hint.add_theme_color_override("font_color", INK)
-	footer.add_child(hint)
-
-	shop_refresh_button = Button.new()
-	shop_refresh_button.text = "刷新 -0.5"
-	shop_refresh_button.custom_minimum_size = Vector2(120, 40)
-	shop_refresh_button.add_theme_stylebox_override("normal", _style(Color(0.70, 0.86, 0.96), 10, 2))
-	shop_refresh_button.add_theme_stylebox_override("hover", _style(Color(0.82, 0.94, 1.0), 10, 2))
-	shop_refresh_button.add_theme_stylebox_override("disabled", _style(Color(0.50, 0.50, 0.48), 10, 1))
-	shop_refresh_button.add_theme_color_override("font_color", INK)
-	shop_refresh_button.add_theme_color_override("font_disabled_color", Color(0.24, 0.23, 0.21))
-	shop_refresh_button.pressed.connect(func() -> void: shop_refresh_requested.emit())
-	footer.add_child(shop_refresh_button)
-	return shop_panel
+func _on_language_changed(_locale: String) -> void:
+	if state != null:
+		refresh(state)
 
 
 func _refresh_status() -> void:
@@ -313,196 +124,17 @@ func _refresh_selects() -> void:
 
 
 func _refresh_battlefield() -> void:
-	_clear_children(player_layer)
-	_clear_children(enemy_layer)
-	player_hit_rects.clear()
-	enemy_hit_rects.clear()
-
-	var field_size := battlefield.size
-	if field_size == Vector2.ZERO:
-		field_size = Vector2(1228, 395)
-
-	var player_positions: Array[Vector2] = [
-		Vector2(70, field_size.y * 0.08),
-		Vector2(210, field_size.y * 0.27),
-		Vector2(70, field_size.y * 0.46)
-	]
-	for i in state.player_team.size():
-		var standee := _make_character_standee(state.player_team[i], i == selected_character_index, i == hovered_player_target_index)
-		var base_position: Vector2 = player_positions[i]
-		var target_position: Vector2 = base_position + (Vector2(0, -18) if i == selected_character_index else Vector2.ZERO)
-		var start_position: Vector2 = target_position
-		if selection_transition_pending:
-			if i == selected_character_index:
-				start_position = base_position + Vector2(0, 8)
-			elif i == previous_character_index:
-				start_position = base_position + Vector2(0, -18)
-		standee.position = start_position
-		standee.size = standee.custom_minimum_size
-		player_layer.add_child(standee)
-		player_hit_rects.append(standee.get_global_rect())
-		if start_position != target_position:
-			var standee_tween: Tween = create_tween()
-			standee_tween.set_ease(Tween.EASE_OUT)
-			standee_tween.set_trans(Tween.TRANS_CUBIC)
-			standee_tween.tween_property(standee, "position", target_position, 0.18)
-
-	var enemy_positions: Array[Vector2] = [
-		Vector2(field_size.x - 300, field_size.y * 0.07),
-		Vector2(field_size.x - 430, field_size.y * 0.31),
-		Vector2(field_size.x - 300, field_size.y * 0.50)
-	]
-	for i in state.enemy_team.size():
-		var enemy_standee := _make_enemy_standee(state.enemy_team[i], i == selected_enemy_index, i == hovered_enemy_target_index)
-		enemy_standee.position = enemy_positions[i]
-		enemy_standee.size = enemy_standee.custom_minimum_size
-		enemy_layer.add_child(enemy_standee)
-		enemy_hit_rects.append(enemy_standee.get_global_rect())
+	battlefield_controller.refresh(
+		state,
+		selected_character_index,
+		previous_character_index,
+		selection_transition_pending,
+		selected_enemy_index,
+		showing_enemy_info,
+		hovered_player_target_index,
+		hovered_enemy_target_index
+	)
 	selection_transition_pending = false
-
-
-func _make_character_standee(character: CharacterData, selected: bool, target_highlighted: bool = false) -> Control:
-	var button := Button.new()
-	button.flat = true
-	button.mouse_filter = Control.MOUSE_FILTER_STOP
-	button.custom_minimum_size = Vector2(190, 230)
-	button.disabled = not character.is_alive()
-	var character_alpha: float = 1.0
-	if not character.is_alive():
-		character_alpha = 0.35
-	elif character.has_acted:
-		character_alpha = 0.52
-	button.modulate = Color(1, 1, 1, character_alpha)
-	var normal_color: Color = Color(0, 0, 0, 0)
-	var normal_border: int = 0
-	if target_highlighted:
-		normal_color = Color(0.58, 0.96, 0.62, 0.34)
-		normal_border = 3
-	elif selected:
-		normal_color = Color(0.72, 0.86, 1.0, 0.23)
-		normal_border = 2
-	button.add_theme_stylebox_override("normal", _style(normal_color, 8, normal_border))
-	button.add_theme_stylebox_override("hover", _style(Color(0.72, 0.86, 1.0, 0.22), 8, 2))
-	button.add_theme_stylebox_override("pressed", _style(Color(0.72, 0.86, 1.0, 0.35), 8, 2))
-	var index := state.player_team.find(character)
-	button.pressed.connect(_select_character.bind(index))
-
-	var box := VBoxContainer.new()
-	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	box.set_anchors_preset(Control.PRESET_FULL_RECT)
-	box.alignment = BoxContainer.ALIGNMENT_END
-	box.add_theme_constant_override("separation", 4)
-	button.add_child(box)
-
-	box.add_child(_make_hp_bar(character.current_hp, character.max_hp, GREEN))
-
-	var portrait := TextureRect.new()
-	portrait.texture = load(character.portrait_path)
-	portrait.custom_minimum_size = Vector2(178, 145)
-	portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	box.add_child(portrait)
-
-	var selected_icon := Label.new()
-	selected_icon.text = "◆"
-	selected_icon.visible = selected
-	selected_icon.custom_minimum_size = Vector2(178, 24)
-	selected_icon.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	selected_icon.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	selected_icon.add_theme_font_size_override("font_size", 24)
-	selected_icon.add_theme_color_override("font_color", Color(0.38, 0.70, 1.0))
-	box.add_child(selected_icon)
-	if target_highlighted:
-		button.add_child(_make_target_highlight(Color(0.50, 1.0, 0.52, 0.30), Color(0.36, 1.0, 0.42)))
-	return button
-
-
-func _make_enemy_standee(enemy: EnemyData, selected: bool, target_highlighted: bool = false) -> Control:
-	var button := Button.new()
-	button.flat = true
-	button.mouse_filter = Control.MOUSE_FILTER_STOP
-	button.custom_minimum_size = Vector2(220, 210)
-	button.disabled = not enemy.is_alive()
-	button.modulate = Color(1, 1, 1, 1.0 if enemy.is_alive() else 0.30)
-	var normal_color: Color = Color(0, 0, 0, 0)
-	var normal_border: int = 0
-	if target_highlighted:
-		normal_color = Color(1.0, 0.75, 0.42, 0.34)
-		normal_border = 3
-	elif selected and showing_enemy_info:
-		normal_color = Color(1.0, 0.82, 0.74, 0.23)
-		normal_border = 2
-	button.add_theme_stylebox_override("normal", _style(normal_color, 8, normal_border))
-	button.add_theme_stylebox_override("hover", _style(Color(1.0, 0.82, 0.74, 0.22), 8, 2))
-	button.add_theme_stylebox_override("pressed", _style(Color(1.0, 0.82, 0.74, 0.35), 8, 2))
-	var index := state.enemy_team.find(enemy)
-	button.pressed.connect(_select_enemy.bind(index))
-
-	var box := VBoxContainer.new()
-	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	box.set_anchors_preset(Control.PRESET_FULL_RECT)
-	box.alignment = BoxContainer.ALIGNMENT_END
-	box.add_theme_constant_override("separation", 4)
-	button.add_child(box)
-
-	box.add_child(_make_hp_bar(enemy.current_hp, enemy.max_hp, RED))
-
-	var portrait := TextureRect.new()
-	portrait.texture = load(enemy.portrait_path)
-	portrait.custom_minimum_size = Vector2(200, 135)
-	portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	box.add_child(portrait)
-
-	if target_highlighted:
-		button.add_child(_make_target_highlight(Color(1.0, 0.72, 0.32, 0.30), Color(1.0, 0.58, 0.18)))
-	return button
-
-
-func _make_target_highlight(fill_color: Color, border_color: Color) -> Control:
-	var panel := Panel.new()
-	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
-	var style := StyleBoxFlat.new()
-	style.bg_color = fill_color
-	style.border_color = border_color
-	style.border_width_left = 5
-	style.border_width_right = 5
-	style.border_width_top = 5
-	style.border_width_bottom = 5
-	style.corner_radius_top_left = 12
-	style.corner_radius_top_right = 12
-	style.corner_radius_bottom_left = 12
-	style.corner_radius_bottom_right = 12
-	style.shadow_color = Color(border_color.r, border_color.g, border_color.b, 0.45)
-	style.shadow_size = 12
-	panel.add_theme_stylebox_override("panel", style)
-	return panel
-
-
-func _make_hp_bar(current_hp: int, max_hp: int, color: Color) -> Control:
-	var wrap := Control.new()
-	wrap.custom_minimum_size = Vector2(160, 26)
-
-	var bar := ProgressBar.new()
-	bar.min_value = 0
-	bar.max_value = max_hp
-	bar.value = current_hp
-	bar.show_percentage = false
-	bar.set_anchors_preset(Control.PRESET_FULL_RECT)
-	bar.add_theme_stylebox_override("background", _style(Color(0.40, 0.34, 0.27), 12, 2))
-	bar.add_theme_stylebox_override("fill", _style(color, 12, 1))
-	wrap.add_child(bar)
-
-	var label := Label.new()
-	label.text = "%d / %d" % [current_hp, max_hp]
-	label.set_anchors_preset(Control.PRESET_FULL_RECT)
-	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	label.add_theme_color_override("font_color", INK)
-	label.add_theme_font_size_override("font_size", 15)
-	wrap.add_child(label)
-	return wrap
 
 
 func _refresh_cards() -> void:
@@ -763,9 +395,11 @@ func _reset_card_drag_state(card_index: int) -> void:
 func _set_cancel_drop_visible(visible: bool) -> void:
 	if cancel_drop_area == null:
 		return
-	cancel_drop_area.visible = visible
 	cancel_drop_hovered = false
-	cancel_drop_area.add_theme_stylebox_override("panel", _cancel_drop_style(false))
+	if visible:
+		cancel_drop_area.show_area()
+	else:
+		cancel_drop_area.hide_area()
 
 
 func _update_cancel_drop_hover(global_position: Vector2) -> void:
@@ -775,8 +409,7 @@ func _update_cancel_drop_hover(global_position: Vector2) -> void:
 	if next_hovered == cancel_drop_hovered:
 		return
 	cancel_drop_hovered = next_hovered
-	cancel_drop_area.add_theme_stylebox_override("panel", _cancel_drop_style(cancel_drop_hovered))
-	cancel_drop_label.add_theme_color_override("font_color", Color.WHITE if cancel_drop_hovered else INK)
+	cancel_drop_area.set_hovered(cancel_drop_hovered)
 
 
 func _is_over_cancel_drop_area(global_position: Vector2) -> bool:
@@ -869,6 +502,8 @@ func _apply_card_arc_pose(parent: Control, card_button: CardButton, slot: int, c
 	var pivot_offset: Vector2 = Vector2(card_size.x * 0.5, card_size.y * HAND_PIVOT_Y_OFFSET_FACTOR)
 	var pivot_base_y: float = parent_size.y - (card_size.y - pivot_offset.y) - HAND_BOTTOM_PADDING
 	var center_x: float = parent_size.x * 0.5
+	if parent == general_cards:
+		center_x -= GENERAL_HAND_LEFT_SHIFT
 	var max_angle_degrees: float = _max_hand_angle_degrees_for_count(count)
 	var max_angle: float = deg_to_rad(max_angle_degrees)
 	var group_span: float = card_size.x * 0.32 * float(maxi(count - 1, 1))
@@ -949,17 +584,11 @@ func _convert_pivot_to_top_left(pivot_position: Vector2, pivot_offset: Vector2, 
 
 
 func _enemy_index_at(global_position: Vector2) -> int:
-	for i in enemy_hit_rects.size():
-		if enemy_hit_rects[i].has_point(global_position) and state.enemy_team[i].is_alive():
-			return i
-	return -1
+	return battlefield_controller.enemy_index_at(global_position)
 
 
 func _player_index_at(global_position: Vector2) -> int:
-	for i in player_hit_rects.size():
-		if player_hit_rects[i].has_point(global_position) and state.player_team[i].is_alive():
-			return i
-	return -1
+	return battlefield_controller.player_index_at(global_position)
 
 
 func _update_drag_target_highlight(global_position: Vector2) -> void:
@@ -1033,17 +662,22 @@ func _refresh_info_hint() -> void:
 		return
 	if showing_enemy_info and selected_enemy_index >= 0 and selected_enemy_index < state.enemy_team.size():
 		var enemy: EnemyData = state.enemy_team[selected_enemy_index]
-		selected_hint.text = "敌人：%s\n属性：%s\n攻击：基础攻击 %d\n技能：暂无" % [enemy.display_name, enemy.attribute, enemy.get_basic_attack_damage()]
+		selected_hint.text = tr("INFO_ENEMY_FORMAT").replace("\\n", "\n") % [
+			tr(enemy.display_name),
+			_attribute_text(enemy.attribute),
+			enemy.get_basic_attack_damage(),
+			tr("INFO_NO_SKILL")
+		]
 		return
 
 	var character: CharacterData = _get_selected_character()
 	if character == null:
 		selected_hint.text = ""
 		return
-	selected_hint.text = "出牌者：%s\n属性：%s\n状态：%s\n被动：%s" % [
-		character.display_name,
-		character.attribute,
-		"已行动" if character.has_acted else "可行动",
+	selected_hint.text = tr("INFO_PLAYER_FORMAT").replace("\\n", "\n") % [
+		tr(character.display_name),
+		_attribute_text(character.attribute),
+		tr("STATUS_ACTED") if character.has_acted else tr("STATUS_READY"),
 		_passive_text(character.attribute)
 	]
 
@@ -1051,19 +685,31 @@ func _refresh_info_hint() -> void:
 func _passive_text(attribute: String) -> String:
 	match attribute:
 		"拼音":
-			return "全员属性 +20%"
+			return tr("PASSIVE_PINYIN")
 		"词汇":
-			return "错题 25% 触发加成"
+			return tr("PASSIVE_VOCABULARY")
 		"文化":
-			return "AP 增长 +0.25"
+			return tr("PASSIVE_CULTURE")
 		_:
-			return "暂无"
+			return tr("PASSIVE_NONE")
+
+
+func _attribute_text(attribute: String) -> String:
+	match attribute:
+		"拼音":
+			return tr("ATTRIBUTE_PINYIN")
+		"词汇":
+			return tr("ATTRIBUTE_VOCABULARY")
+		"文化":
+			return tr("ATTRIBUTE_CULTURE")
+		_:
+			return attribute
 
 
 func _toggle_shop_panel() -> void:
 	if shop_panel == null:
 		return
-	shop_panel.visible = not shop_panel.visible
+	shop_panel.toggle()
 	if shop_panel.visible:
 		_refresh_shop_panel()
 
@@ -1071,44 +717,7 @@ func _toggle_shop_panel() -> void:
 func _refresh_shop_panel() -> void:
 	if shop_panel == null or state == null:
 		return
-	shop_balance_label.text = "TOEFL %.1f" % state.new_toefl
-	if shop_refresh_button != null:
-		shop_refresh_button.disabled = state.new_toefl + 0.001 < 0.5
-	if not shop_panel.visible:
-		return
-
-	_clear_children(shop_cards_row)
-	for i in state.shop_offer_cards.size():
-		var offer_card: CardData = state.shop_offer_cards[i]
-		var item := VBoxContainer.new()
-		item.custom_minimum_size = Vector2(148, 270)
-		item.add_theme_constant_override("separation", 8)
-		shop_cards_row.add_child(item)
-
-		var preview: CardButton = CARD_BUTTON_SCENE.instantiate() as CardButton
-		preview.custom_minimum_size = Vector2(116, 152)
-		preview.size = preview.custom_minimum_size
-		item.add_child(preview)
-		preview.setup(offer_card, i, state.ap, true)
-		preview.disabled = true
-
-		var price := Label.new()
-		price.text = "%.1f TOEFL" % offer_card.shop_price
-		price.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		price.add_theme_font_size_override("font_size", 16)
-		price.add_theme_color_override("font_color", INK)
-		item.add_child(price)
-
-		var buy_button := Button.new()
-		buy_button.text = "购买"
-		buy_button.custom_minimum_size = Vector2(116, 36)
-		buy_button.disabled = state.new_toefl + 0.001 < offer_card.shop_price
-		buy_button.add_theme_stylebox_override("normal", _style(Color(0.78, 0.88, 0.62), 10, 2))
-		buy_button.add_theme_stylebox_override("hover", _style(Color(0.88, 0.96, 0.70), 10, 2))
-		buy_button.add_theme_stylebox_override("disabled", _style(Color(0.55, 0.52, 0.46), 10, 1))
-		buy_button.add_theme_color_override("font_color", INK)
-		buy_button.pressed.connect(_buy_shop_card.bind(i))
-		item.add_child(buy_button)
+	shop_panel.refresh(state.new_toefl, state.shop_offer_cards, state.ap)
 
 
 func _buy_shop_card(offer_index: int) -> void:
@@ -1134,6 +743,17 @@ func _clamp_selection() -> void:
 		selected_enemy_index = -1
 	else:
 		selected_enemy_index = clampi(selected_enemy_index, 0, state.enemy_team.size() - 1)
+		if not state.enemy_team[selected_enemy_index].is_alive():
+			selected_enemy_index = _first_alive_enemy_index()
+			if selected_enemy_index == -1:
+				showing_enemy_info = false
+
+
+func _first_alive_enemy_index() -> int:
+	for i in state.enemy_team.size():
+		if state.enemy_team[i].is_alive():
+			return i
+	return -1
 
 
 func _select_next_ready_character_if_needed() -> void:
@@ -1172,21 +792,6 @@ func _style(color: Color, radius: int, border_width: int) -> StyleBoxFlat:
 	style.border_color = Color(0.13, 0.10, 0.08)
 	style.shadow_color = Color(0, 0, 0, 0.20)
 	style.shadow_size = 5
-	return style
-
-
-func _cancel_drop_style(hovered: bool) -> StyleBoxFlat:
-	var color: Color = Color(0.88, 0.80, 0.68, 0.90)
-	var border_color: Color = Color(0.13, 0.10, 0.08)
-	var shadow_color: Color = Color(0, 0, 0, 0.20)
-	if hovered:
-		color = Color(0.88, 0.30, 0.26, 0.96)
-		border_color = Color(0.42, 0.08, 0.06)
-		shadow_color = Color(0.72, 0.12, 0.08, 0.35)
-	var style := _style(color, 18, 3)
-	style.border_color = border_color
-	style.shadow_color = shadow_color
-	style.shadow_size = 8 if hovered else 5
 	return style
 
 

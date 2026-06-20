@@ -10,9 +10,9 @@ enum Phase {
 	DEFEAT
 }
 
-const ATTRIBUTE_PINYIN: String = "拼音"
-const ATTRIBUTE_VOCABULARY: String = "词汇"
-const ATTRIBUTE_CULTURE: String = "文化"
+const ATTRIBUTE_PINYIN: String = LearningAttribute.PINYIN
+const ATTRIBUTE_VOCABULARY: String = LearningAttribute.VOCABULARY
+const ATTRIBUTE_CULTURE: String = LearningAttribute.CULTURE
 
 var phase: Phase = Phase.SETUP
 var turn_count: int = 0
@@ -31,19 +31,21 @@ var shop_offer_cards: Array[CardData] = []
 var battle_log: Array[String] = []
 
 
-func setup(players: Array[CharacterData], enemies: Array[EnemyData]) -> void:
+func setup(players: Array[CharacterData], enemies: Array[EnemyData], rng: RandomNumberGenerator = null) -> void:
 	player_team = players
 	enemy_team = enemies
 	phase = Phase.SETUP
 	turn_count = 0
 	ap = 0.0
 	new_toefl = 0.0
-	team_general_cards = GameDataFactory.create_starting_general_cards()
+	team_general_cards = GameDataFactory.create_starting_general_cards(rng)
 	shop_offer_cards.clear()
 	battle_log.clear()
 
+	var pinyin_passive_count: int = get_attribute_count(ATTRIBUTE_PINYIN, false)
+	var max_hp_multiplier: float = 1.0 + float(pinyin_passive_count) * 0.20
 	for character: CharacterData in player_team:
-		character.setup_runtime()
+		character.setup_runtime(max_hp_multiplier)
 	for enemy: EnemyData in enemy_team:
 		enemy.setup_runtime()
 
@@ -95,16 +97,26 @@ func did_all_living_players_act() -> bool:
 
 
 func get_pinyin_passive_count() -> int:
-	return _count_alive_players_by_attribute(ATTRIBUTE_PINYIN)
+	return get_attribute_count(ATTRIBUTE_PINYIN)
 
 
 func get_vocabulary_passive_count() -> int:
-	return _count_alive_players_by_attribute(ATTRIBUTE_VOCABULARY)
+	return get_attribute_count(ATTRIBUTE_VOCABULARY)
 
 
 func get_culture_passive_count() -> int:
-	return _count_alive_players_by_attribute(ATTRIBUTE_CULTURE)
+	return get_attribute_count(ATTRIBUTE_CULTURE)
 
+
+func get_attribute_count(attribute: String, alive_only: bool = true) -> int:
+	var count: int = 0
+	for character: CharacterData in player_team:
+		if character.attribute != attribute:
+			continue
+		if alive_only and not character.is_alive():
+			continue
+		count += 1
+	return count
 
 func get_team_stat_multiplier() -> float:
 	return 1.0 + float(get_pinyin_passive_count()) * 0.20
@@ -150,11 +162,3 @@ func clear_pending_action() -> void:
 	pending_card = null
 	pending_question = null
 	pending_difficulty = "easy"
-
-
-func _count_alive_players_by_attribute(attribute: String) -> int:
-	var count: int = 0
-	for character: CharacterData in player_team:
-		if character.is_alive() and character.attribute == attribute:
-			count += 1
-	return count

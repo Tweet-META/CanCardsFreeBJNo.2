@@ -19,43 +19,43 @@ func _ready() -> void:
 
 
 func start_new_battle() -> void:
-	state.setup(GameDataFactory.create_player_team(), GameDataFactory.create_enemy_team())
+	state.setup(GameDataFactory.create_player_team(), GameDataFactory.create_enemy_team(), rng)
 	_roll_shop_offers()
-	state.push_log("战斗开始：三位吉祥物准备好了。")
+	state.push_log(tr("LOG_BATTLE_START"))
 	state.start_player_turn()
-	_emit_log("玩家回合 %d：请选择角色和卡牌。" % state.turn_count)
+	_emit_log(tr("LOG_PLAYER_TURN_START") % state.turn_count)
 	state_changed.emit(state)
 
 
 func request_use_card(character_index: int, card_index: int, enemy_index: int, ally_index: int, difficulty: String) -> void:
 	if state.phase != BattleState.Phase.PLAYER_TURN:
-		_emit_log("现在不能使用卡牌。")
+		_emit_log(tr("LOG_CANNOT_USE_CARD"))
 		return
 	if character_index < 0 or character_index >= state.player_team.size():
 		return
 
 	var character: CharacterData = state.player_team[character_index]
 	if not character.is_alive():
-		_emit_log("%s 已无法行动。" % character.display_name)
+		_emit_log(tr("LOG_CHARACTER_UNAVAILABLE") % tr(character.display_name))
 		return
 	if character.has_acted:
-		_emit_log("%s 本回合已经行动过。" % character.display_name)
+		_emit_log(tr("LOG_CHARACTER_ACTED") % tr(character.display_name))
 		return
 	var card: CardData = _get_card_for_request(character, card_index)
 	if card == null:
 		return
 
 	if not card.can_use(state.ap):
-		_emit_log("%s 需要 AP ≥ %.1f。" % [card.display_name, card.skill_ap_cost])
+		_emit_log(tr("LOG_CARD_AP_REQUIRED") % [tr(card.display_name), card.skill_ap_cost])
 		return
 
 	var target_enemy: EnemyData = _get_enemy_or_first_alive(enemy_index)
 	if _card_needs_enemy(card) and target_enemy == null:
-		_emit_log("没有可攻击的敌人。")
+		_emit_log(tr("LOG_NO_ENEMY_TARGET"))
 		return
 	var target_ally: CharacterData = _get_ally_or_actor(ally_index, character)
 	if _card_needs_ally(card) and target_ally == null:
-		_emit_log("请选择一名我方角色作为防御目标。")
+		_emit_log(tr("LOG_SELECT_ALLY_TARGET"))
 		return
 
 	state.selected_character = character
@@ -71,7 +71,7 @@ func request_use_card(character_index: int, card_index: int, enemy_index: int, a
 
 	state.phase = BattleState.Phase.QUESTION
 	state.pending_question = question_bank.get_random_question(card.required_attribute, state.pending_difficulty, rng)
-	_emit_log("%s 使用 %s，需要回答%s题。" % [character.display_name, card.display_name, _difficulty_label(state.pending_difficulty)])
+	_emit_log(tr("LOG_CARD_QUESTION") % [tr(character.display_name), tr(card.display_name), _difficulty_label(state.pending_difficulty)])
 	question_requested.emit(state.pending_question)
 	state_changed.emit(state)
 
@@ -86,13 +86,13 @@ func submit_answer(answer_index: int) -> void:
 		var chance: float = state.get_wrong_answer_bonus_chance()
 		bonus_triggered = rng.randf() < chance
 
-	var answer_text: String = "回答正确" if correct else "回答错误"
+	var answer_text: String = tr("RESULT_CORRECT") if correct else tr("RESULT_WRONG")
 	if bonus_triggered and not correct:
-		answer_text += "，词汇被动触发，加成仍然生效"
+		answer_text += tr("RESULT_VOCABULARY_TRIGGER")
 
 	_apply_card_effect(correct, bonus_triggered)
-	_emit_log(answer_text + "。")
-	result_requested.emit(answer_text, state.pending_question.explanation, false, false)
+	_emit_log(answer_text + ("。" if TranslationServer.get_locale() == "zh_CN" else "."))
+	result_requested.emit(answer_text, tr(state.pending_question.explanation), false, false)
 	_finish_player_action()
 
 
@@ -108,11 +108,11 @@ func retry_battle() -> void:
 
 func request_refresh_shop() -> void:
 	if not state.spend_new_toefl(0.5):
-		_emit_log("New TOEFL 不足，无法刷新商店。")
+		_emit_log(tr("LOG_REFRESH_NO_FUNDS"))
 		state_changed.emit(state)
 		return
 	_roll_shop_offers()
-	_emit_log("花费 0.5 New TOEFL 刷新商店。")
+	_emit_log(tr("LOG_SHOP_REFRESHED"))
 	state_changed.emit(state)
 
 
@@ -123,13 +123,13 @@ func request_buy_shop_card(offer_index: int, character_index: int) -> void:
 		return
 	var target_character: CharacterData = state.player_team[character_index]
 	if not target_character.is_alive():
-		_emit_log("无法给无法行动的角色购买卡牌。")
+		_emit_log(tr("LOG_BUY_INVALID_CHARACTER"))
 		state_changed.emit(state)
 		return
 
 	var offer_card: CardData = state.shop_offer_cards[offer_index]
 	if not state.spend_new_toefl(offer_card.shop_price):
-		_emit_log("New TOEFL 不足，无法购买 %s。" % offer_card.display_name)
+		_emit_log(tr("LOG_BUY_NO_FUNDS") % tr(offer_card.display_name))
 		state_changed.emit(state)
 		return
 
@@ -137,38 +137,68 @@ func request_buy_shop_card(offer_index: int, character_index: int) -> void:
 	bought_card.id = "%s_bought_%d" % [offer_card.id, Time.get_ticks_msec()]
 	bought_card.owner_id = "team"
 	state.team_general_cards.append(bought_card)
-	_emit_log("队伍购买了 %s，花费 %.1f New TOEFL。" % [bought_card.display_name, offer_card.shop_price])
+	_emit_log(tr("LOG_CARD_PURCHASED") % [tr(bought_card.display_name), offer_card.shop_price])
 	state_changed.emit(state)
 
 
-func _apply_card_effect(answer_correct: bool, bonus_triggered: bool) -> void:
+func developer_add_festival_mask() -> void:
+	if not SettingsManager.developer_mode:
+		return
+	if state.get_alive_enemies().size() >= 8:
+		_emit_log(tr("DEV_LOG_ENEMY_LIMIT"))
+		return
+
+	var enemy: EnemyData = GameDataFactory.create_festival_mask_enemy()
+	enemy.id = "%s_dev_%d" % [enemy.id, Time.get_ticks_msec()]
+	enemy.setup_runtime()
+	state.enemy_team.append(enemy)
+	_emit_log(tr("DEV_LOG_ADDED_MASK"))
+	state_changed.emit(state)
+
+
+func developer_add_general_card() -> void:
+	if not SettingsManager.developer_mode:
+		return
+	var card: CardData = GameDataFactory.create_general_encouragement_i()
+	card.id = "%s_dev_%d" % [card.id, Time.get_ticks_msec()]
+	card.owner_id = "team"
+	state.team_general_cards.append(card)
+	_emit_log(tr("DEV_LOG_ADDED_CARD"))
+	state_changed.emit(state)
+
+
+func _apply_card_effect(_answer_correct: bool, bonus_triggered: bool) -> void:
 	var character: CharacterData = state.selected_character
 	var card: CardData = state.pending_card
 	if character == null or card == null:
 		return
 
-	match card.card_type:
-		CardData.CardType.GENERAL:
+	match card.effect_id:
+		"gain_team_ap":
 			var gain: float = card.base_ap_gain + state.get_ap_growth_bonus()
 			state.add_ap(gain)
-			_emit_log("队伍获得 %.2f AP。" % gain)
-		CardData.CardType.ATTACK:
+			_emit_log(tr("LOG_TEAM_GAIN_AP") % gain)
+		"attack_single":
 			_apply_attack_card(character, card, bonus_triggered)
 			if bonus_triggered:
 				_gain_answer_ap(character, card)
-		CardData.CardType.DEFENSE:
+		"defend_single":
 			var defense_target: CharacterData = state.selected_ally if state.selected_ally != null else character
 			var block: float = card.base_block
 			if bonus_triggered:
 				block += card.get_block_bonus_for_difficulty(state.pending_difficulty)
 			defense_target.add_turn_damage_reduction(block)
-			_emit_log("%s 为 %s 提供 %.0f%% 本回合减伤。" % [character.display_name, defense_target.display_name, block * 100.0])
+			_emit_log(tr("LOG_DEFENSE_GRANTED") % [tr(character.display_name), tr(defense_target.display_name), block * 100.0])
 			if bonus_triggered:
 				_gain_answer_ap(character, card)
-		CardData.CardType.SKILL:
+		"skill_attack_single", "skill_attack_all":
 			_apply_skill_card(character, card, bonus_triggered)
-			state.clear_ap()
-			_emit_log("队伍 AP 清零。")
+		_:
+			push_error("BattleManager: unknown card effect_id '%s' for card '%s'." % [card.effect_id, card.id])
+
+	if card.is_skill():
+		state.clear_ap()
+		_emit_log(tr("LOG_AP_CLEARED"))
 
 
 func _apply_attack_card(character: CharacterData, card: CardData, bonus_triggered: bool) -> void:
@@ -177,7 +207,7 @@ func _apply_attack_card(character: CharacterData, card: CardData, bonus_triggere
 		return
 	var damage: int = _calculate_damage(character, enemy, card.base_damage, card.get_damage_bonus_for_difficulty(state.pending_difficulty) if bonus_triggered else 0.0)
 	var dealt: int = enemy.take_damage(damage)
-	_emit_log("%s 对 %s 造成 %d 伤害。" % [character.display_name, enemy.display_name, dealt])
+	_emit_log(tr("LOG_ATTACK_DAMAGE") % [tr(character.display_name), tr(enemy.display_name), dealt])
 	_collect_reward_if_dead(enemy)
 
 
@@ -188,14 +218,14 @@ func _apply_skill_card(character: CharacterData, card: CardData, bonus_triggered
 			if enemy.is_alive():
 				var damage: int = _calculate_damage(character, enemy, card.base_damage, extra_bonus)
 				var dealt: int = enemy.take_damage(damage)
-				_emit_log("%s 的技能击中 %s，造成 %d 伤害。" % [character.display_name, enemy.display_name, dealt])
+				_emit_log(tr("LOG_SKILL_HIT_ALL") % [tr(character.display_name), tr(enemy.display_name), dealt])
 				_collect_reward_if_dead(enemy)
 	else:
 		var enemy: EnemyData = state.selected_enemy
 		if enemy != null:
 			var damage: int = _calculate_damage(character, enemy, card.base_damage, extra_bonus)
 			var dealt: int = enemy.take_damage(damage)
-			_emit_log("%s 的技能对 %s 造成 %d 伤害。" % [character.display_name, enemy.display_name, dealt])
+			_emit_log(tr("LOG_SKILL_HIT_ONE") % [tr(character.display_name), tr(enemy.display_name), dealt])
 			_collect_reward_if_dead(enemy)
 
 
@@ -204,13 +234,13 @@ func _calculate_damage(character: CharacterData, enemy: EnemyData, base_damage: 
 	if character.attribute == enemy.attribute:
 		multiplier += 0.20
 	multiplier += card_bonus
-	return maxi(1, roundi(float(base_damage + character.attack) * multiplier))
+	return maxi(1, roundi(float(base_damage) * multiplier))
 
 
 func _gain_answer_ap(character: CharacterData, card: CardData) -> void:
 	var gain: float = card.base_ap_gain + card.get_correct_answer_ap_bonus(state.pending_difficulty) + state.get_ap_growth_bonus()
 	state.add_ap(gain)
-	_emit_log("队伍获得 %.2f AP。" % gain)
+	_emit_log(tr("LOG_TEAM_GAIN_AP") % gain)
 
 
 func _finish_player_action() -> void:
@@ -236,7 +266,7 @@ func _finish_player_action() -> void:
 func _run_enemy_turn() -> void:
 	state.phase = BattleState.Phase.ENEMY_TURN
 	state_changed.emit(state)
-	_emit_log("敌方回合开始。")
+	_emit_log(tr("LOG_ENEMY_TURN_START"))
 
 	for enemy: EnemyData in state.enemy_team:
 		if not enemy.is_alive():
@@ -246,24 +276,24 @@ func _run_enemy_turn() -> void:
 			break
 		var raw_damage: int = enemy.get_basic_attack_damage()
 		var dealt: int = target.take_damage(raw_damage, enemy.attribute)
-		_emit_log("%s 攻击 %s，造成 %d 伤害。" % [enemy.display_name, target.display_name, dealt])
+		_emit_log(tr("LOG_ENEMY_ATTACK") % [tr(enemy.display_name), tr(target.display_name), dealt])
 		if _check_battle_end():
 			state_changed.emit(state)
 			return
 
 	state.start_player_turn()
-	_emit_log("玩家回合 %d：请选择尚未行动的角色。" % state.turn_count)
+	_emit_log(tr("LOG_NEXT_PLAYER_TURN") % state.turn_count)
 	state_changed.emit(state)
 
 
 func _check_battle_end() -> bool:
 	if state.are_all_enemies_dead():
 		state.phase = BattleState.Phase.VICTORY
-		result_requested.emit("胜利", "敌方全灭！本关 MVP 完成。New TOEFL：%.1f" % state.new_toefl, true, true)
+		result_requested.emit(tr("RESULT_VICTORY_TITLE"), tr("RESULT_VICTORY_MESSAGE") % state.new_toefl, true, true)
 		return true
 	if state.are_all_players_dead():
 		state.phase = BattleState.Phase.DEFEAT
-		result_requested.emit("失败", "我方全灭。失败无惩罚，可以重新挑战。", true, false)
+		result_requested.emit(tr("RESULT_DEFEAT_TITLE"), tr("RESULT_DEFEAT_MESSAGE"), true, false)
 		return true
 	return false
 
@@ -271,7 +301,7 @@ func _check_battle_end() -> bool:
 func _collect_reward_if_dead(enemy: EnemyData) -> void:
 	if not enemy.is_alive() and enemy.toefl_reward > 0.0:
 		state.add_new_toefl(enemy.toefl_reward)
-		_emit_log("击败 %s，获得 %.1f New TOEFL。" % [enemy.display_name, enemy.toefl_reward])
+		_emit_log(tr("LOG_ENEMY_REWARD") % [tr(enemy.display_name), enemy.toefl_reward])
 		enemy.toefl_reward = 0.0
 
 
@@ -336,10 +366,10 @@ func _decode_team_general_card_index(card_index: int) -> int:
 func _difficulty_label(difficulty: String) -> String:
 	match difficulty:
 		"easy":
-			return "简单"
+			return tr("DIFFICULTY_EASY")
 		"medium":
-			return "中等"
+			return tr("DIFFICULTY_MEDIUM")
 		"hard":
-			return "困难"
+			return tr("DIFFICULTY_HARD")
 		_:
 			return difficulty

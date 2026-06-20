@@ -14,6 +14,11 @@ config/name="Can Cards Free BJNo.2"
 run/main_scene="res://scenes/MainMenu.tscn"
 config/features=PackedStringArray("4.6")
 
+[autoload]
+
+LanguageManager="*res://scripts/localization/LanguageManager.gd"
+SettingsManager="*res://scripts/settings/SettingsManager.gd"
+
 [display]
 
 window/size/viewport_width=1280
