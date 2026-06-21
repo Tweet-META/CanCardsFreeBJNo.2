@@ -115,6 +115,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="GeneralCards" type="Control" parent="Root/Bottom/CardsArea" unique_id=59993371]
+z_index = 700
 custom_minimum_size = Vector2(310, 205)
 layout_mode = 2
 

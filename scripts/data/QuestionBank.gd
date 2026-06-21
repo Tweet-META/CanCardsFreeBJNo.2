@@ -58,9 +58,25 @@ func get_random_question(category: String, difficulty: String, rng: RandomNumber
 				candidates.append(question)
 
 	if candidates.is_empty():
-		return questions[0]
+		return questions[0].create_shuffled_copy(rng)
 
-	return candidates[rng.randi_range(0, candidates.size() - 1)]
+	return candidates[rng.randi_range(0, candidates.size() - 1)].create_shuffled_copy(rng)
+
+
+func get_random_question_by_difficulty(difficulty: String, rng: RandomNumberGenerator) -> QuestionData:
+	# 战斗抽题只按难度池筛选，题目属性不受出牌角色或卡牌属性限制。
+	var candidates: Array[QuestionData] = get_questions_for_difficulty(difficulty)
+	if candidates.is_empty():
+		return questions[0].create_shuffled_copy(rng)
+	return candidates[rng.randi_range(0, candidates.size() - 1)].create_shuffled_copy(rng)
+
+
+func get_questions_for_difficulty(difficulty: String) -> Array[QuestionData]:
+	var candidates: Array[QuestionData] = []
+	for question: QuestionData in questions:
+		if question.difficulty == difficulty:
+			candidates.append(question)
+	return candidates
 
 
 func _setup_default_questions() -> void:

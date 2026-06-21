@@ -10,13 +10,13 @@ func _init() -> void:
 		return
 
 	language_manager.set_language("zh_CN", false)
-	if tr("MENU_START") != "开始战斗":
+	if tr("MENU_START") != "开始游戏":
 		push_error("Chinese localization failed.")
 		quit(1)
 		return
 
 	language_manager.set_language("en", false)
-	if tr("MENU_START") != "Start Battle":
+	if tr("MENU_START") != "Start Game":
 		push_error("English UI localization failed.")
 		quit(1)
 		return

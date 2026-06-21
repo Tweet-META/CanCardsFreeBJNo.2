@@ -17,7 +17,7 @@ func _test_pinyin_stacking() -> void:
 		_make_character("culture_one", BattleState.ATTRIBUTE_CULTURE, 120)
 	]
 	var state: BattleState = BattleState.new()
-	state.setup(players, [], _seeded_rng())
+	state.setup(players, [], _test_stage(), _seeded_rng())
 
 	assert(state.get_attribute_count(BattleState.ATTRIBUTE_PINYIN) == 2)
 	assert(state.get_pinyin_passive_count() == 2)
@@ -38,7 +38,7 @@ func _test_vocabulary_stacking() -> void:
 		_make_character("vocabulary_two", BattleState.ATTRIBUTE_VOCABULARY)
 	]
 	var state: BattleState = BattleState.new()
-	state.setup(players, [], _seeded_rng())
+	state.setup(players, [], _test_stage(), _seeded_rng())
 
 	assert(state.get_vocabulary_passive_count() == 2)
 	assert(is_equal_approx(state.get_wrong_answer_bonus_chance(), 0.5))
@@ -53,7 +53,7 @@ func _test_culture_stacking() -> void:
 		_make_character("culture_two", BattleState.ATTRIBUTE_CULTURE)
 	]
 	var state: BattleState = BattleState.new()
-	state.setup(players, [], _seeded_rng())
+	state.setup(players, [], _test_stage(), _seeded_rng())
 
 	assert(state.get_culture_passive_count() == 2)
 	assert(is_equal_approx(state.get_ap_growth_bonus(), 0.5))
@@ -74,3 +74,10 @@ func _seeded_rng() -> RandomNumberGenerator:
 	var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 	rng.seed = 12345
 	return rng
+
+
+func _test_stage() -> StageData:
+	var stage: StageData = StageData.new()
+	stage.id = "passive_test"
+	stage.waves = [StageWaveData.new()]
+	return stage

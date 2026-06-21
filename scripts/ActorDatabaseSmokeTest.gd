@@ -38,7 +38,10 @@ func _test_characters() -> void:
 
 
 func _test_enemies() -> void:
-	var team: Array[EnemyData] = EnemyDatabase.create_default_team()
+	var stage: StageData = StageDatabase.create_stage("first_stage")
+	var rng: RandomNumberGenerator = RandomNumberGenerator.new()
+	rng.seed = 12345
+	var team: Array[EnemyData] = GameDataFactory.create_stage_wave(stage, 0, rng)
 	assert(team.size() == 3)
 
 	var pinyin_bun: EnemyData = team[0]
@@ -48,14 +51,17 @@ func _test_enemies() -> void:
 	assert(pinyin_bun.prototype == EnemyData.PROTOTYPE_BUN)
 	assert(pinyin_bun.description == "ENEMY_PINYIN_BUN_DESCRIPTION")
 	assert(pinyin_bun.max_hp == 70)
-	assert(pinyin_bun.attack == 11)
+	assert(pinyin_bun.abilities.size() == 1)
+	assert(pinyin_bun.abilities[0].id == "bun_group_attack")
+	assert(pinyin_bun.abilities[0].power == 11)
 
 	var vocab_slime: EnemyData = team[1]
 	assert(vocab_slime.id == "vocab_slime")
 	assert(vocab_slime.display_name == "ENEMY_VOCAB_SLIME")
 	assert(vocab_slime.prototype == EnemyData.PROTOTYPE_SLIME)
-	assert(vocab_slime.attack == 0)
-	assert(vocab_slime.ability_power == 8)
+	assert(vocab_slime.abilities.size() == 1)
+	assert(vocab_slime.abilities[0].id == "slime_team_shield")
+	assert(vocab_slime.abilities[0].power == 8)
 	assert(vocab_slime.portrait_path == "res://assets/enemies/vocab_slime.png")
 
 	var culture_mask: EnemyData = EnemyDatabase.create_enemy("culture_mask")

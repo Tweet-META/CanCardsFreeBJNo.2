@@ -25,24 +25,37 @@
 
 - Cards: edit `data/cards.json`; add translation keys to `data/localization/translations.csv`.
 - Characters: edit `data/characters.json`; card references must resolve through `CardDatabase`, and the complete information-panel text must use one `description` key.
-- Enemies: edit `data/enemies.json`; all portrait paths must exist, and the complete information-panel text must use one `description` key.
+- Enemies: edit `data/enemies.json`; it contains definitions only, never stage lineups. All portrait paths must exist, and the complete information-panel text must use one `description` key.
 - Questions: edit `data/questions.json` and add every generated `Q_<ID>_*` localization key.
+- Map floors: edit `data/maps.json`; every configured `image_path` must point to an imported texture.
+- Map stages: edit `data/stages.json`, then reference their IDs from the owning floor. Store positions as normalized `[x, y]` coordinates and target scenes as `res://` paths.
+- Put battle backgrounds and all wave lineups in `data/stages.json`. Every `monster` entry is one position containing one or more random candidate enemy IDs.
 - Use unique stable ASCII IDs.
 - Store translatable fields as localization keys.
 - Never add player or enemy fixed base defense unless the game design explicitly reintroduces it.
 - Attribute passives must remain attribute-driven and stack through `BattleState.get_attribute_count()`, not through character-ID checks.
-- Enemy prototype behavior must remain prototype-driven. Attribute variants should not duplicate combat code.
+- Enemy behavior must come from weighted `abilities`, not `prototype`, `attack`, or `ability_power` fields. Attribute variants should not duplicate combat code.
+- Adding a new enemy ability ID requires `BattleManager` dispatch logic and a focused test.
 - Adding a new card `effect_id`, target type, enemy prototype, or attribute requires parser, rule, UI-description, localization, and test updates.
 
 ## Battle Invariants
 
 - `BattleState` is the authoritative mutable state.
 - Team AP is capped at `5`; skills force hard questions and clear AP.
+- Exclusive attack/defense cards grant base AP on every answer; difficulty AP is added only for a correct answer or vocabulary-compensation trigger.
 - Each living player character acts at most once per player turn.
 - General cards belong to the team, are consumable, and use the negative-index encoding documented in `ARCHITECTURE.md`.
+- General-card sale value must come from `CardData.get_sell_price()` (`shop_price * 0.6`, rounded upward to one decimal place); UI code must not duplicate the economy formula.
+- Each enemy must grant exactly one random general card on first death-reward collection; use `rewards_collected` rather than mutating reward values as the duplicate guard.
 - Question/result overlays must lock card interaction.
+- Attack and defense cards must enter `DIFFICULTY_SELECTION` before drawing from the selected global difficulty pool.
+- Skill cards must bypass difficulty selection and draw directly from the global hard pool.
+- Do not filter battle questions by card or character attribute.
+- Shuffle every drawn question through a runtime copy and update `correct_index`; never mutate the source question stored in `QuestionBank`.
 - Wrong answers do not directly remove HP or AP.
 - Dead enemies must disappear from the battlefield while retaining their original `enemy_team` index semantics.
+- Clearing a non-final wave must start the next player turn without resetting player HP, AP, cards, currency, or shop state.
+- Victory is allowed only after the final configured wave is cleared.
 - No more than eight living enemies may be displayed or added by developer tools.
 - Both sides support fixed shields and percentage reduction. Resolve percentage reduction first, then fixed shield, then HP.
 - Fixed shields persist until consumed; their shared `ShieldVisual` must disappear when the value reaches zero and no percentage shield remains.
@@ -57,6 +70,8 @@
 - Exclusive and team-general hands remain separate fan layouts.
 - Question and answer-result panels render on `QuestionLayer` at layer `100`.
 - Shop and log panels must remain usable above normal battle content but below question/result overlays.
+- Opening the shop must lock and cancel all hand interaction; closing it must not clear an active question/result flow lock.
+- Team general cards must render above enemy standees and below the shop.
 
 ## Localization
 

@@ -23,7 +23,6 @@ func _test_slime_support(manager: BattleManager) -> void:
 	manager._run_enemy_action(slime)
 	assert(slime.current_shield == 8)
 	assert(ally.current_shield == 8)
-	assert(slime.get_basic_attack_damage() == 0)
 
 	var hp_before: int = ally.current_hp
 	var dealt: int = ally.take_damage(8)
@@ -62,6 +61,17 @@ func _test_mask_single_attack(manager: BattleManager) -> void:
 			damaged_count += 1
 	assert(damaged_count == 1)
 	assert(_total_player_hp(manager.state.player_team) < total_hp_before)
+
+	var mixed_enemy: EnemyData = EnemyData.new()
+	var disabled_ability: EnemyAbilityData = EnemyAbilityData.new()
+	disabled_ability.id = "disabled"
+	disabled_ability.weight = 0.0
+	var selected_ability: EnemyAbilityData = EnemyAbilityData.new()
+	selected_ability.id = "selected"
+	selected_ability.weight = 1.0
+	mixed_enemy.abilities = [disabled_ability, selected_ability]
+	for _index in 20:
+		assert(mixed_enemy.choose_ability(manager.rng) == selected_ability)
 
 
 func _total_player_hp(team: Array[CharacterData]) -> int:

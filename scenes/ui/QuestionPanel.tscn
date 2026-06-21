@@ -22,23 +22,49 @@ script = ExtResource("1")
 layout_mode = 2
 theme_override_constants/separation = 12
 
+[node name="DifficultyTitle" type="Label" parent="Box"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 26
+text = "QUESTION_SELECT_DIFFICULTY"
+horizontal_alignment = 1
+
+[node name="DifficultyButton0" type="Button" parent="Box"]
+custom_minimum_size = Vector2(560, 58)
+layout_mode = 2
+text = "DIFFICULTY_EASY"
+
+[node name="DifficultyButton1" type="Button" parent="Box"]
+custom_minimum_size = Vector2(560, 58)
+layout_mode = 2
+text = "DIFFICULTY_MEDIUM"
+
+[node name="DifficultyButton2" type="Button" parent="Box"]
+custom_minimum_size = Vector2(560, 58)
+layout_mode = 2
+text = "DIFFICULTY_HARD"
+
 [node name="PromptLabel" type="Label" parent="Box"]
+visible = false
 layout_mode = 2
 theme_override_font_sizes/font_size = 22
 autowrap_mode = 3
 
 [node name="OptionButton0" type="Button" parent="Box"]
+visible = false
 custom_minimum_size = Vector2(560, 48)
 layout_mode = 2
 
 [node name="OptionButton1" type="Button" parent="Box"]
+visible = false
 custom_minimum_size = Vector2(560, 48)
 layout_mode = 2
 
 [node name="OptionButton2" type="Button" parent="Box"]
+visible = false
 custom_minimum_size = Vector2(560, 48)
 layout_mode = 2
 
 [node name="OptionButton3" type="Button" parent="Box"]
+visible = false
 custom_minimum_size = Vector2(560, 48)
 layout_mode = 2

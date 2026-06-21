@@ -21,6 +21,7 @@ scripts/data/           Runtime data models, databases, and factories
 scripts/localization/   Translation loading and locale persistence
 scripts/settings/       Global settings persistence
 scripts/ui/             UI behavior and interaction coordination
+scripts/map/            Map scene presentation and floor switching
 scripts/*Test.gd        Headless smoke and regression tests
 images/                 References and non-runtime source images
 ```
@@ -40,6 +41,40 @@ BattleScene (Node2D, BattleScene.gd)
 ```
 
 `QuestionLayer` deliberately renders above battle cards, units, the shop, and developer controls.
+
+## Map
+
+`MainMenu` starts `MapScene.tscn`. `MapDatabase` loads ordered floor definitions
+from `data/maps.json`; `MapScene` displays the selected floor image and keeps an
+extensible `StageLayer`. Floors reference stage IDs; `StageDatabase` loads
+position, marker, localization keys, unlock state, and target scene from
+`data/stages.json`. `StageNode.tscn` emits the selected `StageData`.
+
+`StageDatabase` keeps the active stage ID across the map-to-battle scene
+change. `BattleManager` loads that stage and generates each wave through
+`GameDataFactory.create_stage_wave()`. Wave changes replace only the enemy
+team; player HP, AP, cards, currency, and shop state persist.
+
+Stage battle data uses this shape:
+
+```json
+"battle_background": "res://assets/ui/conversation_room.png",
+"wave": [
+  {
+    "monster": [
+      ["pinyin_bun", "culture_bun"],
+      ["vocab_slime"],
+      ["culture_mask", "pinyin_mask"]
+    ]
+  }
+]
+```
+
+Each nested candidate array is one battlefield position. One enemy is randomly
+chosen per position when the wave starts, with a maximum of eight positions.
+
+`QuestionPanel` has two modes: difficulty selection for normal attack/defense
+cards, and four-option question display. Skills bypass difficulty selection.
 
 `BattleUI.tscn` contains:
 
@@ -90,8 +125,8 @@ Database classes parse JSON lazily and create fresh runtime instances:
 - Card target and AP validation.
 - Question result processing.
 - Card `effect_id` dispatch.
-- Damage, AP, defense-card, enemy-prototype, reward, and victory/defeat rules.
-- Shop purchases and developer test actions.
+- Damage, AP, defense-card, weighted enemy-ability, reward, and victory/defeat rules.
+- Shop purchases, general-card sales, and developer test actions.
 
 It must not manipulate UI nodes. It publishes:
 
@@ -145,6 +180,8 @@ Current effects:
 - `skill_attack_all`
 
 All `type = general` cards automatically enter both the starting-hand and shop random pools.
+The same pool also supplies one random card whenever an enemy's death rewards
+are collected.
 
 ### Attributes
 

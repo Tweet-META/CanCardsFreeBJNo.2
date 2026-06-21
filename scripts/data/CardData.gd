@@ -47,6 +47,11 @@ func can_use(current_ap: float) -> bool:
 	return true
 
 
+func get_sell_price() -> float:
+	# 出售价格为买入价的 60%，并向上取整到一位小数。
+	return ceilf(shop_price * 0.6 * 10.0) / 10.0
+
+
 func get_question_difficulty(default_difficulty: String) -> String:
 	# 技能始终使用困难题，其余卡牌沿用玩家选择的难度。
 	return "hard" if is_skill() else default_difficulty

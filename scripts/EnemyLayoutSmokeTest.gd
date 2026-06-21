@@ -72,7 +72,10 @@ func _run() -> void:
 		enemies.append(enemy)
 
 	var state := BattleState.new()
-	state.setup(GameDataFactory.create_player_team(), enemies)
+	var stage: StageData = StageData.new()
+	stage.id = "layout_test"
+	stage.waves = [StageWaveData.new()]
+	state.setup(GameDataFactory.create_player_team(), enemies, stage)
 	state.start_player_turn()
 	battle_ui.refresh(state)
 	await process_frame

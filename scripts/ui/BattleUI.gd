@@ -5,6 +5,7 @@ class_name BattleUI
 signal card_use_requested(character_index: int, card_index: int, enemy_index: int, ally_index: int, difficulty: String)
 signal shop_refresh_requested()
 signal shop_buy_requested(offer_index: int, character_index: int)
+signal general_card_sell_requested(card_index: int)
 signal developer_add_culture_mask_requested()
 signal developer_add_general_card_requested()
 
@@ -26,6 +27,7 @@ const CARD_BUTTON_SCENE: PackedScene = preload("res://scenes/CardButton.tscn")
 
 var state: BattleState
 
+@onready var background: TextureRect = $Background
 @onready var top_bar: BattleTopBar = $Root/BattleTopBar
 @onready var battlefield: Control = $Root/Battlefield
 @onready var player_layer: Control = $Root/Battlefield/PlayerLayer
@@ -52,6 +54,8 @@ var hovered_player_target_index: int = -1
 var hovered_enemy_target_index: int = -1
 var hover_restore_time_left: float = 0.0
 var cancel_drop_hovered: bool = false
+# 流程弹窗与商店分别持有锁，避免关闭其中一个时错误解锁另一个。
+var flow_cards_interaction_locked: bool = false
 var cards_interaction_locked: bool = false
 var battlefield_controller: BattlefieldController = BattlefieldController.new()
 
@@ -66,6 +70,7 @@ func _ready() -> void:
 	top_bar.shop_requested.connect(_toggle_shop_panel)
 	shop_panel.refresh_requested.connect(func() -> void: shop_refresh_requested.emit())
 	shop_panel.buy_requested.connect(_buy_shop_card)
+	shop_panel.visibility_changed.connect(_on_shop_visibility_changed)
 	developer_controls.add_culture_mask_requested.connect(func() -> void: developer_add_culture_mask_requested.emit())
 	developer_controls.add_general_card_requested.connect(func() -> void: developer_add_general_card_requested.emit())
 	LanguageManager.language_changed.connect(_on_language_changed)
@@ -81,6 +86,7 @@ func _process(delta: float) -> void:
 	arrow_layer.update_arrow(mouse_position)
 	_update_drag_target_highlight(mouse_position)
 	_update_cancel_drop_hover(mouse_position)
+	top_bar.update_sell_drop_hover(mouse_position)
 
 
 func _input(event: InputEvent) -> void:
@@ -116,9 +122,16 @@ func _on_language_changed(_locale: String) -> void:
 
 
 func _refresh_status() -> void:
-	top_bar.refresh(state.ap, state.phase, state.turn_count)
+	top_bar.refresh(state.ap, state.phase, state.turn_count, state.current_wave, state.total_waves)
+	_refresh_battle_background()
 	_refresh_info_hint()
 	_refresh_shop_panel()
+
+
+func _refresh_battle_background() -> void:
+	# 背景由关卡数据提供，所有关卡仍复用同一个 BattleUI 场景。
+	if not state.battle_background.is_empty():
+		background.texture = load(state.battle_background) as Texture2D
 
 
 func _refresh_selects() -> void:
@@ -188,6 +201,16 @@ func _layout_card_fan(parent: Control, character: CharacterData, indices: Array[
 
 
 func set_card_interaction_locked(locked: bool) -> void:
+	flow_cards_interaction_locked = locked
+	_update_effective_card_interaction_lock()
+
+
+func _update_effective_card_interaction_lock() -> void:
+	var should_lock: bool = flow_cards_interaction_locked or (shop_panel != null and shop_panel.visible)
+	_set_effective_card_interaction_locked(should_lock)
+
+
+func _set_effective_card_interaction_locked(locked: bool) -> void:
 	if cards_interaction_locked == locked:
 		return
 	cards_interaction_locked = locked
@@ -208,6 +231,7 @@ func set_card_interaction_locked(locked: bool) -> void:
 func _cancel_current_card_interaction() -> void:
 	if dragging_card_index != -1:
 		arrow_layer.end_arrow()
+		top_bar.end_sell_mode()
 		_reset_card_drag_state(dragging_card_index)
 		dragging_card_index = -1
 		_set_cancel_drop_visible(false)
@@ -376,6 +400,10 @@ func _on_card_drag_started(card_index: int, global_position: Vector2) -> void:
 	_relayout_existing_cards()
 	_set_cancel_drop_visible(true)
 	arrow_layer.begin_arrow(global_position, global_position)
+	var character: CharacterData = _get_selected_character()
+	var card: CardData = _get_card_for_ui_index(character, card_index) if character != null else null
+	if card != null and card.is_general():
+		top_bar.begin_sell_mode(card.get_sell_price())
 
 
 func _on_card_drag_moved(global_position: Vector2) -> void:
@@ -383,6 +411,7 @@ func _on_card_drag_moved(global_position: Vector2) -> void:
 		return
 	arrow_layer.update_arrow(global_position)
 	_update_drag_target_highlight(global_position)
+	top_bar.update_sell_drop_hover(global_position)
 
 
 func _on_card_drag_released(card_index: int, global_position: Vector2) -> void:
@@ -430,8 +459,10 @@ func _release_dragging_card(card_index: int, global_position: Vector2) -> void:
 	# 需要目标的卡牌若没有落在合法对象上，会按取消处理并恢复悬停。
 	if cards_interaction_locked or dragging_card_index == -1:
 		return
+	var sold_to_shop: bool = top_bar.is_sell_drop_target(global_position)
 	var cancelled_by_drop_area: bool = _is_over_cancel_drop_area(global_position)
 	arrow_layer.end_arrow()
+	top_bar.end_sell_mode()
 	dragging_card_index = -1
 	_reset_card_drag_state(card_index)
 	_set_cancel_drop_visible(false)
@@ -446,6 +477,9 @@ func _release_dragging_card(card_index: int, global_position: Vector2) -> void:
 	var card: CardData = _get_card_for_ui_index(character, card_index)
 	if card == null:
 		_restore_hover_after_cancel(global_position)
+		return
+	if sold_to_shop and card.is_general():
+		general_card_sell_requested.emit(card_index)
 		return
 	if _card_targets_ally(card):
 		var ally_index: int = _player_index_at(global_position)
@@ -704,6 +738,11 @@ func _toggle_shop_panel() -> void:
 		_refresh_shop_panel()
 
 
+func _on_shop_visibility_changed() -> void:
+	# 打开商店立即取消悬停/拖动；关闭时仅在没有其他流程锁的情况下恢复。
+	_update_effective_card_interaction_lock()
+
+
 func _refresh_shop_panel() -> void:
 	if shop_panel == null or state == null:
 		return
@@ -766,8 +805,8 @@ func _select_next_ready_character_if_needed() -> void:
 
 
 func _selected_difficulty() -> String:
-	# 当前非技能卡暂时默认简单；技能会在 CardData 中自动改为困难。
-	return "easy"
+	# 普通答题卡由 QuestionPanel 选择难度；技能难度由 BattleManager 固定为困难。
+	return ""
 
 
 func _clear_children(node: Node) -> void:

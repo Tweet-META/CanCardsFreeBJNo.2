@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "stages": [
+    {
+      "id": "first_stage",
+      "display_name": "STAGE_FIRST_NAME",
+      "description": "STAGE_FIRST_DESCRIPTION",
+      "marker_text": "1",
+      "floor_id": "first_floor",
+      "map_position": [0.44, 0.69],
+      "scene_path": "res://scenes/BattleScene.tscn",
+      "battle_background": "res://assets/ui/conversation_room.png",
+      "wave": [
+        {
+          "monster": [
+            ["pinyin_bun","vocab_bun","culture_bun"],
+            ["pinyin_slime","vocab_slime","culture_slime"],
+            ["pinyin_mask","vocab_mask","culture_mask"]
+          ]
+        }
+      ],
+      "unlocked": true
+    }
+  ]
+}

@@ -7,11 +7,20 @@
 The current deliverable is a single-stage MVP with:
 
 - Main menu, language selection, settings, battle, shop, questions, battle log, and result flow.
+- Main menu enters a data-driven map scene before any battle.
 - Three fixed player characters: βudding (culture), 天才兔 (pinyin), and Lawilim (vocabulary).
 - Three learning attributes: `pinyin`, `vocabulary`, and `culture`.
 - Character-exclusive cards and a team-owned consumable general-card hand.
 - Bilingual Chinese/English UI and question content.
 - One battle containing a configurable enemy team of up to eight visible enemies.
+
+The current map contains the first floor and one stage node near the meeting
+table. Selecting it enters the existing battle scene. Its background is
+`assets/ui/first_floor.png`.
+
+All stages reuse `BattleScene.tscn`. `data/stages.json` defines the battle
+background and ordered waves. Each wave contains monster positions, and each
+position randomly chooses one enemy from its candidate ID list.
 
 Do not treat the narrative and planned systems in `README.md` as implemented unless supported by current code. SAT progression, multiple stages, persistent collections, and story progression are not implemented.
 
@@ -23,7 +32,8 @@ Do not treat the narrative and planned systems in `README.md` as implemented unl
 4. Answer a question when required.
 5. Resolve the card and mark the acting character as used.
 6. After every living character has acted, all living enemies act in array order.
-7. Start the next player turn, restoring action availability and clearing temporary player damage reduction.
+7. Clearing a non-final wave generates the next wave and starts a fresh player turn.
+8. Clearing the final wave resolves victory.
 
 Question and result overlays lock card interaction. Wrong answers have no direct penalty.
 
@@ -35,17 +45,23 @@ Question and result overlays lock card interaction. Wrong answers have no direct
 - AP starts at `0` and is capped at `5`.
 - Skill cards require their configured `skill_ap_cost`, currently `5`.
 - Skills always request a hard question and clear all AP after use.
+- Exclusive attack and defense cards always grant their configured base AP, currently `0.5`, even after a wrong answer.
+- Correct answers add `0.5` / `0.7` / `1.0` AP for easy / medium / hard. Vocabulary compensation also triggers this difficulty bonus.
 - General cards do not ask questions and are removed from the team hand after use.
 - The starting general hand contains three cards randomly drawn with replacement.
+- Defeating each enemy grants one random general card drawn with replacement from the same complete general-card pool.
 
 ### Questions
 
 - Source: `data/questions.json`.
 - Categories match the three learning attributes.
 - Difficulties: `easy`, `medium`, `hard`.
-- Normal cards use the requested difficulty; skill cards force `hard`.
+- Attack and defense cards open a difficulty choice before drawing a question.
+- Skills skip the choice and immediately draw from the `hard` pool.
+- Battle questions are selected by difficulty across all three categories; card and character attributes do not constrain the category.
 - If no exact category/difficulty question exists, `QuestionBank` falls back to the same category, then the first loaded question.
 - Question text stored in JSON is converted to stable localization keys at runtime.
+- Every drawn question is copied and its options are shuffled; the source question and correct-answer mapping remain unchanged.
 
 ### Damage and Defense
 
@@ -81,7 +97,9 @@ Nine enemy definitions exist as every combination of three attributes and three 
 - `slime`: has no attack; grants `ability_power` shield to every living enemy.
 - `mask`: attacks one random living player character.
 
-Prototype behavior is implemented once in `BattleManager`; attribute variants are data entries in `data/enemies.json`.
+`prototype` identifies the enemy family, while combat behavior comes from its
+weighted `abilities` array. Every ability has an `id`, `power`, and `weight`;
+an enemy with multiple entries randomly selects one each turn.
 
 ### Shop and Currency
 
@@ -90,12 +108,15 @@ Prototype behavior is implemented once in `BattleManager`; attribute variants ar
 - Shop displays four random general cards drawn with replacement from all `type = general` definitions.
 - Refresh costs `0.5`.
 - Purchased cards are added to the shared team general hand.
+- During the player turn, a general card can be dragged onto the top-right shop button and sold for `shop_price * 0.6`, rounded upward to one decimal place; selling does not consume a character action.
+- General cards can therefore enter the hand through the starting draw, enemy drops, developer tools, or shop purchases.
 
 ## Content Sources
 
 - Cards and card values: `data/cards.json`
 - Player characters and default team: `data/characters.json`
-- Enemies and default enemy team: `data/enemies.json`
+- Enemy definitions: `data/enemies.json`
+- Stage backgrounds, waves, and enemy lineups: `data/stages.json`
 - Questions: `data/questions.json`
 - Chinese and English text: `data/localization/translations.csv`
 - Runtime art: `assets/`

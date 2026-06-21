@@ -39,7 +39,7 @@ func close() -> void:
 
 func refresh(balance: float, offers: Array[CardData], current_ap: float) -> void:
 	# 每次商店状态变化都重建报价项，避免旧价格和禁用状态残留。
-	balance_label.text = tr("UI_BALANCE_FORMAT") % balance
+	balance_label.text = tr("UI_BALANCE_FORMAT") % _format_amount(balance)
 	refresh_button.disabled = balance + 0.001 < 0.5
 	if not visible:
 		return
@@ -60,6 +60,16 @@ func _clear_cards() -> void:
 	for child: Node in cards_row.get_children():
 		cards_row.remove_child(child)
 		child.queue_free()
+
+
+func _format_amount(amount: float) -> String:
+	# New TOEFL 可能由六折售价产生两位小数，显示时去掉无意义的末尾零。
+	var text: String = "%.2f" % amount
+	while text.contains(".") and text.ends_with("0"):
+		text = text.left(text.length() - 1)
+	if text.ends_with("."):
+		text = text.left(text.length() - 1)
+	return text
 
 
 func _style(color: Color, radius: int, border_width: int) -> StyleBoxFlat:

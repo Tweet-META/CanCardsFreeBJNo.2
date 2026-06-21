@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "default_floor": "first_floor",
+  "floors": [
+    {
+      "id": "first_floor",
+      "display_name": "MAP_FIRST_FLOOR",
+      "image_path": "res://assets/ui/first_floor.png",
+      "unlocked": true,
+      "stages": [
+        "first_stage"
+      ]
+    }
+  ]
+}

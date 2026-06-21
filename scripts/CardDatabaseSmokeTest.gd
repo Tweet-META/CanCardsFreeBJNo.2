@@ -48,6 +48,13 @@ func _init() -> void:
 		assert(general_pool_ids.has(card.id))
 		assert(card.get_question_difficulty("medium") == "medium")
 
+	var drop_rng: RandomNumberGenerator = RandomNumberGenerator.new()
+	drop_rng.seed = 54321
+	var dropped_card: CardData = GameDataFactory.create_enemy_drop_general_card(drop_rng)
+	assert(dropped_card != null)
+	assert(dropped_card.is_general())
+	assert(general_pool_ids.has(dropped_card.id))
+
 	var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 	rng.seed = 12345
 	var offers: Array[CardData] = GameDataFactory.create_shop_general_offers(rng, 4)

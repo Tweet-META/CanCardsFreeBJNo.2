@@ -12,20 +12,21 @@ const PROTOTYPE_MASK: String = "mask"
 @export var prototype: String = PROTOTYPE_MASK
 @export var description: String = ""
 @export var max_hp: int = 80
-@export var attack: int = 12
-@export var ability_power: int = 0
+@export var abilities: Array[EnemyAbilityData] = []
 @export var toefl_reward: float = 1.0
 @export var portrait_path: String = ""
 
 var current_hp: int = 80
 var current_shield: int = 0
 var damage_reduction: float = 0.0
+var rewards_collected: bool = false
 
 
 func setup_runtime() -> void:
 	current_hp = max_hp
 	current_shield = 0
 	damage_reduction = 0.0
+	rewards_collected = false
 
 
 func is_alive() -> bool:
@@ -55,9 +56,20 @@ func add_damage_reduction(amount: float) -> void:
 	damage_reduction = clampf(damage_reduction + amount, 0.0, 0.85)
 
 
-func get_basic_attack_damage() -> int:
-	return maxi(0, attack)
+func choose_ability(rng: RandomNumberGenerator) -> EnemyAbilityData:
+	# 非正权重技能不会被选择；全部权重无效时回退第一项，避免敌方回合中断。
+	if abilities.is_empty():
+		return null
+	var total_weight: float = 0.0
+	for ability: EnemyAbilityData in abilities:
+		total_weight += maxf(ability.weight, 0.0)
+	if total_weight <= 0.0:
+		return abilities[0]
 
-
-func get_ability_power() -> int:
-	return maxi(0, ability_power)
+	var roll: float = rng.randf() * total_weight
+	var accumulated_weight: float = 0.0
+	for ability: EnemyAbilityData in abilities:
+		accumulated_weight += maxf(ability.weight, 0.0)
+		if roll < accumulated_weight:
+			return ability
+	return abilities[-1]

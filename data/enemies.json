@@ -1,10 +1,5 @@
 {
   "version": 1,
-  "enemy_team": [
-    "pinyin_bun",
-    "vocab_slime",
-    "culture_mask"
-  ],
   "enemies": [
     {
       "id": "pinyin_bun",
@@ -13,8 +8,9 @@
       "prototype": "bun",
       "description": "ENEMY_PINYIN_BUN_DESCRIPTION",
       "max_hp": 70,
-      "attack": 11,
-      "ability_power": 11,
+      "abilities": [
+        {"id": "bun_group_attack", "power": 11, "weight": 1.0}
+      ],
       "toefl_reward": 1.0,
       "portrait_path": "res://assets/enemies/pinyin_bun.png"
     },
@@ -25,8 +21,9 @@
       "prototype": "bun",
       "description": "ENEMY_VOCAB_BUN_DESCRIPTION",
       "max_hp": 70,
-      "attack": 11,
-      "ability_power": 11,
+      "abilities": [
+        {"id": "bun_group_attack", "power": 11, "weight": 1.0}
+      ],
       "toefl_reward": 1.0,
       "portrait_path": "res://assets/enemies/vocab_bun.png"
     },
@@ -37,8 +34,9 @@
       "prototype": "bun",
       "description": "ENEMY_CULTURE_BUN_DESCRIPTION",
       "max_hp": 70,
-      "attack": 11,
-      "ability_power": 11,
+      "abilities": [
+        {"id": "bun_group_attack", "power": 11, "weight": 1.0}
+      ],
       "toefl_reward": 1.0,
       "portrait_path": "res://assets/enemies/culture_bun.png"
     },
@@ -49,8 +47,9 @@
       "prototype": "slime",
       "description": "ENEMY_PINYIN_SLIME_DESCRIPTION",
       "max_hp": 80,
-      "attack": 0,
-      "ability_power": 8,
+      "abilities": [
+        {"id": "slime_team_shield", "power": 8, "weight": 1.0}
+      ],
       "toefl_reward": 1.0,
       "portrait_path": "res://assets/enemies/pinyin_slime.png"
     },
@@ -61,8 +60,9 @@
       "prototype": "slime",
       "description": "ENEMY_VOCAB_SLIME_DESCRIPTION",
       "max_hp": 80,
-      "attack": 0,
-      "ability_power": 8,
+      "abilities": [
+        {"id": "slime_team_shield", "power": 8, "weight": 1.0}
+      ],
       "toefl_reward": 1.0,
       "portrait_path": "res://assets/enemies/vocab_slime.png"
     },
@@ -73,8 +73,9 @@
       "prototype": "slime",
       "description": "ENEMY_CULTURE_SLIME_DESCRIPTION",
       "max_hp": 80,
-      "attack": 0,
-      "ability_power": 8,
+      "abilities": [
+        {"id": "slime_team_shield", "power": 8, "weight": 1.0}
+      ],
       "toefl_reward": 1.0,
       "portrait_path": "res://assets/enemies/culture_slime.png"
     },
@@ -85,8 +86,9 @@
       "prototype": "mask",
       "description": "ENEMY_PINYIN_MASK_DESCRIPTION",
       "max_hp": 90,
-      "attack": 13,
-      "ability_power": 13,
+      "abilities": [
+        {"id": "mask_single_attack", "power": 13, "weight": 1.0}
+      ],
       "toefl_reward": 1.5,
       "portrait_path": "res://assets/enemies/pinyin_mask.png"
     },
@@ -97,8 +99,9 @@
       "prototype": "mask",
       "description": "ENEMY_VOCAB_MASK_DESCRIPTION",
       "max_hp": 90,
-      "attack": 13,
-      "ability_power": 13,
+      "abilities": [
+        {"id": "mask_single_attack", "power": 13, "weight": 1.0}
+      ],
       "toefl_reward": 1.5,
       "portrait_path": "res://assets/enemies/vocab_mask.png"
     },
@@ -109,8 +112,9 @@
       "prototype": "mask",
       "description": "ENEMY_CULTURE_MASK_DESCRIPTION",
       "max_hp": 90,
-      "attack": 13,
-      "ability_power": 13,
+      "abilities": [
+        {"id": "mask_single_attack", "power": 13, "weight": 1.0}
+      ],
       "toefl_reward": 1.5,
       "portrait_path": "res://assets/enemies/culture_mask.png"
     }

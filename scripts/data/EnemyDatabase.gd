@@ -1,12 +1,11 @@
 extends RefCounted
-## 从 enemies.json 创建敌人，并按 enemy_team 配置组装当前关卡阵容。
+## 从 enemies.json 创建敌人定义；实际关卡阵容由 stages.json 的波次决定。
 class_name EnemyDatabase
 
 const DATA_PATH: String = "res://data/enemies.json"
 
 static var _loaded: bool = false
 # 每次 create_enemy 都从定义生成新实例，避免奖励和生命跨局残留。
-static var _root_data: Dictionary = {}
 static var _definitions: Dictionary = {}
 
 
@@ -25,27 +24,34 @@ static func create_enemy(enemy_id: String) -> EnemyData:
 	enemy.prototype = str(raw.get("prototype", EnemyData.PROTOTYPE_MASK))
 	enemy.description = str(raw.get("description", ""))
 	enemy.max_hp = int(raw.get("max_hp", 80))
-	enemy.attack = int(raw.get("attack", 12))
-	enemy.ability_power = int(raw.get("ability_power", enemy.attack))
+	enemy.abilities = _parse_abilities(raw.get("abilities", []), enemy.id)
 	enemy.toefl_reward = float(raw.get("toefl_reward", 0.0))
 	enemy.portrait_path = str(raw.get("portrait_path", ""))
 	return enemy
 
 
-static func create_default_team() -> Array[EnemyData]:
-	# enemy_team 数组决定当前关卡默认敌人及其初始顺序。
-	_ensure_loaded()
-	var team: Array[EnemyData] = []
-	for enemy_id: String in _to_string_array(_root_data.get("enemy_team", [])):
-		var enemy: EnemyData = create_enemy(enemy_id)
-		if enemy != null:
-			team.append(enemy)
-	return team
+static func _parse_abilities(value: Variant, enemy_id: String) -> Array[EnemyAbilityData]:
+	var abilities: Array[EnemyAbilityData] = []
+	if not value is Array:
+		push_error("EnemyDatabase: abilities for '%s' must be an array." % enemy_id)
+		return abilities
+	for raw_value: Variant in value as Array:
+		if not raw_value is Dictionary:
+			continue
+		var raw: Dictionary = raw_value as Dictionary
+		var ability: EnemyAbilityData = EnemyAbilityData.new()
+		ability.id = str(raw.get("id", ""))
+		ability.power = int(raw.get("power", 0))
+		ability.weight = float(raw.get("weight", 1.0))
+		if ability.id.is_empty():
+			push_error("EnemyDatabase: enemy '%s' has an ability without an id." % enemy_id)
+			continue
+		abilities.append(ability)
+	return abilities
 
 
 static func reload() -> void:
 	_loaded = false
-	_root_data.clear()
 	_definitions.clear()
 	_ensure_loaded()
 
@@ -65,8 +71,8 @@ static func _ensure_loaded() -> void:
 		push_error("EnemyDatabase: %s must contain a JSON object." % DATA_PATH)
 		return
 
-	_root_data = parsed as Dictionary
-	var enemies_value: Variant = _root_data.get("enemies")
+	var root_data: Dictionary = parsed as Dictionary
+	var enemies_value: Variant = root_data.get("enemies")
 	if not enemies_value is Array:
 		push_error("EnemyDatabase: enemies must be an array.")
 		return
@@ -82,12 +88,3 @@ static func _ensure_loaded() -> void:
 			push_error("EnemyDatabase: duplicate enemy id '%s'." % enemy_id)
 			continue
 		_definitions[enemy_id] = raw
-
-
-static func _to_string_array(value: Variant) -> Array[String]:
-	var result: Array[String] = []
-	if not value is Array:
-		return result
-	for item: Variant in value as Array:
-		result.append(str(item))
-	return result

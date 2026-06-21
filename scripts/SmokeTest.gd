@@ -31,6 +31,8 @@ func _run() -> void:
 	assert(manager.state.ap > 0.0)
 
 	manager.request_use_card(1, 0, 0, -1, "easy")
+	assert(manager.state.phase == BattleState.Phase.DIFFICULTY_SELECTION)
+	manager.select_question_difficulty("easy")
 	assert(manager.state.phase == BattleState.Phase.QUESTION)
 	manager.submit_answer(manager.state.pending_question.correct_index)
 	assert(manager.state.player_team[1].has_acted)
