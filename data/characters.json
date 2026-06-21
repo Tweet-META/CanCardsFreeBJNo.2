@@ -10,8 +10,8 @@
       "id": "budding",
       "display_name": "CHARACTER_BUDDING",
       "attribute": "culture",
+      "description": "CHARACTER_BUDDING_DESCRIPTION",
       "max_hp": 110,
-      "defense": 4,
       "portrait_path": "res://assets/characters/βudding.png",
       "cards": [
         "budding_attack",
@@ -23,8 +23,8 @@
       "id": "tiancaitu",
       "display_name": "CHARACTER_RABBIT",
       "attribute": "pinyin",
+      "description": "CHARACTER_RABBIT_DESCRIPTION",
       "max_hp": 95,
-      "defense": 3,
       "portrait_path": "res://assets/characters/天才兔.png",
       "cards": [
         "rabbit_attack",
@@ -36,8 +36,8 @@
       "id": "lawilim",
       "display_name": "CHARACTER_LAWILIM",
       "attribute": "vocabulary",
+      "description": "CHARACTER_LAWILIM_DESCRIPTION",
       "max_hp": 100,
-      "defense": 3,
       "portrait_path": "res://assets/characters/Lawilim.png",
       "cards": [
         "lawilim_attack",

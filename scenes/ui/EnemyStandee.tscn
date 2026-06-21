@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/EnemyStandee.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/ui/ShieldVisual.tscn" id="2"]
 
 [node name="EnemyStandee" type="Button"]
 flat = true
@@ -56,8 +57,12 @@ mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
+[node name="ShieldVisual" parent="." instance=ExtResource("2")]
+layout_mode = 1
+
 [node name="TargetHighlight" type="Panel" parent="."]
 visible = false
+z_index = 3
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0

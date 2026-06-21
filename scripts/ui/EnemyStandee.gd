@@ -10,6 +10,7 @@ const HP_RED: Color = Color(0.93, 0.25, 0.20)
 @onready var hp_bar: ProgressBar = $Content/HpWrap/HpBar
 @onready var hp_label: Label = $Content/HpWrap/HpLabel
 @onready var portrait: TextureRect = $Content/Portrait
+@onready var shield_visual: ShieldVisual = $ShieldVisual
 @onready var target_highlight: Panel = $TargetHighlight
 
 var enemy_index: int = -1
@@ -43,6 +44,7 @@ func setup(enemy: EnemyData, index: int, selected: bool, target_highlighted: boo
 	hp_bar.value = enemy.current_hp
 	hp_label.text = "%d / %d" % [enemy.current_hp, enemy.max_hp]
 	portrait.texture = load(enemy.portrait_path) as Texture2D
+	shield_visual.setup(enemy.current_shield, enemy.damage_reduction)
 	target_highlight.visible = target_highlighted
 
 

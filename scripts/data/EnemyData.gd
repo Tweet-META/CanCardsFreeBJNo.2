@@ -1,21 +1,31 @@
 extends Resource
-## 敌人的静态资料与单局生命状态；未来护盾和技能状态应扩展在这里或独立组件中。
+## 敌人的静态资料与单局生命、护盾状态；原型决定其敌方回合行为。
 class_name EnemyData
+
+const PROTOTYPE_BUN: String = "bun"
+const PROTOTYPE_SLIME: String = "slime"
+const PROTOTYPE_MASK: String = "mask"
 
 @export var id: String = ""
 @export var display_name: String = ""
 @export var attribute: String = ""
+@export var prototype: String = PROTOTYPE_MASK
+@export var description: String = ""
 @export var max_hp: int = 80
 @export var attack: int = 12
-@export var defense: int = 2
+@export var ability_power: int = 0
 @export var toefl_reward: float = 1.0
 @export var portrait_path: String = ""
 
 var current_hp: int = 80
+var current_shield: int = 0
+var damage_reduction: float = 0.0
 
 
 func setup_runtime() -> void:
 	current_hp = max_hp
+	current_shield = 0
+	damage_reduction = 0.0
 
 
 func is_alive() -> bool:
@@ -23,11 +33,31 @@ func is_alive() -> bool:
 
 
 func take_damage(raw_damage: int) -> int:
-	# 当前敌方只有基础防御；护盾与百分比减伤尚未加入。
-	var final_damage: int = maxi(1, raw_damage - defense)
-	current_hp = maxi(0, current_hp - final_damage)
-	return final_damage
+	# 百分比减伤先结算，再由固定护盾吸收，最后扣除生命。
+	var incoming_damage: int = maxi(0, raw_damage)
+	var reduced_damage: int = roundi(float(incoming_damage) * (1.0 - clampf(damage_reduction, 0.0, 0.85)))
+	var absorbed_damage: int = mini(current_shield, reduced_damage)
+	current_shield -= absorbed_damage
+	var health_damage: int = reduced_damage - absorbed_damage
+	current_hp = maxi(0, current_hp - health_damage)
+	return health_damage
+
+
+func add_shield(amount: int) -> int:
+	# 返回实际增加值，供战斗日志与后续状态表现使用。
+	var gained_shield: int = maxi(0, amount)
+	current_shield += gained_shield
+	return gained_shield
+
+
+func add_damage_reduction(amount: float) -> void:
+	# 为未来敌方百分比护盾技能提供统一入口，当前上限与我方一致。
+	damage_reduction = clampf(damage_reduction + amount, 0.0, 0.85)
 
 
 func get_basic_attack_damage() -> int:
-	return maxi(1, attack)
+	return maxi(0, attack)
+
+
+func get_ability_power() -> int:
+	return maxi(0, ability_power)

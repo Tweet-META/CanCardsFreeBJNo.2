@@ -22,9 +22,11 @@ static func create_enemy(enemy_id: String) -> EnemyData:
 	enemy.id = str(raw.get("id", ""))
 	enemy.display_name = str(raw.get("display_name", ""))
 	enemy.attribute = LearningAttribute.from_id(str(raw.get("attribute", "")))
+	enemy.prototype = str(raw.get("prototype", EnemyData.PROTOTYPE_MASK))
+	enemy.description = str(raw.get("description", ""))
 	enemy.max_hp = int(raw.get("max_hp", 80))
 	enemy.attack = int(raw.get("attack", 12))
-	enemy.defense = int(raw.get("defense", 0))
+	enemy.ability_power = int(raw.get("ability_power", enemy.attack))
 	enemy.toefl_reward = float(raw.get("toefl_reward", 0.0))
 	enemy.portrait_path = str(raw.get("portrait_path", ""))
 	return enemy

@@ -34,7 +34,7 @@ func _run() -> void:
 	assert(manager.state.phase == BattleState.Phase.QUESTION)
 	manager.submit_answer(manager.state.pending_question.correct_index)
 	assert(manager.state.player_team[1].has_acted)
-	assert(manager.state.enemy_team[0].current_hp == 33)
+	assert(manager.state.enemy_team[0].current_hp == 32)
 
 	manager.request_use_card(2, -1000, -1, -1, "easy")
 	assert(manager.state.turn_count >= 2 or manager.state.phase == BattleState.Phase.VICTORY)

@@ -674,36 +674,14 @@ func _refresh_info_hint() -> void:
 		return
 	if showing_enemy_info and selected_enemy_index >= 0 and selected_enemy_index < state.enemy_team.size():
 		var enemy: EnemyData = state.enemy_team[selected_enemy_index]
-		selected_hint.text = tr("INFO_ENEMY_FORMAT").replace("\\n", "\n") % [
-			tr(enemy.display_name),
-			_attribute_text(enemy.attribute),
-			enemy.get_basic_attack_damage(),
-			tr("INFO_NO_SKILL")
-		]
+		selected_hint.text = tr(enemy.description).replace("\\n", "\n")
 		return
 
 	var character: CharacterData = _get_selected_character()
 	if character == null:
 		selected_hint.text = ""
 		return
-	selected_hint.text = tr("INFO_PLAYER_FORMAT").replace("\\n", "\n") % [
-		tr(character.display_name),
-		_attribute_text(character.attribute),
-		tr("STATUS_ACTED") if character.has_acted else tr("STATUS_READY"),
-		_passive_text(character.attribute)
-	]
-
-
-func _passive_text(attribute: String) -> String:
-	match attribute:
-		"拼音":
-			return tr("PASSIVE_PINYIN")
-		"词汇":
-			return tr("PASSIVE_VOCABULARY")
-		"文化":
-			return tr("PASSIVE_CULTURE")
-		_:
-			return tr("PASSIVE_NONE")
+	selected_hint.text = tr(character.description).replace("\\n", "\n")
 
 
 func _attribute_text(attribute: String) -> String:

@@ -268,7 +268,7 @@ func _finish_player_action() -> void:
 
 
 func _run_enemy_turn() -> void:
-	# 当前敌人只会依次对随机存活角色进行基础单体攻击。
+	# 每个存活敌人按原型行动；属性仍参与我方同属性减伤判定。
 	state.phase = BattleState.Phase.ENEMY_TURN
 	state_changed.emit(state)
 	_emit_log(tr("LOG_ENEMY_TURN_START"))
@@ -276,12 +276,7 @@ func _run_enemy_turn() -> void:
 	for enemy: EnemyData in state.enemy_team:
 		if not enemy.is_alive():
 			continue
-		var target: CharacterData = _get_random_alive_player()
-		if target == null:
-			break
-		var raw_damage: int = enemy.get_basic_attack_damage()
-		var dealt: int = target.take_damage(raw_damage, enemy.attribute)
-		_emit_log(tr("LOG_ENEMY_ATTACK") % [tr(enemy.display_name), tr(target.display_name), dealt])
+		_run_enemy_action(enemy)
 		if _check_battle_end():
 			state_changed.emit(state)
 			return
@@ -289,6 +284,44 @@ func _run_enemy_turn() -> void:
 	state.start_player_turn()
 	_emit_log(tr("LOG_NEXT_PLAYER_TURN") % state.turn_count)
 	state_changed.emit(state)
+
+
+func _run_enemy_action(enemy: EnemyData) -> void:
+	# 原型行为集中在这里，新增属性变体时只需配置 JSON，无需复制战斗代码。
+	match enemy.prototype:
+		EnemyData.PROTOTYPE_SLIME:
+			_run_slime_support(enemy)
+		EnemyData.PROTOTYPE_BUN:
+			_run_bun_group_attack(enemy)
+		EnemyData.PROTOTYPE_MASK:
+			_run_mask_single_attack(enemy)
+		_:
+			_run_mask_single_attack(enemy)
+
+
+func _run_slime_support(enemy: EnemyData) -> void:
+	# 史莱姆没有攻击能力，为所有存活敌人提供可叠加护盾。
+	var shield_amount: int = enemy.get_ability_power()
+	for ally: EnemyData in state.enemy_team:
+		if ally.is_alive():
+			ally.add_shield(shield_amount)
+	_emit_log(tr("LOG_ENEMY_SHIELD_ALL") % [tr(enemy.display_name), shield_amount])
+
+
+func _run_bun_group_attack(enemy: EnemyData) -> void:
+	# 包子对每名存活角色分别结算伤害及同属性减伤。
+	for target: CharacterData in state.get_alive_players():
+		var dealt: int = target.take_damage(enemy.get_basic_attack_damage(), enemy.attribute)
+		_emit_log(tr("LOG_ENEMY_GROUP_ATTACK") % [tr(enemy.display_name), tr(target.display_name), dealt])
+
+
+func _run_mask_single_attack(enemy: EnemyData) -> void:
+	# 面具随机选择一名存活角色进行基础单体攻击。
+	var target: CharacterData = _get_random_alive_player()
+	if target == null:
+		return
+	var dealt: int = target.take_damage(enemy.get_basic_attack_damage(), enemy.attribute)
+	_emit_log(tr("LOG_ENEMY_ATTACK") % [tr(enemy.display_name), tr(target.display_name), dealt])
 
 
 func _check_battle_end() -> bool:

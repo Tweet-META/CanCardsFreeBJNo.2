@@ -22,8 +22,8 @@ static func create_character(character_id: String) -> CharacterData:
 	character.id = str(raw.get("id", ""))
 	character.display_name = str(raw.get("display_name", ""))
 	character.attribute = LearningAttribute.from_id(str(raw.get("attribute", "")))
+	character.description = str(raw.get("description", ""))
 	character.max_hp = int(raw.get("max_hp", 100))
-	character.defense = int(raw.get("defense", 0))
 	character.portrait_path = str(raw.get("portrait_path", ""))
 	character.cards = CardDatabase.create_cards(_to_string_array(raw.get("cards", [])))
 	return character

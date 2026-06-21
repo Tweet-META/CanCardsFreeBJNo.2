@@ -11,6 +11,7 @@ const HP_GREEN: Color = Color(0.50, 0.82, 0.25)
 @onready var hp_label: Label = $Content/HpWrap/HpLabel
 @onready var portrait: TextureRect = $Content/Portrait
 @onready var selected_icon: Label = $Content/SelectedIcon
+@onready var shield_visual: ShieldVisual = $ShieldVisual
 @onready var target_highlight: Panel = $TargetHighlight
 
 var character_index: int = -1
@@ -51,6 +52,7 @@ func setup(character: CharacterData, index: int, selected: bool, target_highligh
 	hp_bar.value = character.current_hp
 	hp_label.text = "%d / %d" % [character.current_hp, character.max_hp]
 	portrait.texture = load(character.portrait_path) as Texture2D
+	shield_visual.setup(character.current_shield, character.turn_damage_reduction)
 	selected_icon.visible = selected
 	target_highlight.visible = target_highlighted
 
