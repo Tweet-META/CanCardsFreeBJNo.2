@@ -84,6 +84,10 @@ func start_player_turn() -> void:
 	for character: CharacterData in player_team:
 		if character.is_alive():
 			character.reset_turn_state()
+			character.advance_status_effect_turns()
+	for enemy: EnemyData in enemy_team:
+		if enemy.is_alive():
+			enemy.advance_status_effect_turns()
 
 
 func get_alive_players() -> Array[CharacterData]:

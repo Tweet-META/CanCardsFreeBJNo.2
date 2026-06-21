@@ -37,8 +37,12 @@ static func create_enemy_drop_general_card(rng: RandomNumberGenerator) -> CardDa
 	return cards[0] if not cards.is_empty() else null
 
 
-static func create_general_encouragement_i() -> CardData:
-	return CardDatabase.create_card("general_ap_1")
+static func create_potion_of_confucius() -> CardData:
+	return CardDatabase.create_card("potion_of_confucius")
+
+
+static func create_six_seven() -> CardData:
+	return CardDatabase.create_card("six_seven")
 
 
 static func create_shop_general_offers(rng: RandomNumberGenerator, count: int = 4) -> Array[CardData]:

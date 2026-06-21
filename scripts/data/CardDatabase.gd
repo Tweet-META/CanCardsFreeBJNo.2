@@ -32,6 +32,18 @@ static func create_card(card_id: String) -> CardData:
 	card.base_ap_gain = float(raw.get("base_ap_gain", 0.0))
 	card.skill_ap_cost = float(raw.get("skill_ap_cost", 5.0))
 	card.effect_id = str(raw.get("effect_id", ""))
+	card.status_effect_id = str(raw.get("status_effect_id", ""))
+	card.status_effect_value = float(raw.get("status_effect_value", 0.0))
+	card.status_effect_duration = int(raw.get("status_effect_duration", 0))
+	card.status_effect_delay = int(raw.get("status_effect_delay", 0))
+	card.secondary_status_effect_id = str(raw.get("secondary_status_effect_id", ""))
+	card.secondary_status_effect_value = float(raw.get("secondary_status_effect_value", 0.0))
+	card.secondary_status_effect_duration = int(raw.get("secondary_status_effect_duration", 0))
+	card.secondary_status_effect_delay = int(raw.get("secondary_status_effect_delay", 0))
+	card.current_hp_damage_ratio = float(raw.get("current_hp_damage_ratio", 0.0))
+	card.max_hp_heal_ratio = float(raw.get("max_hp_heal_ratio", 0.0))
+	card.direct_hp_loss = int(raw.get("direct_hp_loss", 0))
+	card.available_in_pool = bool(raw.get("available_in_pool", true))
 	card.art_path = str(raw.get("art_path", ""))
 	card.shop_price = float(raw.get("shop_price", 0.0))
 	return card
@@ -56,7 +68,7 @@ static func get_general_pool_ids() -> Array[String]:
 		if not raw_value is Dictionary:
 			continue
 		var raw: Dictionary = raw_value as Dictionary
-		if str(raw.get("type", "")) == "general":
+		if str(raw.get("type", "")) == "general" and bool(raw.get("available_in_pool", true)):
 			general_ids.append(card_id)
 	return general_ids
 
@@ -134,6 +146,8 @@ static func _target_type_from_string(value: String) -> CardData.TargetType:
 	match value:
 		"self":
 			return CardData.TargetType.SELF
+		"single_ally":
+			return CardData.TargetType.SINGLE_ALLY
 		"single_enemy":
 			return CardData.TargetType.SINGLE_ENEMY
 		"all_enemies":

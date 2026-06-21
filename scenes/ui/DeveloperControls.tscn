@@ -17,13 +17,16 @@ corner_radius_bottom_left = 6
 [node name="DeveloperControls" type="PanelContainer" unique_id=422216097]
 visible = false
 z_index = 900
+layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.5
+anchor_top = 0.0
 anchor_right = 0.5
+anchor_bottom = 0.0
 offset_left = -275.0
 offset_top = 98.0
 offset_right = -70.0
-offset_bottom = 238.0
+offset_bottom = 286.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
 script = ExtResource("1")
 
@@ -47,3 +50,8 @@ text = "DEV_ADD_CULTURE_MASK"
 custom_minimum_size = Vector2(240, 40)
 layout_mode = 2
 text = "DEV_ADD_GENERAL_CARD"
+
+[node name="AddSixSevenButton" type="Button" parent="Box"]
+custom_minimum_size = Vector2(240, 40)
+layout_mode = 2
+text = "DEV_ADD_SIX_SEVEN"

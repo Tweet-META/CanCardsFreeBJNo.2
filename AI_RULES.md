@@ -26,6 +26,7 @@
 - Cards: edit `data/cards.json`; add translation keys to `data/localization/translations.csv`.
 - Characters: edit `data/characters.json`; card references must resolve through `CardDatabase`, and the complete information-panel text must use one `description` key.
 - Enemies: edit `data/enemies.json`; it contains definitions only, never stage lineups. All portrait paths must exist, and the complete information-panel text must use one `description` key.
+- Persistent effects: edit `data/effects.json`; every effect needs a stable ID, localization keys, and an icon path under `assets/effects/`.
 - Questions: edit `data/questions.json` and add every generated `Q_<ID>_*` localization key.
 - Map floors: edit `data/maps.json`; every configured `image_path` must point to an imported texture.
 - Map stages: edit `data/stages.json`, then reference their IDs from the owning floor. Store positions as normalized `[x, y]` coordinates and target scenes as `res://` paths.
@@ -37,6 +38,7 @@
 - Enemy behavior must come from weighted `abilities`, not `prototype`, `attack`, or `ability_power` fields. Attribute variants should not duplicate combat code.
 - Adding a new enemy ability ID requires `BattleManager` dispatch logic and a focused test.
 - Adding a new card `effect_id`, target type, enemy prototype, or attribute requires parser, rule, UI-description, localization, and test updates.
+- Do not hardcode status-effect values or durations in UI scripts. Card data supplies runtime values; `effects.json` supplies reusable metadata and icon paths.
 
 ## Battle Invariants
 
@@ -53,12 +55,19 @@
 - Do not filter battle questions by card or character attribute.
 - Shuffle every drawn question through a runtime copy and update `correct_index`; never mutate the source question stored in `QuestionBank`.
 - Wrong answers do not directly remove HP or AP.
+- Current-HP percentage damage must calculate its dynamic base damage from the target's HP before applying attacker bonuses, status multipliers, reductions, shields, and HP loss.
+- Damage immunity is consumed only when positive incoming damage reaches `CharacterData.take_damage()` and negates that complete damage instance before reductions or shields.
+- Stun is consumed when an enemy would act and skips the complete action.
+- Damage-immunity charges stack numerically and one charge is consumed per positive incoming damage instance.
+- Hidden cards must set `available_in_pool = false`; `six_seven` may only be granted through developer controls or the `676767` input code.
 - Dead enemies must disappear from the battlefield while retaining their original `enemy_team` index semantics.
 - Clearing a non-final wave must start the next player turn without resetting player HP, AP, cards, currency, or shop state.
 - Victory is allowed only after the final configured wave is cleared.
 - No more than eight living enemies may be displayed or added by developer tools.
 - Both sides support fixed shields and percentage reduction. Resolve percentage reduction first, then fixed shield, then HP.
 - Fixed shields persist until consumed; their shared `ShieldVisual` must disappear when the value reaches zero and no percentage shield remains.
+- Persistent effects use `effect_id + source_id` as the stack key: the same source refreshes, while different sources may coexist. Vulnerable effects from different sources stack multiplicatively.
+- Status durations advance at the start of player turns. An effect applied for two turns affects the application turn and the following player turn.
 
 ## UI and Interaction Invariants
 
@@ -72,10 +81,12 @@
 - Shop and log panels must remain usable above normal battle content but below question/result overlays.
 - Opening the shop must lock and cancel all hand interaction; closing it must not clear an active question/result flow lock.
 - Team general cards must render above enemy standees and below the shop.
+- Independent UI panel scenes must set `layout_mode = 1` and explicit root anchors/offsets in their own `.tscn`. Their host-scene instance must repeat the final layout overrides, and export-sensitive overlays must restore the same anchors/offsets in `_ready()`; never rely on implicit root-layout inheritance.
 
 ## Localization
 
 - Edit `data/localization/translations.csv`, not generated `.translation` files.
+- Register the generated locale-specific `.translation` resources in `project.godot`; keep `translations.csv` as the editable source and do not restore CSV parsing in `LanguageManager`.
 - Maintain both `zh_CN` and `en` columns for every new key.
 - UI scripts use `tr(key)` and refresh on `LanguageManager.language_changed`.
 - Do not embed user-facing Chinese or English strings in battle/UI scripts unless they are non-display identifiers.

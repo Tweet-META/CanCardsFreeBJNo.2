@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "effects": [
+    {
+      "id": "vulnerable",
+      "display_name": "EFFECT_VULNERABLE",
+      "description": "EFFECT_VULNERABLE_DESC",
+      "icon_path": "res://assets/effects/vulnerable.png",
+      "value_format": "percent"
+    },
+    {
+      "id": "damage_immunity",
+      "display_name": "EFFECT_DAMAGE_IMMUNITY",
+      "description": "EFFECT_DAMAGE_IMMUNITY_DESC",
+      "icon_path": "res://assets/effects/shield_icon.png",
+      "value_format": "none",
+      "show_duration": false,
+      "advances_with_turn": false
+    },
+    {
+      "id": "stun",
+      "display_name": "EFFECT_STUN",
+      "description": "EFFECT_STUN_DESC",
+      "icon_path": "res://assets/effects/stun.png",
+      "value_format": "none",
+      "show_duration": true
+    },
+    {
+      "id": "weakness",
+      "display_name": "EFFECT_WEAKNESS",
+      "description": "EFFECT_WEAKNESS_DESC",
+      "icon_path": "res://assets/effects/weakness.png",
+      "value_format": "percent",
+      "show_duration": true
+    },
+    {
+      "id": "strength",
+      "display_name": "EFFECT_STRENGTH",
+      "description": "EFFECT_STRENGTH_DESC",
+      "icon_path": "res://assets/effects/strength.png",
+      "value_format": "percent",
+      "show_duration": true
+    }
+  ]
+}

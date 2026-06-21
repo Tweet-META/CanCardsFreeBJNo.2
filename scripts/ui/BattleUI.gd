@@ -8,6 +8,7 @@ signal shop_buy_requested(offer_index: int, character_index: int)
 signal general_card_sell_requested(card_index: int)
 signal developer_add_culture_mask_requested()
 signal developer_add_general_card_requested()
+signal six_seven_requested()
 
 const CARD_SIZE: Vector2 = Vector2(144, 188)
 const HOVERED_HAND_Z_INDEX: int = 100
@@ -24,6 +25,7 @@ const GENERAL_HAND_LEFT_SHIFT: float = 24.0
 const TEAM_GENERAL_CARD_INDEX_OFFSET: int = 1000
 # 通用卡使用负数索引编码，避免和角色 cards 数组的非负索引冲突。
 const CARD_BUTTON_SCENE: PackedScene = preload("res://scenes/CardButton.tscn")
+const SIX_SEVEN_CODE: String = "676767"
 
 var state: BattleState
 
@@ -58,6 +60,7 @@ var cancel_drop_hovered: bool = false
 var flow_cards_interaction_locked: bool = false
 var cards_interaction_locked: bool = false
 var battlefield_controller: BattlefieldController = BattlefieldController.new()
+var hidden_code_buffer: String = ""
 
 
 func _ready() -> void:
@@ -73,6 +76,7 @@ func _ready() -> void:
 	shop_panel.visibility_changed.connect(_on_shop_visibility_changed)
 	developer_controls.add_culture_mask_requested.connect(func() -> void: developer_add_culture_mask_requested.emit())
 	developer_controls.add_general_card_requested.connect(func() -> void: developer_add_general_card_requested.emit())
+	developer_controls.add_six_seven_requested.connect(func() -> void: six_seven_requested.emit())
 	LanguageManager.language_changed.connect(_on_language_changed)
 
 
@@ -90,11 +94,23 @@ func _process(delta: float) -> void:
 
 
 func _input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo:
+		_process_hidden_code_key(event as InputEventKey)
 	if dragging_card_index == -1:
 		return
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
 		_release_dragging_card(dragging_card_index, get_global_mouse_position())
 		accept_event()
+
+
+func _process_hidden_code_key(event: InputEventKey) -> void:
+	var typed_character: String = char(event.unicode)
+	if typed_character < "0" or typed_character > "9":
+		return
+	hidden_code_buffer = (hidden_code_buffer + typed_character).right(SIX_SEVEN_CODE.length())
+	if hidden_code_buffer == SIX_SEVEN_CODE:
+		hidden_code_buffer = ""
+		six_seven_requested.emit()
 
 
 func refresh(new_state: BattleState) -> void:
@@ -484,6 +500,10 @@ func _release_dragging_card(card_index: int, global_position: Vector2) -> void:
 	if _card_targets_ally(card):
 		var ally_index: int = _player_index_at(global_position)
 		if ally_index != -1:
+			if card.is_general():
+				await _play_general_card_consume_animation(card_index)
+				if state == null or state.phase != BattleState.Phase.PLAYER_TURN:
+					return
 			card_use_requested.emit(selected_character_index, card_index, -1, ally_index, _selected_difficulty())
 			return
 		_restore_hover_after_cancel(global_position)
@@ -492,6 +512,10 @@ func _release_dragging_card(card_index: int, global_position: Vector2) -> void:
 		var enemy_index := _enemy_index_at(global_position)
 		if enemy_index != -1:
 			selected_enemy_index = enemy_index
+			if card.is_general():
+				await _play_general_card_consume_animation(card_index)
+				if state == null or state.phase != BattleState.Phase.PLAYER_TURN:
+					return
 			card_use_requested.emit(selected_character_index, card_index, enemy_index, -1, _selected_difficulty())
 			return
 		_restore_hover_after_cancel(global_position)
@@ -673,7 +697,7 @@ func _card_targets_enemy(card: CardData) -> bool:
 
 
 func _card_targets_ally(card: CardData) -> bool:
-	return card.card_type == CardData.CardType.DEFENSE
+	return card.card_type == CardData.CardType.DEFENSE or card.target_type == CardData.TargetType.SINGLE_ALLY
 
 
 func _select_character(index: int) -> void:

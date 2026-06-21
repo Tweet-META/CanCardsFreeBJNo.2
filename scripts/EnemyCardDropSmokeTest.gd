@@ -20,6 +20,7 @@ func _run() -> void:
 	assert(enemy.rewards_collected)
 	assert(manager.state.team_general_cards.size() == initial_card_count + 1)
 	assert(manager.state.team_general_cards[-1].is_general())
+	assert(CardDatabase.get_general_pool_ids().has(manager.state.team_general_cards[-1].id))
 	assert(is_equal_approx(manager.state.new_toefl, initial_toefl + enemy.toefl_reward))
 
 	manager._collect_reward_if_dead(enemy)

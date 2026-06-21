@@ -50,6 +50,12 @@ Question and result overlays lock card interaction. Wrong answers have no direct
 - General cards do not ask questions and are removed from the team hand after use.
 - The starting general hand contains three cards randomly drawn with replacement.
 - Defeating each enemy grants one random general card drawn with replacement from the same complete general-card pool.
+- The general-card pool includes `potion_of_confucius`, `dagger_of_jingke`, `impenetrable_shield`, `menghan_toxin`, and `elixir_of_huatuo`.
+- `impenetrable_shield` negates the next damage instance, `menghan_toxin` skips an enemy's next action, and `elixir_of_huatuo` heals one ally for 40% maximum HP.
+- `gall_of_goujian` targets one ally and applies one turn of 50% Weakness followed by two turns of 30% Strength. Reuse during Weakness does nothing; reuse during Strength resets Strength to two turns.
+- `insight_of_paoding` applies 30% Vulnerable for two turns and can coexist with Vulnerable from other sources.
+- `smashed_cauldron` targets one ally and applies 100% Vulnerable and 30% Strength for two turns.
+- `six_seven` directly removes 67 HP from a selected ally and is excluded from all random pools; it is granted only by developer tools or the `676767` battle input code.
 
 ### Questions
 
@@ -78,6 +84,10 @@ Question and result overlays lock card interaction. Wrong answers have no direct
 - Percentage reduction resolves first; fixed shields absorb the remaining damage before HP.
 - Fixed shields stack, persist until consumed, and lose their visual effect immediately at zero.
 - The current playable content grants player percentage shields and enemy fixed shields; the inverse data paths already exist for future cards and skills.
+- Persistent status effects are defined in `data/effects.json` and stored as runtime `StatusEffectData` instances.
+- βudding's attack applies `20%` Vulnerable before damage, so the triggering hit is amplified. It lasts for the application turn and the following player turn.
+- Genius Rabbit's attack deals `26` base damage to the selected enemy and `13` base damage to every other living enemy.
+- Reapplying a status from the same actor and card/skill refreshes its duration and keeps the stronger value. The same status from different actor/source pairs is stored separately; Vulnerable from different sources stacks multiplicatively. UI source text displays the card or skill name, not the actor name.
 
 ### Attribute Passives
 
@@ -116,6 +126,7 @@ an enemy with multiple entries randomly selects one each turn.
 - Cards and card values: `data/cards.json`
 - Player characters and default team: `data/characters.json`
 - Enemy definitions: `data/enemies.json`
+- Persistent effect definitions and icon paths: `data/effects.json`
 - Stage backgrounds, waves, and enemy lineups: `data/stages.json`
 - Questions: `data/questions.json`
 - Chinese and English text: `data/localization/translations.csv`
@@ -123,6 +134,10 @@ an enemy with multiple entries randomly selects one each turn.
 - Reference/source art not used directly by runtime: `images/`
 
 Localization keys, not display strings, are stored in character, enemy, and card data.
+
+`translations.csv` remains the editable source. Its generated
+`translations.zh_CN.translation` and `translations.en.translation` resources
+are registered in `project.godot` for runtime and exported builds.
 
 The lower-left battle information panel is data-driven. Every player and enemy
 entry provides one complete localized `description`; its lines and wording are

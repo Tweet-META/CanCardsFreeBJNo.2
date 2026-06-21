@@ -7,10 +7,24 @@ const INK: Color = Color(0.12, 0.10, 0.08)
 
 
 func _ready() -> void:
+	_apply_export_safe_layout()
 	add_theme_color_override("font_color", INK)
 	add_theme_stylebox_override("normal", _style(PAPER, 8, 2))
 	_update_typography()
 	LanguageManager.language_changed.connect(_on_language_changed)
+
+
+func _apply_export_safe_layout() -> void:
+	# 导出包必须重新实例化子场景；显式恢复锚点，避免根节点退回左上角。
+	anchor_left = 0.0
+	anchor_top = 1.0
+	anchor_right = 0.0
+	anchor_bottom = 1.0
+	offset_left = 26.0
+	offset_top = -118.0
+	offset_right = 216.0
+	offset_bottom = -16.0
+	grow_vertical = Control.GROW_DIRECTION_BEGIN
 
 
 func _on_language_changed(_locale: String) -> void:

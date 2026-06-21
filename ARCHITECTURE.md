@@ -158,10 +158,13 @@ Focused UI scenes own their own visuals and local behavior:
 - `CharacterStandee`
 - `EnemyStandee`
 - `ShieldVisual`, shared by both standees for fixed and percentage shields
+- `StatusEffectIcon`, instantiated inside a standee for each persistent effect
 
 `BattlefieldController` creates standee scene instances, performs hit testing, and calculates layouts for one to eight enemies. Dead enemies are omitted when the battlefield is refreshed.
 
 `ShieldVisual` receives a fixed shield value and a percentage reduction value. It is visible when either is positive and uses additive blending for `assets/effects/shield.png`.
+
+`EnemyStandee` reads `EnemyData.active_effects` and instantiates one `StatusEffectIcon` per effect. Effect icons load their configured texture only when the asset exists, allowing effect logic to be implemented before final art is imported.
 
 `BattleUI` creates `CardButton` instances because hand contents are runtime data. `ShopPanel` similarly creates `ShopCardItem` instances. Static panel structure belongs in `.tscn`; repeated data-driven items are allowed to be instantiated from reusable scenes.
 
@@ -175,6 +178,15 @@ Current effects:
 
 - `gain_team_ap`
 - `attack_single`
+- `attack_single_apply_effect`
+- `attack_primary_splash`
+- `damage_current_hp_percent`
+- `apply_status_ally`
+- `apply_status_enemy`
+- `heal_max_hp_percent`
+- `gall_of_goujian`
+- `apply_dual_status_ally`
+- `direct_hp_loss`
 - `defend_single`
 - `skill_attack_single`
 - `skill_attack_all`
@@ -182,6 +194,12 @@ Current effects:
 All `type = general` cards automatically enter both the starting-hand and shop random pools.
 The same pool also supplies one random card whenever an enemy's death rewards
 are collected.
+
+### Persistent Effects
+
+Static effect metadata lives in `data/effects.json` and is loaded by `EffectDatabase`. Cards supply the runtime value and duration through `status_effect_id`, `status_effect_value`, and `status_effect_duration`.
+
+`EnemyData.apply_status_effect()` uses `effect_id + source_id` as its stack key. Card effects encode the actor ID and card ID into `source_id`, while `source_name` is the localized card or skill name shown in the UI. The same actor/source refreshes its existing effect; different sources retain separate instances. Vulnerable instances from different sources multiply together. Durations advance at the start of each player turn. Incoming-damage effects are resolved by `EnemyData.take_damage()` before percentage reduction and fixed shields.
 
 ### Attributes
 
@@ -201,7 +219,7 @@ Both `BattleUI` and `BattleManager` depend on `TEAM_GENERAL_CARD_INDEX_OFFSET = 
 
 ### Localization
 
-`translations.csv` is the source of truth. Generated `.translation` files are imported artifacts.
+`translations.csv` is the source of truth. Its generated locale-specific `.translation` resources are registered through `project.godot`; `LanguageManager` only switches and saves locales and does not parse the CSV.
 
 Display names, descriptions, logs, and question text use translation keys. When adding a question with ID `example`, localization keys must follow:
 

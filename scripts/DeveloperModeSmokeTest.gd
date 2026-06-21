@@ -27,7 +27,7 @@ func _run() -> void:
 	var initial_card_count: int = manager.state.team_general_cards.size()
 	manager.developer_add_general_card()
 	assert(manager.state.team_general_cards.size() == initial_card_count + 1)
-	assert(manager.state.team_general_cards[-1].display_name == "CARD_GENERAL_1")
+	assert(manager.state.team_general_cards[-1].display_name == "CARD_POTION_OF_CONFUCIUS")
 
 	while manager.state.get_alive_enemies().size() < 8:
 		manager.developer_add_culture_mask()

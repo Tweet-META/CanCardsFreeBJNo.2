@@ -4,8 +4,11 @@
 
 [node name="BattleInfoPanel" type="Label"]
 custom_minimum_size = Vector2(190, 102)
+layout_mode = 1
 anchors_preset = -1
+anchor_left = 0.0
 anchor_top = 1.0
+anchor_right = 0.0
 anchor_bottom = 1.0
 offset_left = 26.0
 offset_top = -118.0

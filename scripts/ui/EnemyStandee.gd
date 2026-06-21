@@ -6,11 +6,13 @@ signal standee_selected(enemy_index: int)
 
 const INK: Color = Color(0.12, 0.10, 0.08)
 const HP_RED: Color = Color(0.93, 0.25, 0.20)
+const STATUS_EFFECT_ICON_SCENE: PackedScene = preload("res://scenes/ui/StatusEffectIcon.tscn")
 
 @onready var hp_bar: ProgressBar = $Content/HpWrap/HpBar
 @onready var hp_label: Label = $Content/HpWrap/HpLabel
 @onready var portrait: TextureRect = $Content/Portrait
 @onready var shield_visual: ShieldVisual = $ShieldVisual
+@onready var effect_container: HBoxContainer = $EffectContainer
 @onready var target_highlight: Panel = $TargetHighlight
 
 var enemy_index: int = -1
@@ -45,7 +47,19 @@ func setup(enemy: EnemyData, index: int, selected: bool, target_highlighted: boo
 	hp_label.text = "%d / %d" % [enemy.current_hp, enemy.max_hp]
 	portrait.texture = load(enemy.portrait_path) as Texture2D
 	shield_visual.setup(enemy.current_shield, enemy.damage_reduction)
+	_refresh_effects(enemy.active_effects)
 	target_highlight.visible = target_highlighted
+
+
+func _refresh_effects(effects: Array[StatusEffectData]) -> void:
+	for child: Node in effect_container.get_children():
+		child.queue_free()
+	for effect: StatusEffectData in effects:
+		if not effect.is_active():
+			continue
+		var effect_icon: StatusEffectIcon = STATUS_EFFECT_ICON_SCENE.instantiate() as StatusEffectIcon
+		effect_container.add_child(effect_icon)
+		effect_icon.setup(effect)
 
 
 func _on_pressed() -> void:

@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/CharacterStandee.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/ui/ShieldVisual.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/ui/StatusEffectIcon.tscn" id="3"]
 
 [node name="CharacterStandee" type="Button"]
 flat = true
@@ -69,6 +70,21 @@ vertical_alignment = 1
 
 [node name="ShieldVisual" parent="." instance=ExtResource("2")]
 layout_mode = 1
+
+[node name="EffectContainer" type="HBoxContainer" parent="."]
+z_index = 4
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -92.0
+offset_top = 30.0
+offset_right = -4.0
+offset_bottom = 74.0
+grow_horizontal = 0
+mouse_filter = 2
+theme_override_constants/separation = 2
+alignment = 2
 
 [node name="TargetHighlight" type="Panel" parent="."]
 visible = false

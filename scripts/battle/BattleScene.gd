@@ -14,6 +14,7 @@ func _ready() -> void:
 	battle_ui.general_card_sell_requested.connect(battle_manager.request_sell_general_card)
 	battle_ui.developer_add_culture_mask_requested.connect(battle_manager.developer_add_culture_mask)
 	battle_ui.developer_add_general_card_requested.connect(battle_manager.developer_add_general_card)
+	battle_ui.six_seven_requested.connect(battle_manager.grant_six_seven)
 	question_panel.difficulty_selected.connect(battle_manager.select_question_difficulty)
 	question_panel.answer_submitted.connect(battle_manager.submit_answer)
 	result_panel.retry_requested.connect(battle_manager.retry_battle)

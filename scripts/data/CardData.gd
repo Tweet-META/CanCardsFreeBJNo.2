@@ -11,6 +11,7 @@ enum CardType {
 
 enum TargetType {
 	SELF,
+	SINGLE_ALLY,
 	SINGLE_ENEMY,
 	ALL_ENEMIES,
 	ALL_ALLIES
@@ -29,6 +30,18 @@ enum TargetType {
 @export var base_ap_gain: float = 0.5
 @export var skill_ap_cost: float = 5.0
 @export var effect_id: String = ""
+@export var status_effect_id: String = ""
+@export var status_effect_value: float = 0.0
+@export var status_effect_duration: int = 0
+@export var status_effect_delay: int = 0
+@export var secondary_status_effect_id: String = ""
+@export var secondary_status_effect_value: float = 0.0
+@export var secondary_status_effect_duration: int = 0
+@export var secondary_status_effect_delay: int = 0
+@export var current_hp_damage_ratio: float = 0.0
+@export var max_hp_heal_ratio: float = 0.0
+@export var direct_hp_loss: int = 0
+@export var available_in_pool: bool = true
 @export var art_path: String = ""
 @export var shop_price: float = 0.0
 

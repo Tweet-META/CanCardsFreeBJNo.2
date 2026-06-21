@@ -15,6 +15,7 @@ const SHOP_CARD_ITEM_SCENE: PackedScene = preload("res://scenes/ui/ShopCardItem.
 
 
 func _ready() -> void:
+	_apply_export_safe_layout()
 	add_theme_stylebox_override("panel", _style(Color(0.88, 0.80, 0.66, 0.98), 10, 3))
 	close_button.add_theme_stylebox_override("normal", _style(Color(0.94, 0.87, 0.72), 10, 2))
 	close_button.add_theme_stylebox_override("hover", _style(Color(1.0, 0.78, 0.68), 10, 2))
@@ -27,6 +28,20 @@ func _ready() -> void:
 	close_button.pressed.connect(close)
 	refresh_button.pressed.connect(func() -> void: refresh_requested.emit())
 	hide()
+
+
+func _apply_export_safe_layout() -> void:
+	# 独立面板在导出包中重新实例化时，显式恢复屏幕中央锚点与设计尺寸。
+	anchor_left = 0.5
+	anchor_top = 0.5
+	anchor_right = 0.5
+	anchor_bottom = 0.5
+	offset_left = -370.0
+	offset_top = -210.0
+	offset_right = 370.0
+	offset_bottom = 210.0
+	grow_horizontal = Control.GROW_DIRECTION_BOTH
+	grow_vertical = Control.GROW_DIRECTION_BOTH
 
 
 func toggle() -> void:

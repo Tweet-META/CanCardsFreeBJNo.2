@@ -15,11 +15,17 @@ func _init() -> void:
 	assert(budding_attack.id == "budding_attack")
 	assert(budding_attack.base_damage == 24)
 	assert(is_equal_approx(budding_attack.base_ap_gain, 0.5))
-	assert(budding_attack.effect_id == "attack_single")
+	assert(budding_attack.effect_id == "attack_single_apply_effect")
+	assert(budding_attack.status_effect_id == "vulnerable")
+	assert(is_equal_approx(budding_attack.status_effect_value, 0.20))
+	assert(budding_attack.status_effect_duration == 2)
 	assert(budding_attack.required_attribute == "文化")
 
 	var rabbit_skill: CardData = team[1].cards[2]
-	assert(rabbit_skill.base_damage == 46)
+	var rabbit_attack: CardData = team[1].cards[0]
+	assert(rabbit_attack.base_damage == 26)
+	assert(rabbit_attack.effect_id == "attack_primary_splash")
+	assert(rabbit_skill.base_damage == 92)
 	assert(rabbit_skill.target_type == CardData.TargetType.SINGLE_ENEMY)
 	assert(rabbit_skill.effect_id == "skill_attack_single")
 	assert(rabbit_skill.get_question_difficulty("easy") == "hard")
@@ -30,9 +36,16 @@ func _init() -> void:
 	assert(lawilim_skill.effect_id == "skill_attack_all")
 
 	var general_pool_ids: Array[String] = CardDatabase.get_general_pool_ids()
-	assert(general_pool_ids.size() == 9)
-	assert(general_pool_ids.has("general_ap_1"))
-	assert(general_pool_ids.has("shop_general_ap_big"))
+	assert(general_pool_ids.size() == 8)
+	assert(general_pool_ids.has("potion_of_confucius"))
+	assert(general_pool_ids.has("dagger_of_jingke"))
+	assert(general_pool_ids.has("impenetrable_shield"))
+	assert(general_pool_ids.has("menghan_toxin"))
+	assert(general_pool_ids.has("elixir_of_huatuo"))
+	assert(general_pool_ids.has("gall_of_goujian"))
+	assert(general_pool_ids.has("insight_of_paoding"))
+	assert(general_pool_ids.has("smashed_cauldron"))
+	assert(not general_pool_ids.has("six_seven"))
 	assert(not general_pool_ids.has("budding_attack"))
 	for card_id: String in general_pool_ids:
 		var pool_card: CardData = CardDatabase.create_card(card_id)
@@ -44,7 +57,6 @@ func _init() -> void:
 	var starting_cards: Array[CardData] = GameDataFactory.create_starting_general_cards(starting_rng)
 	assert(starting_cards.size() == 3)
 	for card: CardData in starting_cards:
-		assert(card.effect_id == "gain_team_ap")
 		assert(general_pool_ids.has(card.id))
 		assert(card.get_question_difficulty("medium") == "medium")
 
@@ -61,8 +73,18 @@ func _init() -> void:
 	assert(offers.size() == 4)
 	for card: CardData in offers:
 		assert(card.is_general())
-		assert(card.effect_id == "gain_team_ap")
 		assert(card.shop_price > 0.0)
+
+	var potion: CardData = CardDatabase.create_card("potion_of_confucius")
+	assert(potion.effect_id == "gain_team_ap")
+	assert(is_equal_approx(potion.base_ap_gain, 2.5))
+	assert(potion.art_path == "res://assets/cards/potion_of_confucius.png")
+
+	var dagger: CardData = CardDatabase.create_card("dagger_of_jingke")
+	assert(dagger.effect_id == "damage_current_hp_percent")
+	assert(dagger.target_type == CardData.TargetType.SINGLE_ENEMY)
+	assert(is_equal_approx(dagger.current_hp_damage_ratio, 0.30))
+	assert(dagger.art_path == "res://assets/cards/dagger_of_jingke.png")
 
 	assert(_can_draw_duplicates(3, true))
 	assert(_can_draw_duplicates(4, false))

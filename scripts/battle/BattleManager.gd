@@ -214,11 +214,23 @@ func developer_add_culture_mask() -> void:
 func developer_add_general_card() -> void:
 	if not SettingsManager.developer_mode:
 		return
-	var card: CardData = GameDataFactory.create_general_encouragement_i()
+	var card: CardData = GameDataFactory.create_potion_of_confucius()
 	card.id = "%s_dev_%d" % [card.id, Time.get_ticks_msec()]
 	card.owner_id = "team"
 	state.team_general_cards.append(card)
 	_emit_log(tr("DEV_LOG_ADDED_CARD"))
+	state_changed.emit(state)
+
+
+func grant_six_seven() -> void:
+	# 彩蛋卡不进入随机池，只能由开发者工具或战斗中的数字口令授予。
+	var card: CardData = GameDataFactory.create_six_seven()
+	if card == null:
+		return
+	card.id = "%s_hidden_%d" % [card.id, Time.get_ticks_msec()]
+	card.owner_id = "team"
+	state.team_general_cards.append(card)
+	_emit_log(tr("DEV_LOG_ADDED_SIX_SEVEN"))
 	state_changed.emit(state)
 
 
@@ -237,6 +249,26 @@ func _apply_card_effect(_answer_correct: bool, bonus_triggered: bool) -> void:
 		"attack_single":
 			_apply_attack_card(character, card, bonus_triggered)
 			_gain_question_card_ap(card, bonus_triggered)
+		"attack_single_apply_effect":
+			_apply_status_effect_attack(character, card, bonus_triggered)
+			_gain_question_card_ap(card, bonus_triggered)
+		"attack_primary_splash":
+			_apply_primary_splash_attack(character, card, bonus_triggered)
+			_gain_question_card_ap(card, bonus_triggered)
+		"damage_current_hp_percent":
+			_apply_current_hp_percent_damage(character, card)
+		"apply_status_ally":
+			_apply_status_to_ally(character, card)
+		"apply_status_enemy":
+			_apply_status_to_enemy(character, card)
+		"heal_max_hp_percent":
+			_apply_max_hp_percent_heal(character, card)
+		"gall_of_goujian":
+			_apply_gall_of_goujian(character, card)
+		"apply_dual_status_ally":
+			_apply_dual_status_to_ally(character, card)
+		"direct_hp_loss":
+			_apply_direct_hp_loss(character, card)
 		"defend_single":
 			var defense_target: CharacterData = state.selected_ally if state.selected_ally != null else character
 			var block: float = card.base_block
@@ -265,6 +297,160 @@ func _apply_attack_card(character: CharacterData, card: CardData, bonus_triggere
 	_collect_reward_if_dead(enemy)
 
 
+func _apply_status_effect_attack(character: CharacterData, card: CardData, bonus_triggered: bool) -> void:
+	# 先挂持续性效果，再调用普通攻击结算，确保本次伤害立即受到易伤影响。
+	var enemy: EnemyData = state.selected_enemy
+	if enemy == null:
+		return
+	var effect: StatusEffectData = EffectDatabase.create_effect(
+		card.status_effect_id,
+		card.status_effect_value,
+		card.status_effect_duration,
+		"%s::%s" % [character.id, card.id],
+		card.display_name
+	)
+	if effect != null:
+		enemy.apply_status_effect(effect)
+		_emit_log(tr("LOG_EFFECT_APPLIED") % [
+			tr(character.display_name),
+			tr(enemy.display_name),
+			tr(effect.display_name),
+			effect.remaining_turns
+		])
+	_apply_attack_card(character, card, bonus_triggered)
+
+
+func _apply_primary_splash_attack(character: CharacterData, card: CardData, bonus_triggered: bool) -> void:
+	# 选中目标使用完整基础伤害，其余存活敌人使用一半基础伤害并独立计算属性与答题加成。
+	var primary_target: EnemyData = state.selected_enemy
+	if primary_target == null:
+		return
+	var card_bonus: float = card.get_damage_bonus_for_difficulty(state.pending_difficulty) if bonus_triggered else 0.0
+	for enemy: EnemyData in state.enemy_team:
+		if not enemy.is_alive():
+			continue
+		var base_damage: int = card.base_damage if enemy == primary_target else roundi(float(card.base_damage) * 0.5)
+		var damage: int = _calculate_damage(character, enemy, base_damage, card_bonus)
+		var dealt: int = enemy.take_damage(damage)
+		_emit_log(tr("LOG_ATTACK_DAMAGE") % [tr(character.display_name), tr(enemy.display_name), dealt])
+		_collect_reward_if_dead(enemy)
+
+
+func _apply_current_hp_percent_damage(character: CharacterData, card: CardData) -> void:
+	# 先按目标当前生命计算动态基础伤害，再进入统一增益、易伤、减伤和护盾结算。
+	var enemy: EnemyData = state.selected_enemy
+	if enemy == null:
+		return
+	var target_hp_before: int = enemy.current_hp
+	var dynamic_base_damage: int = maxi(1, roundi(float(target_hp_before) * card.current_hp_damage_ratio))
+	var damage: int = _calculate_damage(character, enemy, dynamic_base_damage, 0.0)
+	var dealt: int = enemy.take_damage(damage)
+	_emit_log(tr("LOG_CURRENT_HP_DAMAGE") % [
+		tr(card.display_name),
+		tr(enemy.display_name),
+		target_hp_before,
+		card.current_hp_damage_ratio * 100.0,
+		dynamic_base_damage,
+		dealt
+	])
+	_collect_reward_if_dead(enemy)
+
+
+func _apply_status_to_ally(character: CharacterData, card: CardData) -> void:
+	var target: CharacterData = state.selected_ally if state.selected_ally != null else character
+	var effect: StatusEffectData = _create_card_status_effect(character, card)
+	if target == null or effect == null:
+		return
+	target.apply_status_effect(effect)
+	_emit_log(tr("LOG_ALLY_EFFECT_APPLIED") % [tr(card.display_name), tr(target.display_name), tr(effect.display_name)])
+
+
+func _apply_status_to_enemy(character: CharacterData, card: CardData) -> void:
+	var target: EnemyData = state.selected_enemy
+	var effect: StatusEffectData = _create_card_status_effect(character, card)
+	if target == null or effect == null:
+		return
+	if target.apply_status_effect(effect):
+		_emit_log(tr("LOG_ENEMY_EFFECT_APPLIED") % [tr(card.display_name), tr(target.display_name), tr(effect.display_name)])
+	else:
+		_emit_log(tr("LOG_EFFECT_SWALLOWED") % [tr(card.display_name), tr(target.display_name)])
+
+
+func _apply_max_hp_percent_heal(character: CharacterData, card: CardData) -> void:
+	var target: CharacterData = state.selected_ally if state.selected_ally != null else character
+	if target == null:
+		return
+	var requested_heal: int = roundi(float(target.max_hp) * card.max_hp_heal_ratio)
+	var healed: int = target.heal(requested_heal)
+	_emit_log(tr("LOG_MAX_HP_HEAL") % [tr(card.display_name), tr(target.display_name), healed])
+
+
+func _apply_gall_of_goujian(character: CharacterData, card: CardData) -> void:
+	var target: CharacterData = state.selected_ally if state.selected_ally != null else character
+	if target == null:
+		return
+	var weakness: StatusEffectData = target.get_status_effect_from_card("weakness", card.id)
+	if weakness != null and weakness.is_active():
+		_emit_log(tr("LOG_GALL_NO_EFFECT") % tr(target.display_name))
+		return
+	var strength: StatusEffectData = target.get_status_effect_from_card("strength", card.id)
+	if strength != null and strength.is_active():
+		strength.remaining_turns = card.secondary_status_effect_duration
+		_emit_log(tr("LOG_GALL_STRENGTH_REFRESHED") % tr(target.display_name))
+		return
+
+	var weakness_effect: StatusEffectData = _create_card_status_effect(character, card)
+	var strength_effect: StatusEffectData = _create_secondary_card_status_effect(character, card)
+	target.apply_status_effect(weakness_effect)
+	target.apply_status_effect(strength_effect)
+	_emit_log(tr("LOG_GALL_APPLIED") % tr(target.display_name))
+
+
+func _apply_dual_status_to_ally(character: CharacterData, card: CardData) -> void:
+	var target: CharacterData = state.selected_ally if state.selected_ally != null else character
+	if target == null:
+		return
+	var primary_effect: StatusEffectData = _create_card_status_effect(character, card)
+	var secondary_effect: StatusEffectData = _create_secondary_card_status_effect(character, card)
+	if primary_effect != null:
+		target.apply_status_effect(primary_effect)
+	if secondary_effect != null:
+		target.apply_status_effect(secondary_effect)
+	_emit_log(tr("LOG_DUAL_EFFECT_APPLIED") % [tr(card.display_name), tr(target.display_name)])
+
+
+func _apply_direct_hp_loss(character: CharacterData, card: CardData) -> void:
+	var target: CharacterData = state.selected_ally if state.selected_ally != null else character
+	if target == null:
+		return
+	var lost_hp: int = target.lose_hp_direct(card.direct_hp_loss)
+	_emit_log(tr("LOG_DIRECT_HP_LOSS") % [tr(card.display_name), tr(target.display_name), lost_hp])
+
+
+func _create_card_status_effect(character: CharacterData, card: CardData) -> StatusEffectData:
+	return EffectDatabase.create_effect(
+		card.status_effect_id,
+		card.status_effect_value,
+		card.status_effect_duration,
+		"%s::%s" % [character.id, card.id],
+		card.display_name,
+		card.status_effect_delay
+	)
+
+
+func _create_secondary_card_status_effect(character: CharacterData, card: CardData) -> StatusEffectData:
+	if card.secondary_status_effect_id.is_empty():
+		return null
+	return EffectDatabase.create_effect(
+		card.secondary_status_effect_id,
+		card.secondary_status_effect_value,
+		card.secondary_status_effect_duration,
+		"%s::%s" % [character.id, card.id],
+		card.display_name,
+		card.secondary_status_effect_delay
+	)
+
+
 func _apply_skill_card(character: CharacterData, card: CardData, bonus_triggered: bool) -> void:
 	# 当前技能答对统一获得 25% 伤害倍率，范围由 target_type 决定。
 	var extra_bonus: float = 0.25 if bonus_triggered else 0.0
@@ -290,7 +476,7 @@ func _calculate_damage(character: CharacterData, enemy: EnemyData, base_damage: 
 	if character.attribute == enemy.attribute:
 		multiplier += 0.20
 	multiplier += card_bonus
-	return maxi(1, roundi(float(base_damage) * multiplier))
+	return maxi(1, roundi(float(base_damage) * multiplier * character.get_outgoing_damage_multiplier()))
 
 
 func _gain_question_card_ap(card: CardData, bonus_triggered: bool) -> void:
@@ -343,6 +529,9 @@ func _run_enemy_turn() -> void:
 
 func _run_enemy_action(enemy: EnemyData) -> void:
 	# 每回合按配置权重选择一个技能；新增技能 ID 时扩展此分发入口。
+	if enemy.consume_all_status_effects("stun") > 0:
+		_emit_log(tr("LOG_ENEMY_STUNNED") % tr(enemy.display_name))
+		return
 	var ability: EnemyAbilityData = enemy.choose_ability(rng)
 	if ability == null:
 		return
@@ -370,7 +559,10 @@ func _run_bun_group_attack(enemy: EnemyData, power: int) -> void:
 	# 包子对每名存活角色分别结算伤害及同属性减伤。
 	for target: CharacterData in state.get_alive_players():
 		var dealt: int = target.take_damage(maxi(0, power), enemy.attribute)
-		_emit_log(tr("LOG_ENEMY_GROUP_ATTACK") % [tr(enemy.display_name), tr(target.display_name), dealt])
+		if target.last_damage_was_immune:
+			_emit_log(tr("LOG_DAMAGE_IMMUNED") % [tr(target.display_name), tr(enemy.display_name)])
+		else:
+			_emit_log(tr("LOG_ENEMY_GROUP_ATTACK") % [tr(enemy.display_name), tr(target.display_name), dealt])
 
 
 func _run_mask_single_attack(enemy: EnemyData, power: int) -> void:
@@ -379,7 +571,10 @@ func _run_mask_single_attack(enemy: EnemyData, power: int) -> void:
 	if target == null:
 		return
 	var dealt: int = target.take_damage(maxi(0, power), enemy.attribute)
-	_emit_log(tr("LOG_ENEMY_ATTACK") % [tr(enemy.display_name), tr(target.display_name), dealt])
+	if target.last_damage_was_immune:
+		_emit_log(tr("LOG_DAMAGE_IMMUNED") % [tr(target.display_name), tr(enemy.display_name)])
+	else:
+		_emit_log(tr("LOG_ENEMY_ATTACK") % [tr(enemy.display_name), tr(target.display_name), dealt])
 
 
 func _check_battle_end() -> bool:
@@ -451,7 +646,7 @@ func _card_needs_enemy(card: CardData) -> bool:
 
 
 func _card_needs_ally(card: CardData) -> bool:
-	return card.card_type == CardData.CardType.DEFENSE
+	return card.card_type == CardData.CardType.DEFENSE or card.target_type == CardData.TargetType.SINGLE_ALLY
 
 
 func _emit_log(message: String) -> void:

@@ -43,8 +43,8 @@ func setup(card: CardData, index: int, current_ap: float, enabled: bool) -> void
 	locked_by_ap = card.is_skill() and current_ap < card.skill_ap_cost
 	disabled = not enabled or not card.can_use(current_ap)
 	tooltip_text = tr(card.description)
-	_update_typography()
 	_update_text(card, current_ap)
+	_update_typography()
 	_update_art(card)
 	_update_lock_state()
 
@@ -150,7 +150,15 @@ func _update_text(card: CardData, current_ap: float) -> void:
 	if card.is_skill():
 		body_label.text = "%s\n%s" % [tr("CARD_SKILL_COST") % card.skill_ap_cost, tr("CARD_SKILL_BASE_EFFECT")]
 	elif card.is_general():
-		body_label.text = "%s\n%s" % [tr("CARD_GENERAL_TEAM_GAIN"), tr("CARD_AP_FORMAT") % card.base_ap_gain]
+		match card.effect_id:
+			"gain_team_ap":
+				body_label.text = "%s\n%s" % [tr("CARD_GENERAL_TEAM_GAIN"), tr("CARD_AP_FORMAT") % card.base_ap_gain]
+			"damage_current_hp_percent":
+				body_label.text = (tr("CARD_CURRENT_HP_DAMAGE") % roundi(card.current_hp_damage_ratio * 100.0)).replace("\\n", "\n")
+			"apply_status_ally", "apply_status_enemy", "heal_max_hp_percent":
+				body_label.text = tr(card.description).replace("\\n", "\n")
+			_:
+				body_label.text = tr(card.description).replace("\\n", "\n")
 	elif card.card_type == CardData.CardType.ATTACK:
 		body_label.text = "%s\n%s" % [tr("CARD_ATTACK_DAMAGE") % card.base_damage, tr("CARD_ANSWER_ENHANCE")]
 	elif card.card_type == CardData.CardType.DEFENSE:
@@ -161,7 +169,11 @@ func _update_text(card: CardData, current_ap: float) -> void:
 
 func _update_typography() -> void:
 	var english: bool = TranslationServer.get_locale().begins_with("en")
-	title_label.add_theme_font_size_override("font_size", 12 if english else 15)
+	var translated_title: String = title_label.text
+	var title_size: int = 12 if english else 15
+	if (english and translated_title.length() > 16) or (not english and translated_title.length() > 4):
+		title_size -= 2
+	title_label.add_theme_font_size_override("font_size", title_size)
 	body_label.add_theme_font_size_override("font_size", 10 if english else 13)
 
 
