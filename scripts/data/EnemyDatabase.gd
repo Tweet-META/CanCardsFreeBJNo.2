@@ -1,5 +1,5 @@
 extends RefCounted
-## 从 enemies.json 创建敌人定义；实际关卡阵容由 stages.json 的波次决定。
+## 从 enemies.json 创建敌人定义；实际关卡阵容由 levels.json 的波次决定。
 class_name EnemyDatabase
 
 const DATA_PATH: String = "res://data/enemies.json"

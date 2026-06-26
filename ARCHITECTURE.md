@@ -21,8 +21,7 @@ scripts/data/           Runtime data models, databases, and factories
 scripts/localization/   Translation loading and locale persistence
 scripts/settings/       Global settings persistence
 scripts/ui/             UI behavior and interaction coordination
-scripts/map/            Map scene presentation and floor switching
-scripts/*Test.gd        Headless smoke and regression tests
+scripts/map/            Map scene presentation and map switching
 images/                 References and non-runtime source images
 ```
 
@@ -44,20 +43,22 @@ BattleScene (Node2D, BattleScene.gd)
 
 ## Map
 
-`MainMenu` starts `MapScene.tscn`. `MapDatabase` loads ordered floor definitions
-from `data/maps.json`; `MapScene` displays the selected floor image and keeps an
-extensible `StageLayer`. Floors reference stage IDs; `StageDatabase` loads
+`MainMenu` starts `MapScene.tscn`. `MapDatabase` loads ordered map definitions
+from `data/maps.json`; `MapScene` displays the selected map image and keeps an
+extensible `LevelLayer`. Maps reference level IDs; `LevelDatabase` loads
 position, marker, localization keys, unlock state, and target scene from
-`data/stages.json`. `StageNode.tscn` emits the selected `StageData`.
+`data/levels.json`. `LevelNode.tscn` emits the selected `LevelData`.
 
-`StageDatabase` keeps the active stage ID across the map-to-battle scene
-change. `BattleManager` loads that stage and generates each wave through
-`GameDataFactory.create_stage_wave()`. Wave changes replace only the enemy
+`LevelDatabase` keeps the active level ID across the map-to-battle scene
+change. `BattleManager` loads that level and generates each wave through
+`GameDataFactory.create_level_wave()`. Wave changes replace only the enemy
 team; player HP, AP, cards, currency, and shop state persist.
 
-Stage battle data uses this shape:
+Level battle data uses this shape:
 
 ```json
+"id": "level1",
+"map_id": "map1",
 "battle_background": "res://assets/ui/conversation_room.png",
 "wave": [
   {
@@ -141,7 +142,9 @@ It must not manipulate UI nodes. It publishes:
 
 ### UI
 
-`BattleUI` owns transient presentation state: selected indices, hover state, drag state, card interaction locks, and panel refresh coordination. It emits user intentions and must not resolve combat.
+`BattleUI` owns transient battle-screen presentation state: selected indices, target highlights, card interaction locks, and panel refresh coordination. It emits user intentions and must not resolve combat.
+
+`BattleHandController` owns the runtime hand UI only: `CardButton` instancing, exclusive/general fan layouts, hover recovery, drag visual state, negative team-card index encoding on the UI side, and the general-card consume particle animation. It does not apply card rules.
 
 Focused UI scenes own their own visuals and local behavior:
 
@@ -166,7 +169,7 @@ Focused UI scenes own their own visuals and local behavior:
 
 `EnemyStandee` reads `EnemyData.active_effects` and instantiates one `StatusEffectIcon` per effect. Effect icons load their configured texture only when the asset exists, allowing effect logic to be implemented before final art is imported.
 
-`BattleUI` creates `CardButton` instances because hand contents are runtime data. `ShopPanel` similarly creates `ShopCardItem` instances. Static panel structure belongs in `.tscn`; repeated data-driven items are allowed to be instantiated from reusable scenes.
+`BattleHandController` creates `CardButton` instances because hand contents are runtime data. `ShopPanel` similarly creates `ShopCardItem` instances. Static panel structure belongs in `.tscn`; repeated data-driven items are allowed to be instantiated from reusable scenes.
 
 ## Important Data Contracts
 
@@ -229,16 +232,9 @@ Q_EXAMPLE_O0 ... Q_EXAMPLE_ON
 Q_EXAMPLE_EXPLANATION
 ```
 
-## Tests
+## Verification
 
-Headless tests cover:
-
-- Main battle flow: `SmokeTest.gd`
-- Character/enemy databases: `ActorDatabaseSmokeTest.gd`
-- Cards and pools: `CardDatabaseSmokeTest.gd`
-- Questions: `QuestionBankSmokeTest.gd`
-- Localization: `LocalizationSmokeTest.gd`
-- Attribute stacking: `PassiveStackSmokeTest.gd`
-- Enemy abilities: `EnemyAbilitySmokeTest.gd`
-- Enemy layouts: `EnemyLayoutSmokeTest.gd`
-- Developer mode and UI information panel behavior.
+Automated smoke-test scripts were removed. Developers should validate gameplay
+manually in Godot after data, scene, or rule changes. AI-assisted changes should
+prefer static checks and editor parsing only when useful, and should not run
+gameplay smoke scripts unless new ones are explicitly requested.

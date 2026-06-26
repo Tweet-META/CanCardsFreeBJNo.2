@@ -1,0 +1,42 @@
+{
+  "levels": [
+    {
+      "id": "level1",
+      "display_name": "LEVEL_1_NAME",
+      "marker_text": "1",
+      "map_id": "map1",
+      "map_position": [0.44, 0.69],
+      "scene_path": "res://scenes/BattleScene.tscn",
+      "battle_background": "res://assets/ui/conversation_room.png",
+      "wave": [
+        {
+          "monster": [
+            ["pinyin_bun","vocab_bun","culture_bun"],
+            ["pinyin_slime","vocab_slime","culture_slime"],
+            ["pinyin_mask","vocab_mask","culture_mask"]
+          ]
+        }
+      ],
+      "unlocked": true
+    },
+    {
+      "id": "level2",
+      "display_name": "LEVEL_2_NAME",
+      "marker_text": "2",
+      "map_id": "map1",
+      "map_position": [0.35, 0.69],
+      "scene_path": "res://scenes/BattleScene.tscn",
+      "battle_background": "res://assets/ui/conversation_room.png",
+      "wave": [
+        {
+          "monster": [
+            ["pinyin_bun","vocab_bun","culture_bun"],
+            ["pinyin_slime","vocab_slime","culture_slime"],
+            ["pinyin_mask","vocab_mask","culture_mask"]
+          ]
+        }
+      ],
+      "unlocked": true
+    }
+  ]
+}

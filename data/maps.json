@@ -1,14 +1,14 @@
 {
-  "version": 1,
-  "default_floor": "first_floor",
-  "floors": [
+  "default_map": "map1",
+  "maps": [
     {
-      "id": "first_floor",
-      "display_name": "MAP_FIRST_FLOOR",
-      "image_path": "res://assets/ui/first_floor.png",
+      "id": "map1",
+      "display_name": "MAP_1_NAME",
+      "image_path": "res://assets/ui/map1.png",
       "unlocked": true,
-      "stages": [
-        "first_stage"
+      "levels": [
+        "level1",
+        "level2"
       ]
     }
   ]

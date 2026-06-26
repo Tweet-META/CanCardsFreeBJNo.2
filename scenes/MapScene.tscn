@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/map/MapScene.gd" id="1"]
-[ext_resource type="Texture2D" path="res://assets/ui/first_floor.png" id="2"]
+[ext_resource type="Texture2D" path="res://assets/ui/map1.png" id="2"]
 
 [node name="MapScene" type="Control"]
 layout_mode = 3
@@ -60,19 +60,19 @@ custom_minimum_size = Vector2(120, 58)
 layout_mode = 2
 text = "MAP_BACK"
 
-[node name="FloorTitle" type="Label" parent="Header"]
+[node name="MapTitle" type="Label" parent="Header"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 30
-text = "MAP_FIRST_FLOOR"
+text = "MAP_1_NAME"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="FloorSelector" type="OptionButton" parent="Header"]
+[node name="MapSelector" type="OptionButton" parent="Header"]
 custom_minimum_size = Vector2(190, 58)
 layout_mode = 2
 
-[node name="StageLayer" type="Control" parent="."]
+[node name="LevelLayer" type="Control" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0

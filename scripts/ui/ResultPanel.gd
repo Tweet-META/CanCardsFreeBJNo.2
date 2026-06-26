@@ -13,7 +13,9 @@ signal dismissed
 @onready var close_button: Button = $Box/ButtonRow/CloseButton
 
 
+## 初始化结果面板样式、布局兜底和按钮连接。
 func _ready() -> void:
+	_apply_export_safe_layout()
 	add_theme_stylebox_override("panel", _style(Color(0.88, 0.80, 0.66, 0.98), 10, 4))
 	close_button.pressed.connect(_close_non_battle_result)
 	retry_button.pressed.connect(_on_retry)
@@ -21,6 +23,16 @@ func _ready() -> void:
 	hide()
 
 
+## 在导出版本中强制恢复居中面板布局，避免实例化后退回左上角。
+func _apply_export_safe_layout() -> void:
+	set_anchors_preset(Control.PRESET_CENTER)
+	offset_left = -260.0
+	offset_top = -130.0
+	offset_right = 260.0
+	offset_bottom = 130.0
+
+
+## 显示答题反馈或战斗结算。
 func show_result(title: String, message: String, battle_over: bool, _victory: bool) -> void:
 	title_label.text = title
 	message_label.text = message
@@ -30,17 +42,20 @@ func show_result(title: String, message: String, battle_over: bool, _victory: bo
 	show()
 
 
+## 处理重新挑战按钮。
 func _on_retry() -> void:
 	hide()
 	dismissed.emit()
 	retry_requested.emit()
 
 
+## 关闭非战斗结束类结果弹窗。
 func _close_non_battle_result() -> void:
 	hide()
 	dismissed.emit()
 
 
+## 生成面板通用纸张风格。
 func _style(color: Color, radius: int, border_width: int) -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
 	style.bg_color = color

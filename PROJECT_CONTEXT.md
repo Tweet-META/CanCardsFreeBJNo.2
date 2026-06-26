@@ -4,7 +4,7 @@
 
 **Can Cards Free BJNo.2?** is a Godot 4.6 turn-based educational card RPG for foreign teachers learning Chinese through the Beijing No.2 High School Chinese Club.
 
-The current deliverable is a single-stage MVP with:
+The current deliverable is a small level-based MVP with:
 
 - Main menu, language selection, settings, battle, shop, questions, battle log, and result flow.
 - Main menu enters a data-driven map scene before any battle.
@@ -14,15 +14,15 @@ The current deliverable is a single-stage MVP with:
 - Bilingual Chinese/English UI and question content.
 - One battle containing a configurable enemy team of up to eight visible enemies.
 
-The current map contains the first floor and one stage node near the meeting
-table. Selecting it enters the existing battle scene. Its background is
-`assets/ui/first_floor.png`.
+The current map contains `map1` and level nodes near the meeting
+table. Selecting a level enters the existing battle scene. The map image is
+`assets/ui/map1.png`.
 
-All stages reuse `BattleScene.tscn`. `data/stages.json` defines the battle
+All levels reuse `BattleScene.tscn`. `data/levels.json` defines the battle
 background and ordered waves. Each wave contains monster positions, and each
 position randomly chooses one enemy from its candidate ID list.
 
-Do not treat the narrative and planned systems in `README.md` as implemented unless supported by current code. SAT progression, multiple stages, persistent collections, and story progression are not implemented.
+Do not treat the narrative and planned systems in `README.md` as implemented unless supported by current code. SAT progression, persistent collections, and story progression are not implemented.
 
 ## Core Battle Flow
 
@@ -127,7 +127,7 @@ an enemy with multiple entries randomly selects one each turn.
 - Player characters and default team: `data/characters.json`
 - Enemy definitions: `data/enemies.json`
 - Persistent effect definitions and icon paths: `data/effects.json`
-- Stage backgrounds, waves, and enemy lineups: `data/stages.json`
+- Level backgrounds, waves, and enemy lineups: `data/levels.json`
 - Questions: `data/questions.json`
 - Chinese and English text: `data/localization/translations.csv`
 - Runtime art: `assets/`

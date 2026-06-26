@@ -1,5 +1,4 @@
 {
-  "version": 1,
   "cards": [
 	{
 	  "id": "budding_attack",
@@ -31,7 +30,7 @@
 	  "attribute": "culture",
 	  "requires_question": true,
 	  "base_damage": 0,
-	  "base_block": 0.15,
+	  "base_block": 0.4,
 	  "base_ap_gain": 0.5,
 	  "skill_ap_cost": 5.0,
 	  "effect_id": "defend_single",
@@ -82,7 +81,7 @@
 	  "attribute": "pinyin",
 	  "requires_question": true,
 	  "base_damage": 0,
-	  "base_block": 0.12,
+	  "base_block": 0.3,
 	  "base_ap_gain": 0.5,
 	  "skill_ap_cost": 5.0,
 	  "effect_id": "defend_single",
@@ -133,7 +132,7 @@
 	  "attribute": "vocabulary",
 	  "requires_question": true,
 	  "base_damage": 0,
-	  "base_block": 0.12,
+	  "base_block": 0.35,
 	  "base_ap_gain": 0.5,
 	  "skill_ap_cost": 5.0,
 	  "effect_id": "defend_single",
@@ -149,7 +148,7 @@
 	  "target": "all_enemies",
 	  "attribute": "vocabulary",
 	  "requires_question": true,
-	  "base_damage": 28,
+	  "base_damage": 42,
 	  "base_block": 0.0,
 	  "base_ap_gain": 0.0,
 	  "skill_ap_cost": 5.0,

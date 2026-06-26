@@ -19,7 +19,7 @@ const ATTRIBUTE_CULTURE: String = LearningAttribute.CULTURE
 var phase: Phase = Phase.SETUP
 # 选择目标与 pending_* 字段共同描述一张正在结算的卡牌。
 var turn_count: int = 0
-var stage_id: String = ""
+var level_id: String = ""
 var battle_background: String = ""
 var current_wave: int = 1
 var total_waves: int = 1
@@ -38,14 +38,14 @@ var shop_offer_cards: Array[CardData] = []
 var battle_log: Array[String] = []
 
 
-func setup(players: Array[CharacterData], enemies: Array[EnemyData], stage: StageData, rng: RandomNumberGenerator = null) -> void:
+func setup(players: Array[CharacterData], enemies: Array[EnemyData], level: LevelData, rng: RandomNumberGenerator = null) -> void:
 	# 拼音生命被动按开战阵容计算一次；角色倒下不会缩减已经获得的最大生命。
 	player_team = players
 	enemy_team = enemies
-	stage_id = stage.id
-	battle_background = stage.battle_background
+	level_id = level.id
+	battle_background = level.battle_background
 	current_wave = 1
-	total_waves = maxi(1, stage.waves.size())
+	total_waves = maxi(1, level.waves.size())
 	phase = Phase.SETUP
 	turn_count = 0
 	ap = 0.0

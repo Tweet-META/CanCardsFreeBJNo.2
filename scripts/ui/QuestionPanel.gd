@@ -20,7 +20,9 @@ signal answer_submitted(answer_index: int)
 ]
 
 
+## 初始化答题面板样式、布局兜底和按钮连接。
 func _ready() -> void:
+	_apply_export_safe_layout()
 	add_theme_stylebox_override("panel", _style(Color(0.88, 0.80, 0.66, 0.98), 10, 4))
 	for i in difficulty_buttons.size():
 		difficulty_buttons[i].pressed.connect(_submit_difficulty.bind(i))
@@ -29,6 +31,16 @@ func _ready() -> void:
 	hide()
 
 
+## 在导出版本中强制恢复居中面板布局，避免实例化后退回左上角。
+func _apply_export_safe_layout() -> void:
+	set_anchors_preset(Control.PRESET_CENTER)
+	offset_left = -310.0
+	offset_top = -180.0
+	offset_right = 310.0
+	offset_bottom = 180.0
+
+
+## 显示难度选择按钮。
 func show_difficulty_selection() -> void:
 	difficulty_title.text = tr("QUESTION_SELECT_DIFFICULTY")
 	var difficulties: Array[String] = ["easy", "medium", "hard"]
@@ -39,6 +51,7 @@ func show_difficulty_selection() -> void:
 	show()
 
 
+## 显示具体题目和打乱后的选项。
 func show_question(question: QuestionData) -> void:
 	# 题目内容使用翻译键解析，本面板只负责显示与提交。
 	_set_difficulty_controls_visible(false)
@@ -55,6 +68,7 @@ func show_question(question: QuestionData) -> void:
 	show()
 
 
+## 将难度按钮索引转换成难度 id 并发出信号。
 func _submit_difficulty(index: int) -> void:
 	var difficulties: Array[String] = ["easy", "medium", "hard"]
 	if index < 0 or index >= difficulties.size():
@@ -62,23 +76,27 @@ func _submit_difficulty(index: int) -> void:
 	difficulty_selected.emit(difficulties[index])
 
 
+## 提交选项索引并关闭答题面板。
 func _submit_answer(index: int) -> void:
 	hide()
 	answer_submitted.emit(index)
 
 
+## 切换难度选择控件的可见性。
 func _set_difficulty_controls_visible(is_visible: bool) -> void:
 	difficulty_title.visible = is_visible
 	for button: Button in difficulty_buttons:
 		button.visible = is_visible
 
 
+## 切换题目文本和选项按钮的可见性。
 func _set_question_controls_visible(is_visible: bool) -> void:
 	prompt_label.visible = is_visible
 	for button: Button in option_buttons:
 		button.visible = is_visible
 
 
+## 将题目分类 id 转成人类可读文本。
 func _category_label(category: String) -> String:
 	match category:
 		"拼音":
@@ -91,6 +109,7 @@ func _category_label(category: String) -> String:
 			return category
 
 
+## 将难度 id 转成人类可读文本。
 func _difficulty_label(difficulty: String) -> String:
 	match difficulty:
 		"easy":
@@ -103,6 +122,7 @@ func _difficulty_label(difficulty: String) -> String:
 			return difficulty
 
 
+## 生成面板通用纸张风格。
 func _style(color: Color, radius: int, border_width: int) -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
 	style.bg_color = color

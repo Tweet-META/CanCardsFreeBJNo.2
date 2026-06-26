@@ -1,15 +1,15 @@
 [gd_scene load_steps=2 format=3]
 
-[ext_resource type="Script" path="res://scripts/map/StageNode.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/map/LevelNode.gd" id="1"]
 
-[node name="StageNode" type="Control"]
+[node name="LevelNode" type="Control"]
 custom_minimum_size = Vector2(104, 96)
 offset_right = 104.0
 offset_bottom = 96.0
 mouse_filter = 1
 script = ExtResource("1")
 
-[node name="StageButton" type="Button" parent="."]
+[node name="LevelButton" type="Button" parent="."]
 custom_minimum_size = Vector2(58, 58)
 layout_mode = 1
 anchors_preset = 10
@@ -22,7 +22,7 @@ grow_horizontal = 2
 theme_override_font_sizes/font_size = 24
 text = "1"
 
-[node name="StageLabel" type="Label" parent="."]
+[node name="LevelLabel" type="Label" parent="."]
 layout_mode = 1
 anchors_preset = 12
 anchor_right = 1.0
@@ -34,6 +34,6 @@ theme_override_colors/font_color = Color(0.16, 0.11, 0.06, 1)
 theme_override_colors/font_outline_color = Color(0.94, 0.86, 0.70, 1)
 theme_override_constants/outline_size = 5
 theme_override_font_sizes/font_size = 16
-text = "STAGE_FIRST_NAME"
+text = "LEVEL_1_NAME"
 horizontal_alignment = 1
 vertical_alignment = 1

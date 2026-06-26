@@ -1,57 +1,62 @@
 extends RefCounted
-## 从 maps.json 加载可扩展楼层列表，并为地图场景创建独立数据实例。
+## 从 maps.json 加载可扩展地图列表，并为地图场景创建独立数据实例。
 class_name MapDatabase
 
 const DATA_PATH: String = "res://data/maps.json"
 
 static var _loaded: bool = false
-static var _default_floor_id: String = ""
-static var _floor_order: Array[String] = []
+static var _default_map_id: String = ""
+static var _map_order: Array[String] = []
 static var _definitions: Dictionary = {}
 
 
-static func get_floors() -> Array[MapFloorData]:
+## 创建所有地图数据，并保留 JSON 中的显示顺序。
+static func get_maps() -> Array[MapData]:
 	_ensure_loaded()
-	var floors: Array[MapFloorData] = []
-	for floor_id: String in _floor_order:
-		var floor: MapFloorData = create_floor(floor_id)
-		if floor != null:
-			floors.append(floor)
-	return floors
+	var maps: Array[MapData] = []
+	for map_id: String in _map_order:
+		var map_data: MapData = create_map(map_id)
+		if map_data != null:
+			maps.append(map_data)
+	return maps
 
 
-static func get_default_floor_index(floors: Array[MapFloorData]) -> int:
-	for index in floors.size():
-		if floors[index].id == _default_floor_id:
+## 在当前地图列表中查找默认地图的下标。
+static func get_default_map_index(maps: Array[MapData]) -> int:
+	for index in maps.size():
+		if maps[index].id == _default_map_id:
 			return index
 	return 0
 
 
-static func create_floor(floor_id: String) -> MapFloorData:
+## 按地图 ID 创建一份新的 MapData 实例。
+static func create_map(map_id: String) -> MapData:
 	_ensure_loaded()
-	var raw_value: Variant = _definitions.get(floor_id)
+	var raw_value: Variant = _definitions.get(map_id)
 	if not raw_value is Dictionary:
-		push_error("MapDatabase: unknown floor id '%s'." % floor_id)
+		push_error("MapDatabase: unknown map id '%s'." % map_id)
 		return null
 
 	var raw: Dictionary = raw_value as Dictionary
-	var floor: MapFloorData = MapFloorData.new()
-	floor.id = str(raw.get("id", ""))
-	floor.display_name = str(raw.get("display_name", ""))
-	floor.image_path = str(raw.get("image_path", ""))
-	floor.unlocked = bool(raw.get("unlocked", false))
-	floor.stage_ids = _to_string_array(raw.get("stages", []))
-	return floor
+	var map_data: MapData = MapData.new()
+	map_data.id = str(raw.get("id", ""))
+	map_data.display_name = str(raw.get("display_name", ""))
+	map_data.image_path = str(raw.get("image_path", ""))
+	map_data.unlocked = bool(raw.get("unlocked", false))
+	map_data.level_ids = _to_string_array(raw.get("levels", []))
+	return map_data
 
 
+## 清空缓存并重新读取 maps.json。
 static func reload() -> void:
 	_loaded = false
-	_default_floor_id = ""
-	_floor_order.clear()
+	_default_map_id = ""
+	_map_order.clear()
 	_definitions.clear()
 	_ensure_loaded()
 
 
+## 延迟读取 maps.json，并建立 ID 到原始字典的索引。
 static func _ensure_loaded() -> void:
 	if _loaded:
 		return
@@ -67,27 +72,28 @@ static func _ensure_loaded() -> void:
 		return
 
 	var root_data: Dictionary = parsed as Dictionary
-	_default_floor_id = str(root_data.get("default_floor", ""))
-	var floors_value: Variant = root_data.get("floors", [])
-	if not floors_value is Array:
-		push_error("MapDatabase: floors must be an array.")
+	_default_map_id = str(root_data.get("default_map", ""))
+	var maps_value: Variant = root_data.get("maps", [])
+	if not maps_value is Array:
+		push_error("MapDatabase: maps must be an array.")
 		return
 
-	for raw_value: Variant in floors_value as Array:
+	for raw_value: Variant in maps_value as Array:
 		if not raw_value is Dictionary:
 			continue
 		var raw: Dictionary = raw_value as Dictionary
-		var floor_id: String = str(raw.get("id", ""))
-		if floor_id.is_empty():
-			push_error("MapDatabase: floor definition is missing an id.")
+		var map_id: String = str(raw.get("id", ""))
+		if map_id.is_empty():
+			push_error("MapDatabase: map definition is missing an id.")
 			continue
-		if _definitions.has(floor_id):
-			push_error("MapDatabase: duplicate floor id '%s'." % floor_id)
+		if _definitions.has(map_id):
+			push_error("MapDatabase: duplicate map id '%s'." % map_id)
 			continue
-		_definitions[floor_id] = raw
-		_floor_order.append(floor_id)
+		_definitions[map_id] = raw
+		_map_order.append(map_id)
 
 
+## 把 JSON 数组安全转换为字符串数组。
 static func _to_string_array(value: Variant) -> Array[String]:
 	var result: Array[String] = []
 	if not value is Array:

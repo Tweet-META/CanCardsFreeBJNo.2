@@ -11,11 +11,11 @@
 7. Runtime collections may instantiate reusable packed scenes such as `CardButton`, `ShopCardItem`, `CharacterStandee`, and `EnemyStandee`.
 8. Bind existing scene nodes with typed `@onready` paths. If a node path changes, update its bound script and instantiate the scene before considering the change complete.
 9. Preserve current UI appearance and battle values unless the requested task explicitly changes them.
-10. Add concise Chinese comments for non-obvious state transitions, data contracts, formulas, and interaction recovery logic. Do not narrate trivial assignments.
+10. Add concise Chinese comments before new or modified functions explaining their purpose. Keep extra inline comments for non-obvious state transitions, data contracts, formulas, and interaction recovery logic; do not narrate trivial assignments.
 
 ## Before Editing
 
-- Inspect the relevant `.tscn`, attached script, data source, and existing tests.
+- Inspect the relevant `.tscn`, attached script, and data source.
 - State the scene-tree change before any scene or UI edit. If no scene tree changes, say so.
 - Check `git status`; do not revert unrelated user changes or generated files.
 - Do not edit or delete `项目日志.docx`.
@@ -25,19 +25,19 @@
 
 - Cards: edit `data/cards.json`; add translation keys to `data/localization/translations.csv`.
 - Characters: edit `data/characters.json`; card references must resolve through `CardDatabase`, and the complete information-panel text must use one `description` key.
-- Enemies: edit `data/enemies.json`; it contains definitions only, never stage lineups. All portrait paths must exist, and the complete information-panel text must use one `description` key.
+- Enemies: edit `data/enemies.json`; it contains definitions only, never level lineups. All portrait paths must exist, and the complete information-panel text must use one `description` key.
 - Persistent effects: edit `data/effects.json`; every effect needs a stable ID, localization keys, and an icon path under `assets/effects/`.
 - Questions: edit `data/questions.json` and add every generated `Q_<ID>_*` localization key.
-- Map floors: edit `data/maps.json`; every configured `image_path` must point to an imported texture.
-- Map stages: edit `data/stages.json`, then reference their IDs from the owning floor. Store positions as normalized `[x, y]` coordinates and target scenes as `res://` paths.
-- Put battle backgrounds and all wave lineups in `data/stages.json`. Every `monster` entry is one position containing one or more random candidate enemy IDs.
+- Map maps: edit `data/maps.json`; every configured `image_path` must point to an imported texture.
+- Map levels: edit `data/levels.json`, then reference their IDs from the owning map. Store positions as normalized `[x, y]` coordinates and target scenes as `res://` paths.
+- Put battle backgrounds and all wave lineups in `data/levels.json`. Every `monster` entry is one position containing one or more random candidate enemy IDs.
 - Use unique stable ASCII IDs.
 - Store translatable fields as localization keys.
 - Never add player or enemy fixed base defense unless the game design explicitly reintroduces it.
 - Attribute passives must remain attribute-driven and stack through `BattleState.get_attribute_count()`, not through character-ID checks.
 - Enemy behavior must come from weighted `abilities`, not `prototype`, `attack`, or `ability_power` fields. Attribute variants should not duplicate combat code.
-- Adding a new enemy ability ID requires `BattleManager` dispatch logic and a focused test.
-- Adding a new card `effect_id`, target type, enemy prototype, or attribute requires parser, rule, UI-description, localization, and test updates.
+- Adding a new enemy ability ID requires `BattleManager` dispatch logic and manual battle verification.
+- Adding a new card `effect_id`, target type, enemy prototype, or attribute requires parser, rule, UI-description, localization, and manual verification updates.
 - Do not hardcode status-effect values or durations in UI scripts. Card data supplies runtime values; `effects.json` supplies reusable metadata and icon paths.
 
 ## Battle Invariants
@@ -93,29 +93,22 @@
 
 ## Required Verification
 
-Run at minimum after code or scene changes:
+Automated smoke-test scripts have been removed. Do not recreate or run smoke
+tests unless the user explicitly asks for them.
+
+For code, data, or scene changes, prefer these lightweight checks:
 
 ```powershell
 .\Godot_v4.6.3-stable_win64.exe --headless --editor --path . --quit
-.\Godot_v4.6.3-stable_win64.exe --headless --path . --script res://scripts/SmokeTest.gd
+git diff --check
 ```
 
-Run the focused smoke test for every affected subsystem. Common commands:
-
-```powershell
-.\Godot_v4.6.3-stable_win64.exe --headless --path . --script res://scripts/ActorDatabaseSmokeTest.gd
-.\Godot_v4.6.3-stable_win64.exe --headless --path . --script res://scripts/CardDatabaseSmokeTest.gd
-.\Godot_v4.6.3-stable_win64.exe --headless --path . --script res://scripts/QuestionBankSmokeTest.gd
-.\Godot_v4.6.3-stable_win64.exe --headless --path . --script res://scripts/LocalizationSmokeTest.gd
-.\Godot_v4.6.3-stable_win64.exe --headless --path . --script res://scripts/PassiveStackSmokeTest.gd
-.\Godot_v4.6.3-stable_win64.exe --headless --path . --script res://scripts/EnemyAbilitySmokeTest.gd
-.\Godot_v4.6.3-stable_win64.exe --headless --path . --script res://scripts/EnemyLayoutSmokeTest.gd
-```
-
-For battle UI changes, also instantiate the real scene:
+For battle UI changes, the user performs gameplay validation manually. If the
+user asks the AI to verify scene boot specifically, instantiate the real scene:
 
 ```powershell
 .\Godot_v4.6.3-stable_win64.exe --headless --path . res://scenes/BattleScene.tscn --quit-after 3
 ```
 
-Validate edited JSON and run `git diff --check`. A successful parse without the focused regression test is not sufficient.
+Validate edited JSON when JSON files change. A successful parse is not a
+substitute for the user's manual gameplay check.
