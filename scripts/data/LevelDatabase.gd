@@ -7,6 +7,7 @@ const DATA_PATH: String = "res://data/levels.json"
 static var _loaded: bool = false
 static var _definitions: Dictionary = {}
 static var _active_level_id: String = "level1"
+static var _active_player_ids: Array[String] = []
 
 
 ## 按关卡 ID 创建一份新的 LevelData 实例。
@@ -21,6 +22,7 @@ static func create_level(level_id: String) -> LevelData:
 	var level: LevelData = LevelData.new()
 	level.id = str(raw.get("id", ""))
 	level.display_name = str(raw.get("display_name", ""))
+	level.description = str(raw.get("description", ""))
 	level.marker_text = str(raw.get("marker_text", ""))
 	level.map_id = str(raw.get("map_id", ""))
 	level.map_position = _parse_position(raw.get("map_position", [0.5, 0.5]))
@@ -43,6 +45,16 @@ static func set_active_level(level_id: String) -> void:
 ## 创建当前被地图激活的关卡数据。
 static func get_active_level() -> LevelData:
 	return create_level(_active_level_id)
+
+
+## 记录准备页选择的出战角色 ID 顺序。
+static func set_active_player_ids(character_ids: Array[String]) -> void:
+	_active_player_ids = character_ids.duplicate()
+
+
+## 读取准备页选择的出战角色 ID；为空时战斗会使用默认队伍。
+static func get_active_player_ids() -> Array[String]:
+	return _active_player_ids.duplicate()
 
 
 ## 按一组关卡 ID 创建关卡列表，忽略无效 ID。

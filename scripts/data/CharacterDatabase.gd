@@ -8,6 +8,7 @@ static var _loaded: bool = false
 # 定义缓存只保存 JSON 字典；create_character 每次都会创建全新运行实例。
 static var _root_data: Dictionary = {}
 static var _definitions: Dictionary = {}
+static var _character_order: Array[String] = []
 
 
 static func create_character(character_id: String) -> CharacterData:
@@ -32,18 +33,31 @@ static func create_character(character_id: String) -> CharacterData:
 static func create_default_team() -> Array[CharacterData]:
 	# player_team 数组决定当前关卡默认阵容及其显示顺序。
 	_ensure_loaded()
+	return create_team(_to_string_array(_root_data.get("player_team", [])))
+
+
+## 按指定角色 ID 顺序创建出战队伍。
+static func create_team(character_ids: Array[String]) -> Array[CharacterData]:
+	_ensure_loaded()
 	var team: Array[CharacterData] = []
-	for character_id: String in _to_string_array(_root_data.get("player_team", [])):
+	for character_id: String in character_ids:
 		var character: CharacterData = create_character(character_id)
 		if character != null:
 			team.append(character)
 	return team
 
 
+## 创建当前可在准备页选择的角色列表。
+static func create_available_characters() -> Array[CharacterData]:
+	_ensure_loaded()
+	return create_team(_character_order)
+
+
 static func reload() -> void:
 	_loaded = false
 	_root_data.clear()
 	_definitions.clear()
+	_character_order.clear()
 	_ensure_loaded()
 
 
@@ -79,6 +93,7 @@ static func _ensure_loaded() -> void:
 			push_error("CharacterDatabase: duplicate character id '%s'." % character_id)
 			continue
 		_definitions[character_id] = raw
+		_character_order.append(character_id)
 
 
 static func _to_string_array(value: Variant) -> Array[String]:

@@ -22,6 +22,11 @@ All levels reuse `BattleScene.tscn`. `data/levels.json` defines the battle
 background and ordered waves. Each wave contains monster positions, and each
 position randomly chooses one enemy from its candidate ID list.
 
+Planned level extensions: the first level is expected to become the tutorial
+level, and some levels may trigger story content after victory. Do not hardcode
+level entry flow in a way that prevents future tutorial or post-clear story
+hooks.
+
 Do not treat the narrative and planned systems in `README.md` as implemented unless supported by current code. SAT progression, persistent collections, and story progression are not implemented.
 
 ## Core Battle Flow

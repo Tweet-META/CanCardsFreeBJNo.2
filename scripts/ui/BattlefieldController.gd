@@ -108,12 +108,8 @@ func _refresh_players(
 	selection_transition_pending: bool,
 	hovered_player_target_index: int
 ) -> void:
-	# 我方当前固定三人阵型；切换选中角色时通过补间上下移动。
-	var player_positions: Array[Vector2] = [
-		Vector2(70, field_size.y * 0.08),
-		Vector2(210, field_size.y * 0.27),
-		Vector2(70, field_size.y * 0.46)
-	]
+	# 队伍人数少于三人时仍使用准备页对应的上/下站位。
+	var player_positions: Array[Vector2] = _player_slot_positions(state.player_team.size(), field_size)
 	for i in state.player_team.size():
 		var standee: CharacterStandee = CHARACTER_STANDEE_SCENE.instantiate() as CharacterStandee
 		player_layer.add_child(standee)
@@ -137,6 +133,20 @@ func _refresh_players(
 			standee_tween.set_ease(Tween.EASE_OUT)
 			standee_tween.set_trans(Tween.TRANS_CUBIC)
 			standee_tween.tween_property(standee, "position", target_position, 0.18)
+
+
+## 按当前队伍人数返回我方站位；两人时跳过中间位。
+func _player_slot_positions(count: int, field_size: Vector2) -> Array[Vector2]:
+	var top: Vector2 = Vector2(70, field_size.y * 0.08)
+	var middle: Vector2 = Vector2(210, field_size.y * 0.27)
+	var bottom: Vector2 = Vector2(70, field_size.y * 0.46)
+	match count:
+		1:
+			return [top]
+		2:
+			return [top, bottom]
+		_:
+			return [top, middle, bottom]
 
 
 func _refresh_enemies(

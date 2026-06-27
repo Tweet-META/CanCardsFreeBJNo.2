@@ -5,6 +5,9 @@ class_name GameDataFactory
 
 ## 创建默认我方队伍。
 static func create_player_team() -> Array[CharacterData]:
+	var selected_character_ids: Array[String] = LevelDatabase.get_active_player_ids()
+	if not selected_character_ids.is_empty():
+		return CharacterDatabase.create_team(selected_character_ids)
 	return CharacterDatabase.create_default_team()
 
 

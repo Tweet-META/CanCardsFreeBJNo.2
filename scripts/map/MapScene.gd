@@ -5,16 +5,32 @@ class_name MapScene
 const PAPER: Color = Color(0.86, 0.78, 0.64, 0.96)
 const INK: Color = Color(0.12, 0.10, 0.08)
 const LEVEL_NODE_SCENE: PackedScene = preload("res://scenes/ui/LevelNode.tscn")
+const PREP_PANEL_HEIGHT: float = 345.0
 
 @onready var map_texture: TextureRect = $MapTexture
 @onready var back_button: Button = $Header/BackButton
 @onready var map_title: Label = $Header/MapTitle
 @onready var map_selector: OptionButton = $Header/MapSelector
 @onready var level_layer: Control = $LevelLayer
+@onready var prep_overlay: Control = $PrepOverlay
+@onready var prep_panel: PanelContainer = $PrepOverlay/PrepPanel
+@onready var prep_level_title: Label = $PrepOverlay/PrepPanel/PrepContent/Header/LevelTitle
+@onready var prep_wave_label: Label = $PrepOverlay/PrepPanel/PrepContent/Header/WaveLabel
+@onready var prep_description_label: Label = $PrepOverlay/PrepPanel/PrepContent/Header/DescriptionLabel
+@onready var slot_top_button: Button = $PrepOverlay/PrepPanel/PrepContent/SlotRow/SlotTop
+@onready var slot_middle_button: Button = $PrepOverlay/PrepPanel/PrepContent/SlotRow/SlotMiddle
+@onready var slot_bottom_button: Button = $PrepOverlay/PrepPanel/PrepContent/SlotRow/SlotBottom
+@onready var character_list: HBoxContainer = $PrepOverlay/PrepPanel/PrepContent/CharacterList
+@onready var prep_back_button: Button = $PrepOverlay/PrepPanel/PrepContent/Footer/PrepBackButton
+@onready var prep_start_button: Button = $PrepOverlay/PrepPanel/PrepContent/Footer/PrepStartButton
 
 var maps: Array[MapData] = []
 var selected_map_index: int = 0
 var level_nodes: Array[LevelNode] = []
+var available_characters: Array[CharacterData] = []
+var selected_character_ids: Array[String] = []
+var pending_level: LevelData
+var prep_tween: Tween
 
 
 ## 初始化地图界面信号、样式和首张地图。
@@ -23,6 +39,12 @@ func _ready() -> void:
 	map_selector.item_selected.connect(_select_map)
 	level_layer.resized.connect(_layout_level_nodes)
 	LanguageManager.language_changed.connect(_on_language_changed)
+	slot_top_button.pressed.connect(_remove_selected_slot.bind(0))
+	slot_middle_button.pressed.connect(_remove_selected_slot.bind(1))
+	slot_bottom_button.pressed.connect(_remove_selected_slot.bind(2))
+	prep_back_button.pressed.connect(_close_preparation)
+	prep_start_button.pressed.connect(_confirm_enter_level)
+	_set_preparation_panel_open(false, false)
 	_apply_styles()
 	_load_map_list()
 
@@ -102,6 +124,10 @@ func _on_language_changed(_locale: String) -> void:
 		level_node.refresh_language()
 	if not maps.is_empty():
 		map_title.text = tr(maps[selected_map_index].display_name)
+	if pending_level != null:
+		_refresh_preparation_text()
+		_refresh_preparation_slots()
+		_refresh_character_buttons()
 
 
 ## 返回主菜单。
@@ -109,10 +135,147 @@ func _return_to_menu() -> void:
 	get_tree().change_scene_to_file("res://scenes/MainMenu.tscn")
 
 
-## 记录当前关卡并切换到其目标场景。
+## 打开进入战斗前的准备面板。
 func _enter_level(level: LevelData) -> void:
-	LevelDatabase.set_active_level(level.id)
-	get_tree().change_scene_to_file(level.scene_path)
+	pending_level = level
+	available_characters = CharacterDatabase.create_available_characters()
+	selected_character_ids.clear()
+	_refresh_preparation_text()
+	_refresh_character_buttons()
+	_refresh_preparation_slots()
+	_set_preparation_panel_open(true, true)
+
+
+## 刷新准备页顶部的关卡编号、波数和介绍。
+func _refresh_preparation_text() -> void:
+	if pending_level == null:
+		return
+	prep_level_title.text = tr("PREP_LEVEL_FORMAT") % pending_level.marker_text
+	prep_wave_label.text = tr("PREP_WAVE_COUNT") % pending_level.waves.size()
+	prep_description_label.text = tr(pending_level.description)
+
+
+## 重建准备页的角色选择按钮。
+func _refresh_character_buttons() -> void:
+	for child: Node in character_list.get_children():
+		child.queue_free()
+
+	for character: CharacterData in available_characters:
+		var character_id: String = character.id
+		var button: Button = Button.new()
+		button.custom_minimum_size = Vector2(155, 54)
+		button.toggle_mode = true
+		button.button_pressed = character_id in selected_character_ids
+		button.text = tr(character.display_name)
+		button.disabled = selected_character_ids.size() >= 3 and not (character_id in selected_character_ids)
+		button.add_theme_stylebox_override("normal", _style(PAPER, 10, 2))
+		button.add_theme_stylebox_override("hover", _style(Color(0.94, 0.87, 0.72), 10, 2))
+		button.add_theme_stylebox_override("pressed", _style(Color(0.78, 0.65, 0.42), 10, 2))
+		button.add_theme_color_override("font_color", INK)
+		button.pressed.connect(_toggle_character.bind(character_id))
+		character_list.add_child(button)
+
+
+## 点击角色按钮时切换出战选择，最多保留三人。
+func _toggle_character(character_id: String) -> void:
+	if character_id in selected_character_ids:
+		selected_character_ids.erase(character_id)
+	elif selected_character_ids.size() < 3:
+		selected_character_ids.append(character_id)
+	_refresh_character_buttons()
+	_refresh_preparation_slots()
+
+
+## 刷新三个站位槽的显示状态。
+func _refresh_preparation_slots() -> void:
+	var slot_buttons: Array[Button] = [slot_top_button, slot_middle_button, slot_bottom_button]
+	for slot_index in range(slot_buttons.size()):
+		var button: Button = slot_buttons[slot_index]
+		var selected_index: int = _selected_index_for_slot(slot_index)
+		var should_show_empty_middle: bool = selected_character_ids.is_empty() and slot_index == 1
+		button.visible = selected_index != -1 or should_show_empty_middle
+		button.disabled = selected_index == -1
+		button.text = tr("PREP_EMPTY_SLOT") if selected_index == -1 else _character_name_for_id(selected_character_ids[selected_index])
+		button.add_theme_stylebox_override("normal", _style(Color(0.90, 0.82, 0.68, 0.96), 14, 3))
+		button.add_theme_stylebox_override("hover", _style(Color(0.98, 0.88, 0.62, 0.98), 14, 3))
+	prep_start_button.disabled = selected_character_ids.is_empty()
+
+
+## 根据槽位位置返回对应的已选角色索引。
+func _selected_index_for_slot(slot_index: int) -> int:
+	match selected_character_ids.size():
+		0:
+			return -1
+		1:
+			return 0 if slot_index == 0 else -1
+		2:
+			if slot_index == 0:
+				return 0
+			if slot_index == 2:
+				return 1
+			return -1
+		_:
+			return slot_index if slot_index < selected_character_ids.size() else -1
+
+
+## 点击站位槽时移除该槽上的角色。
+func _remove_selected_slot(slot_index: int) -> void:
+	var selected_index: int = _selected_index_for_slot(slot_index)
+	if selected_index < 0 or selected_index >= selected_character_ids.size():
+		return
+	selected_character_ids.remove_at(selected_index)
+	_refresh_character_buttons()
+	_refresh_preparation_slots()
+
+
+## 根据角色 ID 读取本地化显示名。
+func _character_name_for_id(character_id: String) -> String:
+	for character: CharacterData in available_characters:
+		if character.id == character_id:
+			return tr(character.display_name)
+	return character_id
+
+
+## 关闭准备面板并保留地图界面。
+func _close_preparation() -> void:
+	_set_preparation_panel_open(false, true)
+
+
+## 确认队伍选择并进入当前关卡。
+func _confirm_enter_level() -> void:
+	if pending_level == null or selected_character_ids.is_empty():
+		return
+	LevelDatabase.set_active_level(pending_level.id)
+	LevelDatabase.set_active_player_ids(selected_character_ids)
+	get_tree().change_scene_to_file(pending_level.scene_path)
+
+
+## 控制准备面板从屏幕底部滑入或滑出。
+func _set_preparation_panel_open(open: bool, animated: bool) -> void:
+	if prep_tween != null:
+		prep_tween.kill()
+	var was_visible: bool = prep_overlay.visible
+	prep_overlay.visible = true
+	prep_overlay.mouse_filter = Control.MOUSE_FILTER_STOP if open else Control.MOUSE_FILTER_IGNORE
+
+	var target_top: float = -PREP_PANEL_HEIGHT if open else 0.0
+	var target_bottom: float = 0.0 if open else PREP_PANEL_HEIGHT
+	if not animated:
+		prep_panel.offset_top = target_top
+		prep_panel.offset_bottom = target_bottom
+		prep_overlay.visible = open
+		return
+
+	if open and not was_visible:
+		prep_panel.offset_top = 0.0
+		prep_panel.offset_bottom = PREP_PANEL_HEIGHT
+	prep_tween = create_tween()
+	prep_tween.set_ease(Tween.EASE_OUT)
+	prep_tween.set_trans(Tween.TRANS_CUBIC)
+	prep_tween.tween_property(prep_panel, "offset_top", target_top, 0.22)
+	prep_tween.parallel().tween_property(prep_panel, "offset_bottom", target_bottom, 0.22)
+	if not open:
+		prep_tween.finished.connect(func() -> void: prep_overlay.visible = false)
 
 
 ## 应用地图界面的纸张风格。
@@ -125,6 +288,11 @@ func _apply_styles() -> void:
 	map_title.add_theme_color_override("font_color", Color(0.96, 0.91, 0.80))
 	map_title.add_theme_color_override("font_outline_color", Color(0.08, 0.06, 0.04))
 	map_title.add_theme_constant_override("outline_size", 6)
+	prep_panel.add_theme_stylebox_override("panel", _style(Color(0.86, 0.78, 0.64, 0.98), 18, 4))
+	prep_back_button.add_theme_stylebox_override("normal", _style(PAPER, 12, 3))
+	prep_start_button.add_theme_stylebox_override("normal", _style(Color(0.91, 0.74, 0.35, 1.0), 12, 3))
+	prep_back_button.add_theme_color_override("font_color", INK)
+	prep_start_button.add_theme_color_override("font_color", INK)
 
 
 ## 创建地图按钮和下拉框共用的样式盒。

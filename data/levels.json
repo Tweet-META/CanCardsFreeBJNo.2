@@ -3,6 +3,7 @@
     {
       "id": "level1",
       "display_name": "LEVEL_1_NAME",
+      "description": "LEVEL_1_DESCRIPTION",
       "marker_text": "1",
       "map_id": "map1",
       "map_position": [0.44, 0.69],
@@ -22,6 +23,7 @@
     {
       "id": "level2",
       "display_name": "LEVEL_2_NAME",
+      "description": "LEVEL_2_DESCRIPTION",
       "marker_text": "2",
       "map_id": "map1",
       "map_position": [0.35, 0.69],

@@ -4,6 +4,7 @@ class_name LevelData
 
 @export var id: String = ""
 @export var display_name: String = ""
+@export var description: String = ""
 @export var marker_text: String = ""
 @export var map_id: String = ""
 @export var map_position: Vector2 = Vector2(0.5, 0.5)

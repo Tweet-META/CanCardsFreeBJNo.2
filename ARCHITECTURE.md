@@ -50,9 +50,12 @@ position, marker, localization keys, unlock state, and target scene from
 `data/levels.json`. `LevelNode.tscn` emits the selected `LevelData`.
 
 `LevelDatabase` keeps the active level ID across the map-to-battle scene
-change. `BattleManager` loads that level and generates each wave through
-`GameDataFactory.create_level_wave()`. Wave changes replace only the enemy
-team; player HP, AP, cards, currency, and shop state persist.
+change. `MapScene` opens an in-scene preparation panel before entering battle;
+the selected player character IDs are stored through `LevelDatabase` and read
+by `GameDataFactory.create_player_team()`. `BattleManager` loads that level and
+generates each wave through `GameDataFactory.create_level_wave()`. Wave changes
+replace only the enemy team; player HP, AP, cards, currency, and shop state
+persist.
 
 Level battle data uses this shape:
 
