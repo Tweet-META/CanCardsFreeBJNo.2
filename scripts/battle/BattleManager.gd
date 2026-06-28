@@ -266,6 +266,17 @@ func developer_defeat_players() -> void:
 	state_changed.emit(state)
 
 
+## Skips the current player turn in developer mode and starts the enemy turn.
+func developer_skip_turn() -> void:
+	if not SettingsManager.developer_mode or state.phase != BattleState.Phase.PLAYER_TURN:
+		return
+	_emit_log(tr("DEV_LOG_SKIPPED_TURN"))
+	for character: CharacterData in state.player_team:
+		if character.is_alive():
+			character.mark_acted()
+	_run_enemy_turn()
+
+
 ## Apply card effect.
 func _apply_card_effect(_answer_correct: bool, bonus_triggered: bool) -> void:
 	var character: CharacterData = state.selected_character
@@ -573,6 +584,9 @@ func _run_enemy_action(enemy: EnemyData) -> void:
 	if enemy.consume_all_status_effects("stun") > 0:
 		_emit_log(tr("LOG_ENEMY_STUNNED") % tr(enemy.display_name))
 		return
+	if enemy.is_charging():
+		_run_nian_charge_progress(enemy)
+		return
 	var ability: EnemyAbilityData = enemy.choose_ability(rng)
 	if ability == null:
 		return
@@ -583,6 +597,10 @@ func _run_enemy_action(enemy: EnemyData) -> void:
 			_run_bun_group_attack(enemy, ability.power)
 		"mask_single_attack":
 			_run_mask_single_attack(enemy, ability.power)
+		"nian_weakening_strike":
+			_run_nian_weakening_strike(enemy, ability.power)
+		"nian_charge_attack":
+			_start_nian_charge(enemy, ability.power)
 		_:
 			push_error("BattleManager: unknown enemy ability '%s' for '%s'." % [ability.id, enemy.id])
 
@@ -616,6 +634,59 @@ func _run_mask_single_attack(enemy: EnemyData, power: int) -> void:
 		_emit_log(tr("LOG_DAMAGE_IMMUNED") % [tr(target.display_name), tr(enemy.display_name)])
 	else:
 		_emit_log(tr("LOG_ENEMY_ATTACK") % [tr(enemy.display_name), tr(target.display_name), dealt])
+
+
+## Runs Nian Beast's medium strike and applies weakness to the target.
+func _run_nian_weakening_strike(enemy: EnemyData, power: int) -> void:
+	var target: CharacterData = _get_random_alive_player()
+	if target == null:
+		return
+	var effect: StatusEffectData = EffectDatabase.create_effect(
+		"weakness",
+		0.30,
+		2,
+		"%s::nian_weakening_strike" % enemy.id,
+		"ENEMY_ABILITY_NIAN_WEAKENING_STRIKE"
+	)
+	target.apply_status_effect(effect)
+	var dealt: int = target.take_damage(maxi(0, power), enemy.attribute)
+	if target.last_damage_was_immune:
+		_emit_log(tr("LOG_DAMAGE_IMMUNED") % [tr(target.display_name), tr(enemy.display_name)])
+	else:
+		_emit_log(tr("LOG_NIAN_WEAKENING_STRIKE") % [tr(enemy.display_name), tr(target.display_name), dealt])
+
+
+## Starts Nian Beast's charged attack and locks its chosen target.
+func _start_nian_charge(enemy: EnemyData, power: int) -> void:
+	var target_index: int = _get_random_alive_player_index()
+	if target_index == -1:
+		return
+	var target: CharacterData = state.player_team[target_index]
+	enemy.start_charge("nian_charge_attack", power, target_index, 2, target.display_name, target.portrait_path)
+	_emit_log(tr("LOG_NIAN_CHARGE_START") % [tr(enemy.display_name), tr(target.display_name)])
+
+
+## Advances Nian Beast's existing charge and releases it when complete.
+func _run_nian_charge_progress(enemy: EnemyData) -> void:
+	var target_index: int = enemy.charge_target_index
+	if target_index < 0 or target_index >= state.player_team.size():
+		enemy.clear_charge()
+		return
+	var target: CharacterData = state.player_team[target_index]
+	if not target.is_alive():
+		_emit_log(tr("LOG_NIAN_CHARGE_TARGET_LOST") % [tr(enemy.display_name), tr(target.display_name)])
+		enemy.clear_charge()
+		return
+	var remaining_turns: int = enemy.advance_charge()
+	if remaining_turns > 0:
+		_emit_log(tr("LOG_NIAN_CHARGING") % [tr(enemy.display_name), tr(target.display_name), remaining_turns])
+		return
+	var dealt: int = target.take_damage(enemy.charge_power, enemy.attribute)
+	enemy.clear_charge()
+	if target.last_damage_was_immune:
+		_emit_log(tr("LOG_DAMAGE_IMMUNED") % [tr(target.display_name), tr(enemy.display_name)])
+	else:
+		_emit_log(tr("LOG_NIAN_CHARGE_RELEASE") % [tr(enemy.display_name), tr(target.display_name), dealt])
 
 
 ## Check battle end.
@@ -685,6 +756,17 @@ func _get_random_alive_player() -> CharacterData:
 	if alive.is_empty():
 		return null
 	return alive[rng.randi_range(0, alive.size() - 1)]
+
+
+## Returns a random alive player index for effects that must keep a fixed target.
+func _get_random_alive_player_index() -> int:
+	var alive_indices: Array[int] = []
+	for i in state.player_team.size():
+		if state.player_team[i].is_alive():
+			alive_indices.append(i)
+	if alive_indices.is_empty():
+		return -1
+	return alive_indices[rng.randi_range(0, alive_indices.size() - 1)]
 
 
 ## Card needs enemy.

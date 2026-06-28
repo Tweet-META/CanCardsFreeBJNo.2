@@ -11,6 +11,7 @@ signal developer_add_general_card_requested()
 signal six_seven_requested()
 signal developer_clear_enemies_requested()
 signal developer_defeat_players_requested()
+signal developer_skip_turn_requested()
 
 const SIX_SEVEN_CODE: String = "676767"
 
@@ -68,6 +69,7 @@ func _ready() -> void:
 	developer_controls.add_six_seven_requested.connect(func() -> void: six_seven_requested.emit())
 	developer_controls.clear_enemies_requested.connect(func() -> void: developer_clear_enemies_requested.emit())
 	developer_controls.defeat_players_requested.connect(func() -> void: developer_defeat_players_requested.emit())
+	developer_controls.skip_turn_requested.connect(func() -> void: developer_skip_turn_requested.emit())
 	LanguageManager.language_changed.connect(_on_language_changed)
 
 

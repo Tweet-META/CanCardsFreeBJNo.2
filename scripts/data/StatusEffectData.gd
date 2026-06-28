@@ -15,6 +15,9 @@ var remaining_turns: int = 0
 var delay_turns: int = 0
 var source_id: String = ""
 var source_name: String = ""
+var value_text: String = ""
+var detail_text: String = ""
+var overlay_icon_path: String = ""
 
 
 func setup_runtime(

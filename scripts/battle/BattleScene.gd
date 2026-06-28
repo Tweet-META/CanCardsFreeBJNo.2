@@ -18,6 +18,7 @@ func _ready() -> void:
 	battle_ui.six_seven_requested.connect(battle_manager.grant_six_seven)
 	battle_ui.developer_clear_enemies_requested.connect(battle_manager.developer_clear_enemies)
 	battle_ui.developer_defeat_players_requested.connect(battle_manager.developer_defeat_players)
+	battle_ui.developer_skip_turn_requested.connect(battle_manager.developer_skip_turn)
 	question_panel.difficulty_selected.connect(battle_manager.select_question_difficulty)
 	question_panel.answer_submitted.connect(battle_manager.submit_answer)
 	result_panel.retry_requested.connect(battle_manager.retry_battle)

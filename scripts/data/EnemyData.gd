@@ -5,6 +5,7 @@ class_name EnemyData
 const PROTOTYPE_BUN: String = "bun"
 const PROTOTYPE_SLIME: String = "slime"
 const PROTOTYPE_MASK: String = "mask"
+const PROTOTYPE_NIAN: String = "nian"
 
 @export var id: String = ""
 @export var display_name: String = ""
@@ -21,6 +22,12 @@ var current_shield: int = 0
 var damage_reduction: float = 0.0
 var rewards_collected: bool = false
 var active_effects: Array[StatusEffectData] = []
+var charge_ability_id: String = ""
+var charge_power: int = 0
+var charge_remaining_turns: int = 0
+var charge_target_index: int = -1
+var charge_target_name: String = ""
+var charge_target_portrait_path: String = ""
 
 
 func setup_runtime() -> void:
@@ -29,10 +36,45 @@ func setup_runtime() -> void:
 	damage_reduction = 0.0
 	rewards_collected = false
 	active_effects.clear()
+	clear_charge()
 
 
 func is_alive() -> bool:
 	return current_hp > 0
+
+
+func is_charging() -> bool:
+	return not charge_ability_id.is_empty() and charge_remaining_turns > 0 and charge_target_index >= 0
+
+
+func start_charge(
+	ability_id: String,
+	power: int,
+	target_index: int,
+	wait_turns: int,
+	target_name: String = "",
+	target_portrait_path: String = ""
+) -> void:
+	charge_ability_id = ability_id
+	charge_power = maxi(0, power)
+	charge_target_index = target_index
+	charge_remaining_turns = maxi(0, wait_turns)
+	charge_target_name = target_name
+	charge_target_portrait_path = target_portrait_path
+
+
+func advance_charge() -> int:
+	charge_remaining_turns = maxi(0, charge_remaining_turns - 1)
+	return charge_remaining_turns
+
+
+func clear_charge() -> void:
+	charge_ability_id = ""
+	charge_power = 0
+	charge_remaining_turns = 0
+	charge_target_index = -1
+	charge_target_name = ""
+	charge_target_portrait_path = ""
 
 
 func take_damage(raw_damage: int) -> int:

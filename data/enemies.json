@@ -116,6 +116,20 @@
       ],
       "toefl_reward": 1.5,
       "portrait_path": "res://assets/enemies/culture_mask.png"
+    },
+    {
+      "id": "nian_beast",
+      "display_name": "ENEMY_NIAN_BEAST",
+      "attribute": "culture",
+      "prototype": "nian",
+      "description": "ENEMY_NIAN_BEAST_DESCRIPTION",
+      "max_hp": 460,
+      "abilities": [
+        {"id": "nian_weakening_strike", "power": 32, "weight": 1.0},
+        {"id": "nian_charge_attack", "power": 150, "weight": 1.0}
+      ],
+      "toefl_reward": 3.0,
+      "portrait_path": "res://assets/enemies/nian_beast.png"
     }
   ]
 }

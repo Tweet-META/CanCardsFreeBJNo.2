@@ -47,19 +47,41 @@ func setup(enemy: EnemyData, index: int, selected: bool, target_highlighted: boo
 	hp_label.text = "%d / %d" % [enemy.current_hp, enemy.max_hp]
 	portrait.texture = load(enemy.portrait_path) as Texture2D
 	shield_visual.setup(enemy.current_shield, enemy.damage_reduction)
-	_refresh_effects(enemy.active_effects)
+	_refresh_effects(enemy)
 	target_highlight.visible = target_highlighted
 
 
-func _refresh_effects(effects: Array[StatusEffectData]) -> void:
+func _refresh_effects(enemy: EnemyData) -> void:
 	for child: Node in effect_container.get_children():
 		child.queue_free()
+	var effects: Array[StatusEffectData] = enemy.active_effects.duplicate()
+	var target_lock_effect: StatusEffectData = _create_target_lock_effect(enemy)
+	if target_lock_effect != null:
+		effects.append(target_lock_effect)
 	for effect: StatusEffectData in effects:
 		if not effect.is_active():
 			continue
 		var effect_icon: StatusEffectIcon = STATUS_EFFECT_ICON_SCENE.instantiate() as StatusEffectIcon
 		effect_container.add_child(effect_icon)
 		effect_icon.setup(effect)
+
+
+func _create_target_lock_effect(enemy: EnemyData) -> StatusEffectData:
+	if not enemy.is_charging():
+		return null
+	var effect: StatusEffectData = EffectDatabase.create_effect(
+		"target_lock",
+		0.0,
+		enemy.charge_remaining_turns,
+		"%s::%s" % [enemy.id, enemy.charge_ability_id],
+		"ENEMY_ABILITY_NIAN_CHARGE_ATTACK"
+	)
+	if effect == null:
+		return null
+	effect.value_text = "EFFECT_TARGET_LOCK_VALUE"
+	effect.detail_text = enemy.charge_target_name
+	effect.overlay_icon_path = enemy.charge_target_portrait_path
+	return effect
 
 
 func _on_pressed() -> void:

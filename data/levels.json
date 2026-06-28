@@ -13,9 +13,7 @@
       "wave": [
         {
           "monster": [
-            ["pinyin_bun","vocab_bun","culture_bun"],
-            ["pinyin_slime","vocab_slime","culture_slime"],
-            ["pinyin_mask","vocab_mask","culture_mask"]
+            ["pinyin_slime","vocab_slime","culture_slime"]
           ]
         }
       ],
@@ -34,9 +32,33 @@
       "wave": [
         {
           "monster": [
+            ["pinyin_bun","vocab_bun","culture_bun"]
+          ]
+        }
+      ],
+      "unlocked": true
+    },
+    {
+      "id": "level3",
+      "order": 3,
+      "display_name": "LEVEL_3_NAME",
+      "description": "LEVEL_3_DESCRIPTION",
+      "marker_text": "3",
+      "map_id": "map1",
+      "map_position": [0.24, 0.69],
+      "scene_path": "res://scenes/BattleScene.tscn",
+      "battle_background": "res://assets/ui/conversation_room.png",
+      "wave": [
+        {
+          "monster": [
             ["pinyin_bun","vocab_bun","culture_bun"],
             ["pinyin_slime","vocab_slime","culture_slime"],
             ["pinyin_mask","vocab_mask","culture_mask"]
+          ]
+        },
+        {
+          "monster": [
+            ["nian_beast"]
           ]
         }
       ],

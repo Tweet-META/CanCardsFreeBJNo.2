@@ -39,6 +39,15 @@
       "icon_path": "res://assets/effects/strength.png",
       "value_format": "percent",
       "show_duration": true
+    },
+    {
+      "id": "target_lock",
+      "display_name": "EFFECT_TARGET_LOCK",
+      "description": "EFFECT_TARGET_LOCK_DESC",
+      "icon_path": "res://assets/effects/target.png",
+      "value_format": "text",
+      "show_duration": true,
+      "advances_with_turn": false
     }
   ]
 }
