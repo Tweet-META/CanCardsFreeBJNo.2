@@ -625,6 +625,7 @@ func _check_battle_end() -> bool:
 			_start_next_wave()
 			return true
 		state.phase = BattleState.Phase.VICTORY
+		SaveManager.advance_after_level_clear(active_level.id)
 		result_requested.emit(tr("RESULT_VICTORY_TITLE"), tr("RESULT_VICTORY_MESSAGE") % state.new_toefl, true, true)
 		return true
 	if state.are_all_players_dead():

@@ -6,6 +6,7 @@ const DATA_PATH: String = "res://data/levels.json"
 
 static var _loaded: bool = false
 static var _definitions: Dictionary = {}
+static var _level_order: Array[String] = []
 static var _active_level_id: String = "level1"
 static var _active_player_ids: Array[String] = []
 
@@ -21,6 +22,7 @@ static func create_level(level_id: String) -> LevelData:
 	var raw: Dictionary = raw_value as Dictionary
 	var level: LevelData = LevelData.new()
 	level.id = str(raw.get("id", ""))
+	level.order = int(raw.get("order", 1))
 	level.display_name = str(raw.get("display_name", ""))
 	level.description = str(raw.get("description", ""))
 	level.marker_text = str(raw.get("marker_text", ""))
@@ -67,10 +69,38 @@ static func create_levels(level_ids: Array[String]) -> Array[LevelData]:
 	return levels
 
 
-## Documents this script block.
+## Returns the mainline order number for a level.
+static func get_level_order(level_id: String) -> int:
+	_ensure_loaded()
+	var raw_value: Variant = _definitions.get(level_id)
+	if not raw_value is Dictionary:
+		return 999999
+	return int((raw_value as Dictionary).get("order", 999999))
+
+
+## Returns the next mainline level id after the given level.
+static func get_next_level_id(level_id: String) -> String:
+	_ensure_loaded()
+	var index: int = _level_order.find(level_id)
+	if index == -1 or index + 1 >= _level_order.size():
+		return level_id
+	return _level_order[index + 1]
+
+
+## Returns the JSON default unlock flag for cases with no active save.
+static func is_level_default_unlocked(level_id: String) -> bool:
+	_ensure_loaded()
+	var raw_value: Variant = _definitions.get(level_id)
+	if not raw_value is Dictionary:
+		return false
+	return bool((raw_value as Dictionary).get("unlocked", false))
+
+
+## Clears cached level data and reloads it from JSON.
 static func reload() -> void:
 	_loaded = false
 	_definitions.clear()
+	_level_order.clear()
 	_ensure_loaded()
 
 
@@ -106,6 +136,8 @@ static func _ensure_loaded() -> void:
 			push_error("LevelDatabase: duplicate level id '%s'." % level_id)
 			continue
 		_definitions[level_id] = raw
+		_level_order.append(level_id)
+	_level_order.sort_custom(func(a: String, b: String) -> bool: return get_level_order(a) < get_level_order(b))
 
 
 ## Documents this script block.

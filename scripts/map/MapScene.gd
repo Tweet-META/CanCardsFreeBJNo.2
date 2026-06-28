@@ -97,6 +97,7 @@ func _refresh_level_layer(map_data: MapData) -> void:
 		if level.map_id != map_data.id:
 			push_error("MapScene: level '%s' belongs to map '%s', not '%s'." % [level.id, level.map_id, map_data.id])
 			continue
+		level.unlocked = SaveManager.is_level_unlocked(level.id)
 		var level_node: LevelNode = LEVEL_NODE_SCENE.instantiate() as LevelNode
 		level_layer.add_child(level_node)
 		level_node.setup(level)
@@ -139,12 +140,21 @@ func _return_to_menu() -> void:
 ## Enter level.
 func _enter_level(level: LevelData) -> void:
 	pending_level = level
-	available_characters = CharacterDatabase.create_available_characters()
+	available_characters = _create_unlocked_characters()
 	selected_character_ids.clear()
 	_refresh_preparation_text()
 	_refresh_character_buttons()
 	_refresh_preparation_slots()
 	_set_preparation_panel_open(true, true)
+
+
+## Creates the character list allowed by the active save.
+func _create_unlocked_characters() -> Array[CharacterData]:
+	var unlocked_characters: Array[CharacterData] = []
+	for character: CharacterData in CharacterDatabase.create_available_characters():
+		if SaveManager.is_character_unlocked(character.id):
+			unlocked_characters.append(character)
+	return unlocked_characters
 
 
 ## Refresh preparation text.

@@ -34,7 +34,13 @@ static func create_default_team() -> Array[CharacterData]:
 	return create_team(_to_string_array(_root_data.get("player_team", [])))
 
 
-## Documents this script block.
+## Returns the character ids unlocked in a fresh save.
+static func get_default_player_ids() -> Array[String]:
+	_ensure_loaded()
+	return _to_string_array(_root_data.get("player_team", []))
+
+
+## Creates a team in the requested character id order.
 static func create_team(character_ids: Array[String]) -> Array[CharacterData]:
 	_ensure_loaded()
 	var team: Array[CharacterData] = []
@@ -45,7 +51,7 @@ static func create_team(character_ids: Array[String]) -> Array[CharacterData]:
 	return team
 
 
-## Documents this script block.
+## Creates all characters that can appear in the team selection UI.
 static func create_available_characters() -> Array[CharacterData]:
 	_ensure_loaded()
 	return create_team(_character_order)

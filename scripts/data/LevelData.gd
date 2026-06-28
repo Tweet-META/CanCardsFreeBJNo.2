@@ -3,6 +3,7 @@ extends Resource
 class_name LevelData
 
 @export var id: String = ""
+@export var order: int = 1
 @export var display_name: String = ""
 @export var description: String = ""
 @export var marker_text: String = ""

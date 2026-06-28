@@ -1,7 +1,8 @@
-[gd_scene format=3 uid="uid://ddyr74qmx6eux"]
+[gd_scene load_steps=3 format=3 uid="uid://ddyr74qmx6eux"]
 
 [ext_resource type="Script" uid="uid://cdiqjckac323i" path="res://scripts/ui/MainMenu.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/ui/SettingsPanel.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/ui/SaveSlotPanel.tscn" id="3"]
 
 [node name="MainMenu" type="Control" unique_id=1712896051]
 layout_mode = 3
@@ -58,6 +59,11 @@ custom_minimum_size = Vector2(280, 58)
 layout_mode = 2
 text = "MENU_START"
 
+[node name="LoadSaveButton" type="Button" parent="CenterBox"]
+custom_minimum_size = Vector2(280, 48)
+layout_mode = 2
+text = "MENU_LOAD_SAVE"
+
 [node name="LanguageRow" type="HBoxContainer" parent="CenterBox" unique_id=1927128736]
 layout_mode = 2
 theme_override_constants/separation = 12
@@ -83,3 +89,5 @@ layout_mode = 2
 text = "MENU_QUIT"
 
 [node name="SettingsPanel" parent="." unique_id=1495635816 instance=ExtResource("2")]
+
+[node name="SaveSlotPanel" parent="." instance=ExtResource("3")]

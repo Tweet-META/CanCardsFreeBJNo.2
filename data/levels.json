@@ -2,6 +2,7 @@
   "levels": [
     {
       "id": "level1",
+      "order": 1,
       "display_name": "LEVEL_1_NAME",
       "description": "LEVEL_1_DESCRIPTION",
       "marker_text": "1",
@@ -22,6 +23,7 @@
     },
     {
       "id": "level2",
+      "order": 2,
       "display_name": "LEVEL_2_NAME",
       "description": "LEVEL_2_DESCRIPTION",
       "marker_text": "2",
