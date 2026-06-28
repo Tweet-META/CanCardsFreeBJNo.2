@@ -1,5 +1,5 @@
 extends Button
-## 敌人立绘组件，显示生命并处理信息查看与目标高亮。
+## Defines the EnemyStandee script.
 class_name EnemyStandee
 
 signal standee_selected(enemy_index: int)

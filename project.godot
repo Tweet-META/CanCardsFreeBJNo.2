@@ -16,8 +16,8 @@ config/features=PackedStringArray("4.6")
 
 [autoload]
 
-LanguageManager="*res://scripts/localization/LanguageManager.gd"
 SettingsManager="*res://scripts/settings/SettingsManager.gd"
+LanguageManager="*res://scripts/localization/LanguageManager.gd"
 
 [display]
 

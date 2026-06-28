@@ -1,5 +1,5 @@
 extends PanelContainer
-## 可展开的战斗日志；折叠时显示为按钮，展开后支持滚轮浏览。
+## Defines the BattleLogPanel script.
 class_name BattleLogPanel
 
 const COLLAPSED_SIZE: Vector2 = Vector2(64, 64)
@@ -61,7 +61,6 @@ func _on_gui_input(event: InputEvent) -> void:
 
 
 func _tween_size(target_size: Vector2) -> void:
-	# 快速开关时先终止旧补间，避免多个尺寸动画互相争抢。
 	if size_tween != null and size_tween.is_running():
 		size_tween.kill()
 	size_tween = create_tween()

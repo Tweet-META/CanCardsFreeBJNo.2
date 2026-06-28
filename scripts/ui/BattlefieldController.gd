@@ -1,5 +1,5 @@
 extends RefCounted
-## 管理战场立绘实例、1～8 敌人站位、选择动画和坐标命中检测。
+## Defines the BattlefieldController script.
 class_name BattlefieldController
 
 signal character_selected(character_index: int)
@@ -37,7 +37,6 @@ func refresh(
 	hovered_player_target_index: int,
 	hovered_enemy_target_index: int
 ) -> void:
-	# 每次刷新重建立绘，确保死亡敌人立即消失且高亮状态不会残留。
 	state = new_state
 	_clear_children(player_layer)
 	_clear_children(enemy_layer)
@@ -81,7 +80,6 @@ func enemy_index_at(global_position: Vector2) -> int:
 
 
 func enemy_layout_for_count(count: int, field_size: Vector2) -> Array[Dictionary]:
-	# 所有数量都保持原始尺寸，通过斜向错落和适度重叠容纳最多八只敌人。
 	var layouts: Array[Dictionary] = []
 	if count <= 0:
 		return layouts
@@ -108,7 +106,6 @@ func _refresh_players(
 	selection_transition_pending: bool,
 	hovered_player_target_index: int
 ) -> void:
-	# 队伍人数少于三人时仍使用准备页对应的上/下站位。
 	var player_positions: Array[Vector2] = _player_slot_positions(state.player_team.size(), field_size)
 	for i in state.player_team.size():
 		var standee: CharacterStandee = CHARACTER_STANDEE_SCENE.instantiate() as CharacterStandee
@@ -135,7 +132,7 @@ func _refresh_players(
 			standee_tween.tween_property(standee, "position", target_position, 0.18)
 
 
-## 按当前队伍人数返回我方站位；两人时跳过中间位。
+## Player slot positions.
 func _player_slot_positions(count: int, field_size: Vector2) -> Array[Vector2]:
 	var top: Vector2 = Vector2(70, field_size.y * 0.08)
 	var middle: Vector2 = Vector2(210, field_size.y * 0.27)
@@ -155,7 +152,6 @@ func _refresh_enemies(
 	showing_enemy_info: bool,
 	hovered_enemy_target_index: int
 ) -> void:
-	# 保留 enemy_team 原始索引，确保 UI 目标与战斗状态一致。
 	var alive_enemy_indices: Array[int] = []
 	for i in state.enemy_team.size():
 		if state.enemy_team[i].is_alive():
@@ -178,13 +174,11 @@ func _refresh_enemies(
 		enemy_standee.position = layout["position"] as Vector2
 		enemy_standee.size = enemy_standee.custom_minimum_size
 		enemy_standee.scale = layout["scale"] as Vector2
-		# 固定基础层级保证顶部单位也在背景遮罩前；纵向位置只负责单位间的纵深。
 		enemy_standee.z_index = ENEMY_BASE_Z_INDEX + maxi(0, roundi(enemy_standee.position.y))
 		enemy_standees[enemy_index] = enemy_standee
 
 
 func _enemy_slot_pattern(count: int) -> Array[Vector2]:
-	# 3～8 只使用累计槽位：新增敌人只占用右侧新位置，不改变已有相对站位。
 	var mirrored_three: Array[Vector2] = [
 		Vector2(0.52, 0.285),
 		Vector2(0.08, 0.56),

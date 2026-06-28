@@ -1,5 +1,5 @@
 extends Resource
-## 敌人的静态资料与单局生命、护盾状态；原型决定其敌方回合行为。
+## Defines the EnemyData script.
 class_name EnemyData
 
 const PROTOTYPE_BUN: String = "bun"
@@ -36,7 +36,6 @@ func is_alive() -> bool:
 
 
 func take_damage(raw_damage: int) -> int:
-	# 易伤先放大来袭伤害，再结算百分比减伤、固定护盾和生命值。
 	var incoming_damage: int = roundi(float(maxi(0, raw_damage)) * get_incoming_damage_multiplier())
 	var reduced_damage: int = roundi(float(incoming_damage) * (1.0 - clampf(damage_reduction, 0.0, 0.85)))
 	var absorbed_damage: int = mini(current_shield, reduced_damage)
@@ -47,14 +46,12 @@ func take_damage(raw_damage: int) -> int:
 
 
 func add_shield(amount: int) -> int:
-	# 返回实际增加值，供战斗日志与后续状态表现使用。
 	var gained_shield: int = maxi(0, amount)
 	current_shield += gained_shield
 	return gained_shield
 
 
 func add_damage_reduction(amount: float) -> void:
-	# 为未来敌方百分比护盾技能提供统一入口，当前上限与我方一致。
 	damage_reduction = clampf(damage_reduction + amount, 0.0, 0.85)
 
 
@@ -72,7 +69,6 @@ func apply_status_effect(effect: StatusEffectData) -> bool:
 
 
 func get_status_effect(effect_id: String) -> StatusEffectData:
-	# 兼容只关心效果类型的查询；存在多来源时返回第一项。
 	for effect: StatusEffectData in active_effects:
 		if effect.id == effect_id:
 			return effect
@@ -97,7 +93,6 @@ func consume_all_status_effects(effect_id: String) -> int:
 
 
 func get_incoming_damage_multiplier() -> float:
-	# 不同来源的易伤按乘算叠加，例如两份 20% 易伤为 1.2 × 1.2。
 	var multiplier: float = 1.0
 	for effect: StatusEffectData in active_effects:
 		if effect.is_active() and effect.id == "vulnerable":
@@ -106,14 +101,12 @@ func get_incoming_damage_multiplier() -> float:
 
 
 func advance_status_effect_turns() -> void:
-	# 从后向前删除到期效果，避免移除元素后跳过下一项。
 	for i in range(active_effects.size() - 1, -1, -1):
 		if active_effects[i].advance_turn():
 			active_effects.remove_at(i)
 
 
 func choose_ability(rng: RandomNumberGenerator) -> EnemyAbilityData:
-	# 非正权重技能不会被选择；全部权重无效时回退第一项，避免敌方回合中断。
 	if abilities.is_empty():
 		return null
 	var total_weight: float = 0.0

@@ -1,5 +1,5 @@
 extends Control
-## 地图场景控制器；读取地图数据、切换地图图片，并生成关卡节点。
+## Defines the MapScene script.
 class_name MapScene
 
 const PAPER: Color = Color(0.86, 0.78, 0.64, 0.96)
@@ -13,6 +13,7 @@ const PREP_PANEL_HEIGHT: float = 345.0
 @onready var map_selector: OptionButton = $Header/MapSelector
 @onready var level_layer: Control = $LevelLayer
 @onready var prep_overlay: Control = $PrepOverlay
+@onready var prep_dimmer: ColorRect = $PrepOverlay/Dimmer
 @onready var prep_panel: PanelContainer = $PrepOverlay/PrepPanel
 @onready var prep_level_title: Label = $PrepOverlay/PrepPanel/PrepContent/Header/LevelTitle
 @onready var prep_wave_label: Label = $PrepOverlay/PrepPanel/PrepContent/Header/WaveLabel
@@ -33,7 +34,7 @@ var pending_level: LevelData
 var prep_tween: Tween
 
 
-## 初始化地图界面信号、样式和首张地图。
+## Ready.
 func _ready() -> void:
 	back_button.pressed.connect(_return_to_menu)
 	map_selector.item_selected.connect(_select_map)
@@ -42,6 +43,7 @@ func _ready() -> void:
 	slot_top_button.pressed.connect(_remove_selected_slot.bind(0))
 	slot_middle_button.pressed.connect(_remove_selected_slot.bind(1))
 	slot_bottom_button.pressed.connect(_remove_selected_slot.bind(2))
+	prep_dimmer.gui_input.connect(_on_preparation_dimmer_input)
 	prep_back_button.pressed.connect(_close_preparation)
 	prep_start_button.pressed.connect(_confirm_enter_level)
 	_set_preparation_panel_open(false, false)
@@ -49,7 +51,7 @@ func _ready() -> void:
 	_load_map_list()
 
 
-## 从地图数据库读取可选地图，并显示默认地图。
+## Load map list.
 func _load_map_list() -> void:
 	maps = MapDatabase.get_maps()
 	map_selector.clear()
@@ -69,7 +71,7 @@ func _load_map_list() -> void:
 	_refresh_map()
 
 
-## 用户切换地图下拉框时刷新地图内容。
+## Select map.
 func _select_map(index: int) -> void:
 	if index < 0 or index >= maps.size() or not maps[index].unlocked:
 		return
@@ -77,7 +79,7 @@ func _select_map(index: int) -> void:
 	_refresh_map()
 
 
-## 刷新当前地图的标题、底图和关卡节点。
+## Refresh map.
 func _refresh_map() -> void:
 	var map_data: MapData = maps[selected_map_index]
 	map_title.text = tr(map_data.display_name)
@@ -85,9 +87,8 @@ func _refresh_map() -> void:
 	_refresh_level_layer(map_data)
 
 
-## 根据地图记录的关卡 ID 创建本地图上的关卡入口。
+## Refresh level layer.
 func _refresh_level_layer(map_data: MapData) -> void:
-	# 地图只保存关卡 ID；具体位置、入口和解锁状态来自 LevelDatabase。
 	for child: Node in level_layer.get_children():
 		child.queue_free()
 	level_nodes.clear()
@@ -105,7 +106,7 @@ func _refresh_level_layer(map_data: MapData) -> void:
 	call_deferred("_layout_level_nodes")
 
 
-## 按归一化坐标把关卡入口摆放到地图图片区域。
+## Layout level nodes.
 func _layout_level_nodes() -> void:
 	if level_layer == null or level_layer.size == Vector2.ZERO:
 		return
@@ -116,7 +117,7 @@ func _layout_level_nodes() -> void:
 		level_node.position = center - level_node.size * 0.5
 
 
-## 语言切换时刷新地图和关卡的显示文本。
+## On language changed.
 func _on_language_changed(_locale: String) -> void:
 	for index in maps.size():
 		map_selector.set_item_text(index, tr(maps[index].display_name))
@@ -130,12 +131,12 @@ func _on_language_changed(_locale: String) -> void:
 		_refresh_character_buttons()
 
 
-## 返回主菜单。
+## Return to menu.
 func _return_to_menu() -> void:
 	get_tree().change_scene_to_file("res://scenes/MainMenu.tscn")
 
 
-## 打开进入战斗前的准备面板。
+## Enter level.
 func _enter_level(level: LevelData) -> void:
 	pending_level = level
 	available_characters = CharacterDatabase.create_available_characters()
@@ -146,7 +147,7 @@ func _enter_level(level: LevelData) -> void:
 	_set_preparation_panel_open(true, true)
 
 
-## 刷新准备页顶部的关卡编号、波数和介绍。
+## Refresh preparation text.
 func _refresh_preparation_text() -> void:
 	if pending_level == null:
 		return
@@ -155,7 +156,7 @@ func _refresh_preparation_text() -> void:
 	prep_description_label.text = tr(pending_level.description)
 
 
-## 重建准备页的角色选择按钮。
+## Refresh character buttons.
 func _refresh_character_buttons() -> void:
 	for child: Node in character_list.get_children():
 		child.queue_free()
@@ -176,7 +177,7 @@ func _refresh_character_buttons() -> void:
 		character_list.add_child(button)
 
 
-## 点击角色按钮时切换出战选择，最多保留三人。
+## Toggle character.
 func _toggle_character(character_id: String) -> void:
 	if character_id in selected_character_ids:
 		selected_character_ids.erase(character_id)
@@ -186,7 +187,7 @@ func _toggle_character(character_id: String) -> void:
 	_refresh_preparation_slots()
 
 
-## 刷新三个站位槽的显示状态。
+## Refresh preparation slots.
 func _refresh_preparation_slots() -> void:
 	var slot_buttons: Array[Button] = [slot_top_button, slot_middle_button, slot_bottom_button]
 	for slot_index in range(slot_buttons.size()):
@@ -201,7 +202,7 @@ func _refresh_preparation_slots() -> void:
 	prep_start_button.disabled = selected_character_ids.is_empty()
 
 
-## 根据槽位位置返回对应的已选角色索引。
+## Selected index for slot.
 func _selected_index_for_slot(slot_index: int) -> int:
 	match selected_character_ids.size():
 		0:
@@ -218,7 +219,7 @@ func _selected_index_for_slot(slot_index: int) -> int:
 			return slot_index if slot_index < selected_character_ids.size() else -1
 
 
-## 点击站位槽时移除该槽上的角色。
+## Remove selected slot.
 func _remove_selected_slot(slot_index: int) -> void:
 	var selected_index: int = _selected_index_for_slot(slot_index)
 	if selected_index < 0 or selected_index >= selected_character_ids.size():
@@ -228,7 +229,7 @@ func _remove_selected_slot(slot_index: int) -> void:
 	_refresh_preparation_slots()
 
 
-## 根据角色 ID 读取本地化显示名。
+## Character name for id.
 func _character_name_for_id(character_id: String) -> String:
 	for character: CharacterData in available_characters:
 		if character.id == character_id:
@@ -236,12 +237,22 @@ func _character_name_for_id(character_id: String) -> String:
 	return character_id
 
 
-## 关闭准备面板并保留地图界面。
+## Close preparation.
 func _close_preparation() -> void:
 	_set_preparation_panel_open(false, true)
 
 
-## 确认队伍选择并进入当前关卡。
+## On preparation dimmer input.
+func _on_preparation_dimmer_input(event: InputEvent) -> void:
+	var mouse_event: InputEventMouseButton = event as InputEventMouseButton
+	if mouse_event == null:
+		return
+	if mouse_event.button_index == MOUSE_BUTTON_LEFT and mouse_event.pressed:
+		_close_preparation()
+		accept_event()
+
+
+## Confirm enter level.
 func _confirm_enter_level() -> void:
 	if pending_level == null or selected_character_ids.is_empty():
 		return
@@ -250,7 +261,7 @@ func _confirm_enter_level() -> void:
 	get_tree().change_scene_to_file(pending_level.scene_path)
 
 
-## 控制准备面板从屏幕底部滑入或滑出。
+## Set preparation panel open.
 func _set_preparation_panel_open(open: bool, animated: bool) -> void:
 	if prep_tween != null:
 		prep_tween.kill()
@@ -278,7 +289,7 @@ func _set_preparation_panel_open(open: bool, animated: bool) -> void:
 		prep_tween.finished.connect(func() -> void: prep_overlay.visible = false)
 
 
-## 应用地图界面的纸张风格。
+## Apply styles.
 func _apply_styles() -> void:
 	back_button.add_theme_stylebox_override("normal", _style(PAPER, 12, 3))
 	back_button.add_theme_stylebox_override("hover", _style(Color(0.94, 0.87, 0.72), 12, 3))
@@ -295,7 +306,7 @@ func _apply_styles() -> void:
 	prep_start_button.add_theme_color_override("font_color", INK)
 
 
-## 创建地图按钮和下拉框共用的样式盒。
+## Style.
 func _style(color: Color, radius: int, border_width: int) -> StyleBoxFlat:
 	var style: StyleBoxFlat = StyleBoxFlat.new()
 	style.bg_color = color

@@ -1,5 +1,5 @@
 extends Control
-## 战斗界面协调器；刷新各 UI 面板，并把玩家交互意图转发给 BattleManager。
+## Defines the BattleUI script.
 class_name BattleUI
 
 signal card_use_requested(character_index: int, card_index: int, enemy_index: int, ally_index: int, difficulty: String)
@@ -9,6 +9,8 @@ signal general_card_sell_requested(card_index: int)
 signal developer_add_culture_mask_requested()
 signal developer_add_general_card_requested()
 signal six_seven_requested()
+signal developer_clear_enemies_requested()
+signal developer_defeat_players_requested()
 
 const SIX_SEVEN_CODE: String = "676767"
 
@@ -43,7 +45,7 @@ var hand_controller: BattleHandController = BattleHandController.new()
 @onready var developer_controls: DeveloperControls = $DeveloperControls
 
 
-## 初始化战斗 UI 子控制器，并连接所有 UI 到 UI 的本地信号。
+## Ready.
 func _ready() -> void:
 	set_process(true)
 	set_process_input(true)
@@ -64,10 +66,12 @@ func _ready() -> void:
 	developer_controls.add_culture_mask_requested.connect(func() -> void: developer_add_culture_mask_requested.emit())
 	developer_controls.add_general_card_requested.connect(func() -> void: developer_add_general_card_requested.emit())
 	developer_controls.add_six_seven_requested.connect(func() -> void: six_seven_requested.emit())
+	developer_controls.clear_enemies_requested.connect(func() -> void: developer_clear_enemies_requested.emit())
+	developer_controls.defeat_players_requested.connect(func() -> void: developer_defeat_players_requested.emit())
 	LanguageManager.language_changed.connect(_on_language_changed)
 
 
-## 每帧更新拖牌箭头、目标高亮、卖牌区和取消区。
+## Process.
 func _process(delta: float) -> void:
 	if hand_controller.dragging_card_index == -1:
 		hand_controller.process_hover_restore(delta, get_global_mouse_position())
@@ -79,7 +83,7 @@ func _process(delta: float) -> void:
 	top_bar.update_sell_drop_hover(mouse_position)
 
 
-## 处理隐藏口令和拖牌时的全局鼠标松开兜底。
+## Input.
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
 		_process_hidden_code_key(event as InputEventKey)
@@ -90,7 +94,7 @@ func _input(event: InputEvent) -> void:
 		accept_event()
 
 
-## 恢复 BattleUI 根节点在导出版本中的全屏锚点。
+## Apply export safe layout.
 func _apply_export_safe_layout() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	offset_left = 0.0
@@ -99,7 +103,7 @@ func _apply_export_safe_layout() -> void:
 	offset_bottom = 0.0
 
 
-## 读取数字输入，并在输入 676767 时发放彩蛋卡。
+## Process hidden code key.
 func _process_hidden_code_key(event: InputEventKey) -> void:
 	var typed_character: String = char(event.unicode)
 	if typed_character < "0" or typed_character > "9":
@@ -110,7 +114,7 @@ func _process_hidden_code_key(event: InputEventKey) -> void:
 		six_seven_requested.emit()
 
 
-## 接收 BattleManager 的完整状态快照并刷新所有战斗 UI。
+## Refresh.
 func refresh(new_state: BattleState) -> void:
 	state = new_state
 	if top_bar == null:
@@ -123,19 +127,19 @@ func refresh(new_state: BattleState) -> void:
 	_refresh_logs()
 
 
-## 战斗日志新增时重绘日志面板。
+## Add log.
 func add_log(_message: String) -> void:
 	if state != null:
 		_refresh_logs()
 
 
-## 语言变化时用当前状态重刷全部文本。
+## On language changed.
 func _on_language_changed(_locale: String) -> void:
 	if state != null:
 		refresh(state)
 
 
-## 刷新顶部栏、背景、信息栏和商店金额。
+## Refresh status.
 func _refresh_status() -> void:
 	top_bar.refresh(state.ap, state.phase, state.turn_count, state.current_wave, state.total_waves)
 	_refresh_battle_background()
@@ -143,13 +147,13 @@ func _refresh_status() -> void:
 	_refresh_shop_panel()
 
 
-## 根据当前关卡数据切换战斗背景。
+## Refresh battle background.
 func _refresh_battle_background() -> void:
 	if not state.battle_background.is_empty():
 		background.texture = load(state.battle_background) as Texture2D
 
 
-## 让战场控制器刷新角色、敌人、血条、效果和目标高亮。
+## Refresh battlefield.
 func _refresh_battlefield() -> void:
 	battlefield_controller.refresh(
 		state,
@@ -164,25 +168,25 @@ func _refresh_battlefield() -> void:
 	selection_transition_pending = false
 
 
-## 刷新专属手牌和队伍通用手牌。
+## Refresh cards.
 func _refresh_cards() -> void:
 	var character: CharacterData = _get_selected_character()
 	rendered_character_index = hand_controller.refresh(state, character, selected_character_index, rendered_character_index)
 
 
-## 设置流程层面的卡牌交互锁，例如答题、结算或商店打开时。
+## Set card interaction locked.
 func set_card_interaction_locked(locked: bool) -> void:
 	flow_cards_interaction_locked = locked
 	_update_effective_card_interaction_lock()
 
 
-## 合并流程锁与商店锁，得到最终是否禁用卡牌。
+## Update effective card interaction lock.
 func _update_effective_card_interaction_lock() -> void:
 	var should_lock: bool = flow_cards_interaction_locked or (shop_panel != null and shop_panel.visible)
 	_set_effective_card_interaction_locked(should_lock)
 
 
-## 切换实际卡牌交互锁，并在解锁时恢复当前可行动角色。
+## Set effective card interaction locked.
 func _set_effective_card_interaction_locked(locked: bool) -> void:
 	if cards_interaction_locked == locked:
 		return
@@ -198,7 +202,7 @@ func _set_effective_card_interaction_locked(locked: bool) -> void:
 			_refresh_cards()
 
 
-## 清理手牌、箭头、卖牌、取消区和目标高亮。
+## Cancel current card interaction.
 func _cancel_current_card_interaction() -> void:
 	if hand_controller.dragging_card_index != -1:
 		arrow_layer.end_arrow()
@@ -208,13 +212,13 @@ func _cancel_current_card_interaction() -> void:
 	hand_controller.set_interaction_locked(true)
 
 
-## 刷新折叠日志按钮或展开日志内容。
+## Refresh logs.
 func _refresh_logs() -> void:
 	if log_panel != null and state != null:
 		log_panel.set_messages(state.battle_log)
 
 
-## 处理点击卡牌：无需指定目标的卡牌可以直接发出使用请求。
+## On card clicked.
 func _on_card_clicked(card_index: int) -> void:
 	if cards_interaction_locked:
 		return
@@ -233,7 +237,7 @@ func _on_card_clicked(card_index: int) -> void:
 	card_use_requested.emit(selected_character_index, card_index, -1, -1, "")
 
 
-## 拖动开始时显示箭头、取消区，通用卡额外让商店按钮变为卖出区。
+## On card drag started.
 func _on_card_drag_started(card_index: int, global_position: Vector2) -> void:
 	if cards_interaction_locked:
 		hand_controller.reset_card_drag_state(card_index)
@@ -248,7 +252,7 @@ func _on_card_drag_started(card_index: int, global_position: Vector2) -> void:
 		top_bar.begin_sell_mode(card.get_sell_price())
 
 
-## 拖动移动时更新箭头、合法目标高亮和卖牌区高亮。
+## On card drag moved.
 func _on_card_drag_moved(global_position: Vector2) -> void:
 	if cards_interaction_locked:
 		return
@@ -257,7 +261,7 @@ func _on_card_drag_moved(global_position: Vector2) -> void:
 	top_bar.update_sell_drop_hover(global_position)
 
 
-## 拖动松开时进入统一落点判定。
+## On card drag released.
 func _on_card_drag_released(card_index: int, global_position: Vector2) -> void:
 	if cards_interaction_locked:
 		hand_controller.reset_card_drag_state(card_index)
@@ -265,7 +269,7 @@ func _on_card_drag_released(card_index: int, global_position: Vector2) -> void:
 	_release_dragging_card(card_index, global_position)
 
 
-## 显示或隐藏下方取消使用区域。
+## Set cancel drop visible.
 func _set_cancel_drop_visible(visible: bool) -> void:
 	if cancel_drop_area == null:
 		return
@@ -276,7 +280,7 @@ func _set_cancel_drop_visible(visible: bool) -> void:
 		cancel_drop_area.hide_area()
 
 
-## 更新取消区域的悬停高亮。
+## Update cancel drop hover.
 func _update_cancel_drop_hover(global_position: Vector2) -> void:
 	if cancel_drop_area == null or not cancel_drop_area.visible:
 		return
@@ -287,14 +291,14 @@ func _update_cancel_drop_hover(global_position: Vector2) -> void:
 	cancel_drop_area.set_hovered(cancel_drop_hovered)
 
 
-## 判断鼠标是否落在取消区域。
+## Is over cancel drop area.
 func _is_over_cancel_drop_area(global_position: Vector2) -> bool:
 	if cancel_drop_area == null or not cancel_drop_area.visible:
 		return false
 	return _control_contains_global_point(cancel_drop_area, global_position)
 
 
-## 判定拖牌落点：取消、卖出、友方目标、敌方目标或直接使用。
+## Release dragging card.
 func _release_dragging_card(card_index: int, global_position: Vector2) -> void:
 	if cards_interaction_locked or hand_controller.dragging_card_index == -1:
 		return
@@ -332,7 +336,7 @@ func _release_dragging_card(card_index: int, global_position: Vector2) -> void:
 	hand_controller.restore_hover_after_cancel(global_position)
 
 
-## 尝试把一张需要友方目标的卡牌用到鼠标下方角色身上。
+## Try use ally target card.
 func _try_use_ally_target_card(card: CardData, card_index: int, global_position: Vector2) -> void:
 	var ally_index: int = _player_index_at(global_position)
 	if ally_index == -1:
@@ -345,7 +349,7 @@ func _try_use_ally_target_card(card: CardData, card_index: int, global_position:
 	card_use_requested.emit(selected_character_index, card_index, -1, ally_index, "")
 
 
-## 尝试把一张需要敌方目标的卡牌用到鼠标下方敌人身上。
+## Try use enemy target card.
 func _try_use_enemy_target_card(card: CardData, card_index: int, global_position: Vector2) -> void:
 	var enemy_index: int = _enemy_index_at(global_position)
 	if enemy_index == -1:
@@ -359,17 +363,17 @@ func _try_use_enemy_target_card(card: CardData, card_index: int, global_position
 	card_use_requested.emit(selected_character_index, card_index, enemy_index, -1, "")
 
 
-## 返回鼠标下方敌人的数组索引。
+## Enemy index at.
 func _enemy_index_at(global_position: Vector2) -> int:
 	return battlefield_controller.enemy_index_at(global_position)
 
 
-## 返回鼠标下方我方角色的数组索引。
+## Player index at.
 func _player_index_at(global_position: Vector2) -> int:
 	return battlefield_controller.player_index_at(global_position)
 
 
-## 拖动时只高亮当前卡牌允许选择的目标。
+## Update drag target highlight.
 func _update_drag_target_highlight(global_position: Vector2) -> void:
 	var character: CharacterData = _get_selected_character()
 	if character == null or hand_controller.dragging_card_index == -1:
@@ -394,7 +398,7 @@ func _update_drag_target_highlight(global_position: Vector2) -> void:
 	_refresh_battlefield()
 
 
-## 清除拖牌目标高亮。
+## Clear drag target highlight.
 func _clear_drag_target_highlight() -> void:
 	if hovered_player_target_index == -1 and hovered_enemy_target_index == -1:
 		return
@@ -403,7 +407,7 @@ func _clear_drag_target_highlight() -> void:
 	_refresh_battlefield()
 
 
-## 点击我方角色时切换出牌者，并触发角色与专属卡切换动画。
+## Select character.
 func _select_character(index: int) -> void:
 	if state == null or index < 0 or index >= state.player_team.size():
 		return
@@ -419,7 +423,7 @@ func _select_character(index: int) -> void:
 	_refresh_cards()
 
 
-## 点击敌人时把左下角信息栏切到敌人描述。
+## Select enemy.
 func _select_enemy(index: int) -> void:
 	if state == null or index < 0 or index >= state.enemy_team.size():
 		return
@@ -431,7 +435,7 @@ func _select_enemy(index: int) -> void:
 	_refresh_battlefield()
 
 
-## 刷新左下角角色或敌人的自由描述文本。
+## Refresh info hint.
 func _refresh_info_hint() -> void:
 	if selected_hint == null or state == null:
 		return
@@ -447,7 +451,7 @@ func _refresh_info_hint() -> void:
 	selected_hint.text = tr(character.description).replace("\\n", "\n")
 
 
-## 打开或关闭商店面板。
+## Toggle shop panel.
 func _toggle_shop_panel() -> void:
 	if shop_panel == null:
 		return
@@ -456,26 +460,26 @@ func _toggle_shop_panel() -> void:
 		_refresh_shop_panel()
 
 
-## 商店显隐变化时重新计算卡牌锁。
+## On shop visibility changed.
 func _on_shop_visibility_changed() -> void:
 	_update_effective_card_interaction_lock()
 
 
-## 刷新商店余额、货架卡牌和刷新按钮状态。
+## Refresh shop panel.
 func _refresh_shop_panel() -> void:
 	if shop_panel == null or state == null:
 		return
 	shop_panel.refresh(state.new_toefl, state.shop_offer_cards, state.ap)
 
 
-## 转发购买商店卡牌的请求。
+## Buy shop card.
 func _buy_shop_card(offer_index: int) -> void:
 	if state == null:
 		return
 	shop_buy_requested.emit(offer_index, selected_character_index)
 
 
-## 返回当前选中的我方角色。
+## Get selected character.
 func _get_selected_character() -> CharacterData:
 	if state == null:
 		return null
@@ -484,7 +488,7 @@ func _get_selected_character() -> CharacterData:
 	return state.player_team[selected_character_index]
 
 
-## 状态刷新后修正越界或死亡目标，避免使用失效索引。
+## Clamp selection.
 func _clamp_selection() -> void:
 	if state.player_team.is_empty():
 		selected_character_index = -1
@@ -500,7 +504,7 @@ func _clamp_selection() -> void:
 				showing_enemy_info = false
 
 
-## 找到第一名存活敌人，用于选中目标死亡后的 UI 回退。
+## First alive enemy index.
 func _first_alive_enemy_index() -> int:
 	for i in state.enemy_team.size():
 		if state.enemy_team[i].is_alive():
@@ -508,7 +512,7 @@ func _first_alive_enemy_index() -> int:
 	return -1
 
 
-## 若当前角色已行动或死亡，自动切到下一名可行动角色。
+## Select next ready character if needed.
 func _select_next_ready_character_if_needed() -> void:
 	if state.phase != BattleState.Phase.PLAYER_TURN:
 		return
@@ -527,7 +531,7 @@ func _select_next_ready_character_if_needed() -> void:
 			return
 
 
-## 判断 Control 的本地矩形是否包含某个全局坐标。
+## Control contains global point.
 func _control_contains_global_point(control: Control, global_position: Vector2) -> bool:
 	var local_position: Vector2 = control.get_global_transform_with_canvas().affine_inverse() * global_position
 	return Rect2(Vector2.ZERO, control.size).has_point(local_position)

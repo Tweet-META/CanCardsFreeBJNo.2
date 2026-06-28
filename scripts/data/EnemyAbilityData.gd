@@ -1,5 +1,5 @@
 extends Resource
-## 单个敌方技能的静态配置；权重用于同一敌人的技能随机选择。
+## Defines the EnemyAbilityData script.
 class_name EnemyAbilityData
 
 @export var id: String = ""

@@ -1,5 +1,5 @@
 extends Node
-## 战斗规则与回合状态机；通过 signal 通知 UI，不直接操作界面节点。
+## Defines the BattleManager script.
 class_name BattleManager
 
 signal state_changed(state: BattleState)
@@ -16,19 +16,18 @@ var active_level: LevelData
 const TEAM_GENERAL_CARD_INDEX_OFFSET: int = 1000
 
 
-## 初始化随机数并开始当前激活关卡的战斗。
+## Ready.
 func _ready() -> void:
 	rng.randomize()
 	start_new_battle()
 
 
-## 使用 LevelDatabase 当前激活关卡创建一场新战斗。
+## Start new battle.
 func start_new_battle() -> void:
-	# 所有关卡共用本场景，地图选择的 level_id 决定背景与全部波次。
 	_start_battle_with_level(LevelDatabase.get_active_level())
 
 
-## 按关卡数据初始化玩家队伍、第一波敌人、商店和首个玩家回合。
+## Start battle with level.
 func _start_battle_with_level(level: LevelData) -> void:
 	active_level = level
 	if active_level == null or active_level.waves.is_empty():
@@ -44,9 +43,8 @@ func _start_battle_with_level(level: LevelData) -> void:
 	state_changed.emit(state)
 
 
-## 接收 UI 出牌请求，验证阶段、行动资格、AP 和目标后进入结算或答题。
+## Request use card.
 func request_use_card(character_index: int, card_index: int, enemy_index: int, ally_index: int, _difficulty: String = "") -> void:
-	# 所有出牌请求的唯一入口：先验证阶段、行动资格、AP 和目标。
 	if state.phase != BattleState.Phase.PLAYER_TURN:
 		_emit_log(tr("LOG_CANNOT_USE_CARD"))
 		return
@@ -99,9 +97,8 @@ func request_use_card(character_index: int, card_index: int, enemy_index: int, a
 	_begin_question("easy")
 
 
-## 接收玩家选择的攻击/防御题目难度。
+## Select question difficulty.
 func select_question_difficulty(difficulty: String) -> void:
-	# 仅在等待选择时接受三种难度，避免重复点击覆盖正在回答的题目。
 	if state.phase != BattleState.Phase.DIFFICULTY_SELECTION:
 		return
 	if difficulty not in ["easy", "medium", "hard"]:
@@ -109,7 +106,7 @@ func select_question_difficulty(difficulty: String) -> void:
 	_begin_question(difficulty)
 
 
-## 按卡牌规则确定实际难度并抽取一道题。
+## Begin question.
 func _begin_question(difficulty: String) -> void:
 	var character: CharacterData = state.selected_character
 	var card: CardData = state.pending_card
@@ -123,9 +120,8 @@ func _begin_question(difficulty: String) -> void:
 	state_changed.emit(state)
 
 
-## 接收答案索引并根据正确性与词汇补偿触发卡牌效果。
+## Submit answer.
 func submit_answer(answer_index: int) -> void:
-	# 答错不受处罚；词汇被动可能让本次仍按“加成触发”结算。
 	if state.phase != BattleState.Phase.QUESTION or state.pending_question == null:
 		return
 
@@ -145,12 +141,12 @@ func submit_answer(answer_index: int) -> void:
 	_finish_player_action()
 
 
-## 重新开始当前激活关卡。
+## Retry battle.
 func retry_battle() -> void:
 	start_new_battle()
 
 
-## 处理商店刷新请求并扣除刷新费用。
+## Request refresh shop.
 func request_refresh_shop() -> void:
 	if not state.spend_new_toefl(0.5):
 		_emit_log(tr("LOG_REFRESH_NO_FUNDS"))
@@ -161,9 +157,8 @@ func request_refresh_shop() -> void:
 	state_changed.emit(state)
 
 
-## 处理购买商店通用卡请求，并把买到的卡加入队伍牌堆。
+## Request buy shop card.
 func request_buy_shop_card(offer_index: int, character_index: int) -> void:
-	# character_index 当前只验证有存活角色；购买结果属于整个队伍。
 	if offer_index < 0 or offer_index >= state.shop_offer_cards.size():
 		return
 	if character_index < 0 or character_index >= state.player_team.size():
@@ -188,9 +183,8 @@ func request_buy_shop_card(offer_index: int, character_index: int) -> void:
 	state_changed.emit(state)
 
 
-## 处理出售队伍通用卡请求并增加 New TOEFL。
+## Request sell general card.
 func request_sell_general_card(card_index: int) -> void:
-	# 出售只修改队伍共享牌堆和 New TOEFL，不占用任何角色的本回合行动。
 	if state.phase != BattleState.Phase.PLAYER_TURN:
 		return
 	if not _is_team_general_card_index(card_index):
@@ -207,7 +201,7 @@ func request_sell_general_card(card_index: int) -> void:
 	state_changed.emit(state)
 
 
-## 开发者模式下向当前波次添加一只文化面具。
+## Developer add culture mask.
 func developer_add_culture_mask() -> void:
 	if not SettingsManager.developer_mode:
 		return
@@ -223,7 +217,7 @@ func developer_add_culture_mask() -> void:
 	state_changed.emit(state)
 
 
-## 开发者模式下给队伍添加一张测试通用卡。
+## Developer add general card.
 func developer_add_general_card() -> void:
 	if not SettingsManager.developer_mode:
 		return
@@ -235,9 +229,8 @@ func developer_add_general_card() -> void:
 	state_changed.emit(state)
 
 
-## 授予隐藏彩蛋卡 six_seven。
+## Grant six seven.
 func grant_six_seven() -> void:
-	# 彩蛋卡不进入随机池，只能由开发者工具或战斗中的数字口令授予。
 	var card: CardData = GameDataFactory.create_six_seven()
 	if card == null:
 		return
@@ -248,9 +241,33 @@ func grant_six_seven() -> void:
 	state_changed.emit(state)
 
 
-## 根据 pending_card.effect_id 分发具体卡牌效果。
+## Developer clear enemies.
+func developer_clear_enemies() -> void:
+	if not SettingsManager.developer_mode:
+		return
+	for enemy: EnemyData in state.enemy_team:
+		if enemy.is_alive():
+			enemy.current_hp = 0
+			_collect_reward_if_dead(enemy)
+	_emit_log(tr("DEV_LOG_CLEARED_ENEMIES"))
+	_check_battle_end()
+	state_changed.emit(state)
+
+
+## Developer defeat players.
+func developer_defeat_players() -> void:
+	if not SettingsManager.developer_mode:
+		return
+	for character: CharacterData in state.player_team:
+		if character.is_alive():
+			character.current_hp = 0
+	_emit_log(tr("DEV_LOG_DEFEATED_PLAYERS"))
+	_check_battle_end()
+	state_changed.emit(state)
+
+
+## Apply card effect.
 func _apply_card_effect(_answer_correct: bool, bonus_triggered: bool) -> void:
-	# effect_id 决定行为；card_type 只负责 UI 分类和技能通用规则。
 	var character: CharacterData = state.selected_character
 	var card: CardData = state.pending_card
 	if character == null or card == null:
@@ -302,7 +319,7 @@ func _apply_card_effect(_answer_correct: bool, bonus_triggered: bool) -> void:
 		_emit_log(tr("LOG_AP_CLEARED"))
 
 
-## 结算单体攻击卡造成的伤害。
+## Apply attack card.
 func _apply_attack_card(character: CharacterData, card: CardData, bonus_triggered: bool) -> void:
 	var enemy: EnemyData = state.selected_enemy
 	if enemy == null:
@@ -313,9 +330,8 @@ func _apply_attack_card(character: CharacterData, card: CardData, bonus_triggere
 	_collect_reward_if_dead(enemy)
 
 
-## 先施加卡牌状态效果，再结算本次单体攻击。
+## Apply status effect attack.
 func _apply_status_effect_attack(character: CharacterData, card: CardData, bonus_triggered: bool) -> void:
-	# 先挂持续性效果，再调用普通攻击结算，确保本次伤害立即受到易伤影响。
 	var enemy: EnemyData = state.selected_enemy
 	if enemy == null:
 		return
@@ -337,9 +353,8 @@ func _apply_status_effect_attack(character: CharacterData, card: CardData, bonus
 	_apply_attack_card(character, card, bonus_triggered)
 
 
-## 结算选中目标全额、其他敌人半额的溅射攻击。
+## Apply primary splash attack.
 func _apply_primary_splash_attack(character: CharacterData, card: CardData, bonus_triggered: bool) -> void:
-	# 选中目标使用完整基础伤害，其余存活敌人使用一半基础伤害并独立计算属性与答题加成。
 	var primary_target: EnemyData = state.selected_enemy
 	if primary_target == null:
 		return
@@ -354,9 +369,8 @@ func _apply_primary_splash_attack(character: CharacterData, card: CardData, bonu
 		_collect_reward_if_dead(enemy)
 
 
-## 按目标当前生命比例计算动态基础伤害并结算。
+## Apply current hp percent damage.
 func _apply_current_hp_percent_damage(character: CharacterData, card: CardData) -> void:
-	# 先按目标当前生命计算动态基础伤害，再进入统一增益、易伤、减伤和护盾结算。
 	var enemy: EnemyData = state.selected_enemy
 	if enemy == null:
 		return
@@ -375,7 +389,7 @@ func _apply_current_hp_percent_damage(character: CharacterData, card: CardData) 
 	_collect_reward_if_dead(enemy)
 
 
-## 向选中的我方角色施加卡牌状态效果。
+## Apply status to ally.
 func _apply_status_to_ally(character: CharacterData, card: CardData) -> void:
 	var target: CharacterData = state.selected_ally if state.selected_ally != null else character
 	var effect: StatusEffectData = _create_card_status_effect(character, card)
@@ -385,7 +399,7 @@ func _apply_status_to_ally(character: CharacterData, card: CardData) -> void:
 	_emit_log(tr("LOG_ALLY_EFFECT_APPLIED") % [tr(card.display_name), tr(target.display_name), tr(effect.display_name)])
 
 
-## 向选中的敌人施加卡牌状态效果。
+## Apply status to enemy.
 func _apply_status_to_enemy(character: CharacterData, card: CardData) -> void:
 	var target: EnemyData = state.selected_enemy
 	var effect: StatusEffectData = _create_card_status_effect(character, card)
@@ -397,7 +411,7 @@ func _apply_status_to_enemy(character: CharacterData, card: CardData) -> void:
 		_emit_log(tr("LOG_EFFECT_SWALLOWED") % [tr(card.display_name), tr(target.display_name)])
 
 
-## 按目标最大生命比例进行治疗。
+## Apply max hp percent heal.
 func _apply_max_hp_percent_heal(character: CharacterData, card: CardData) -> void:
 	var target: CharacterData = state.selected_ally if state.selected_ally != null else character
 	if target == null:
@@ -407,7 +421,7 @@ func _apply_max_hp_percent_heal(character: CharacterData, card: CardData) -> voi
 	_emit_log(tr("LOG_MAX_HP_HEAL") % [tr(card.display_name), tr(target.display_name), healed])
 
 
-## 结算卧薪尝胆的先虚弱、后力量状态组合。
+## Apply gall of goujian.
 func _apply_gall_of_goujian(character: CharacterData, card: CardData) -> void:
 	var target: CharacterData = state.selected_ally if state.selected_ally != null else character
 	if target == null:
@@ -429,7 +443,7 @@ func _apply_gall_of_goujian(character: CharacterData, card: CardData) -> void:
 	_emit_log(tr("LOG_GALL_APPLIED") % tr(target.display_name))
 
 
-## 向我方角色同时施加主副两个状态效果。
+## Apply dual status to ally.
 func _apply_dual_status_to_ally(character: CharacterData, card: CardData) -> void:
 	var target: CharacterData = state.selected_ally if state.selected_ally != null else character
 	if target == null:
@@ -443,7 +457,7 @@ func _apply_dual_status_to_ally(character: CharacterData, card: CardData) -> voi
 	_emit_log(tr("LOG_DUAL_EFFECT_APPLIED") % [tr(card.display_name), tr(target.display_name)])
 
 
-## 结算直接生命损失效果，不走普通伤害流程。
+## Apply direct hp loss.
 func _apply_direct_hp_loss(character: CharacterData, card: CardData) -> void:
 	var target: CharacterData = state.selected_ally if state.selected_ally != null else character
 	if target == null:
@@ -452,7 +466,7 @@ func _apply_direct_hp_loss(character: CharacterData, card: CardData) -> void:
 	_emit_log(tr("LOG_DIRECT_HP_LOSS") % [tr(card.display_name), tr(target.display_name), lost_hp])
 
 
-## 根据卡牌主状态字段创建运行时状态实例。
+## Create card status effect.
 func _create_card_status_effect(character: CharacterData, card: CardData) -> StatusEffectData:
 	return EffectDatabase.create_effect(
 		card.status_effect_id,
@@ -464,7 +478,7 @@ func _create_card_status_effect(character: CharacterData, card: CardData) -> Sta
 	)
 
 
-## 根据卡牌副状态字段创建运行时状态实例。
+## Create secondary card status effect.
 func _create_secondary_card_status_effect(character: CharacterData, card: CardData) -> StatusEffectData:
 	if card.secondary_status_effect_id.is_empty():
 		return null
@@ -478,9 +492,8 @@ func _create_secondary_card_status_effect(character: CharacterData, card: CardDa
 	)
 
 
-## 结算技能卡的单体或全体伤害。
+## Apply skill card.
 func _apply_skill_card(character: CharacterData, card: CardData, bonus_triggered: bool) -> void:
-	# 当前技能答对统一获得 25% 伤害倍率，范围由 target_type 决定。
 	var extra_bonus: float = 0.25 if bonus_triggered else 0.0
 	if card.target_type == CardData.TargetType.ALL_ENEMIES:
 		for enemy: EnemyData in state.enemy_team:
@@ -498,9 +511,8 @@ func _apply_skill_card(character: CharacterData, card: CardData, bonus_triggered
 			_collect_reward_if_dead(enemy)
 
 
-## 计算我方卡牌伤害的最终入参伤害值。
+## Calculate damage.
 func _calculate_damage(character: CharacterData, enemy: EnemyData, base_damage: int, card_bonus: float) -> int:
-	# 我方没有角色攻击值：卡牌伤害叠加拼音、同属性和答题倍率。
 	var multiplier: float = state.get_team_stat_multiplier()
 	if character.attribute == enemy.attribute:
 		multiplier += 0.20
@@ -508,18 +520,16 @@ func _calculate_damage(character: CharacterData, enemy: EnemyData, base_damage: 
 	return maxi(1, roundi(float(base_damage) * multiplier * character.get_outgoing_damage_multiplier()))
 
 
-## 为攻击/防御答题卡增加基础 AP 和可能的难度 AP。
+## Gain question card ap.
 func _gain_question_card_ap(card: CardData, bonus_triggered: bool) -> void:
-	# 攻击/防御卡无论答案均获得基础 AP；答对或词汇补偿才获得难度额外 AP。
 	var difficulty_bonus: float = card.get_correct_answer_ap_bonus(state.pending_difficulty) if bonus_triggered else 0.0
 	var gain: float = card.base_ap_gain + difficulty_bonus + state.get_ap_growth_bonus()
 	state.add_ap(gain)
 	_emit_log(tr("LOG_TEAM_GAIN_AP") % gain)
 
 
-## 标记本次行动完成，并决定继续玩家回合或进入敌方回合。
+## Finish player action.
 func _finish_player_action() -> void:
-	# 通用卡使用后移除；所有存活角色行动完毕后自动进入敌方回合。
 	if state.selected_character != null:
 		state.selected_character.mark_acted()
 		if state.pending_card != null and state.pending_card.is_general():
@@ -539,9 +549,8 @@ func _finish_player_action() -> void:
 		state_changed.emit(state)
 
 
-## 按顺序执行全部存活敌人的回合。
+## Run enemy turn.
 func _run_enemy_turn() -> void:
-	# 每个存活敌人依次行动；技能由各自 abilities 权重选择。
 	state.phase = BattleState.Phase.ENEMY_TURN
 	state_changed.emit(state)
 	_emit_log(tr("LOG_ENEMY_TURN_START"))
@@ -559,9 +568,8 @@ func _run_enemy_turn() -> void:
 	state_changed.emit(state)
 
 
-## 为单个敌人选择并执行一个技能。
+## Run enemy action.
 func _run_enemy_action(enemy: EnemyData) -> void:
-	# 每回合按配置权重选择一个技能；新增技能 ID 时扩展此分发入口。
 	if enemy.consume_all_status_effects("stun") > 0:
 		_emit_log(tr("LOG_ENEMY_STUNNED") % tr(enemy.display_name))
 		return
@@ -579,9 +587,8 @@ func _run_enemy_action(enemy: EnemyData) -> void:
 			push_error("BattleManager: unknown enemy ability '%s' for '%s'." % [ability.id, enemy.id])
 
 
-## 执行史莱姆的全体敌方护盾辅助。
+## Run slime support.
 func _run_slime_support(enemy: EnemyData, power: int) -> void:
-	# 史莱姆没有攻击能力，为所有存活敌人提供可叠加护盾。
 	var shield_amount: int = maxi(0, power)
 	for ally: EnemyData in state.enemy_team:
 		if ally.is_alive():
@@ -589,9 +596,8 @@ func _run_slime_support(enemy: EnemyData, power: int) -> void:
 	_emit_log(tr("LOG_ENEMY_SHIELD_ALL") % [tr(enemy.display_name), shield_amount])
 
 
-## 执行包子的我方全体攻击。
+## Run bun group attack.
 func _run_bun_group_attack(enemy: EnemyData, power: int) -> void:
-	# 包子对每名存活角色分别结算伤害及同属性减伤。
 	for target: CharacterData in state.get_alive_players():
 		var dealt: int = target.take_damage(maxi(0, power), enemy.attribute)
 		if target.last_damage_was_immune:
@@ -600,9 +606,8 @@ func _run_bun_group_attack(enemy: EnemyData, power: int) -> void:
 			_emit_log(tr("LOG_ENEMY_GROUP_ATTACK") % [tr(enemy.display_name), tr(target.display_name), dealt])
 
 
-## 执行面具的随机单体攻击。
+## Run mask single attack.
 func _run_mask_single_attack(enemy: EnemyData, power: int) -> void:
-	# 面具随机选择一名存活角色进行基础单体攻击。
 	var target: CharacterData = _get_random_alive_player()
 	if target == null:
 		return
@@ -613,7 +618,7 @@ func _run_mask_single_attack(enemy: EnemyData, power: int) -> void:
 		_emit_log(tr("LOG_ENEMY_ATTACK") % [tr(enemy.display_name), tr(target.display_name), dealt])
 
 
-## 检查胜负或波次推进，并在需要时发出结果信号。
+## Check battle end.
 func _check_battle_end() -> bool:
 	if state.are_all_enemies_dead():
 		if state.current_wave < state.total_waves:
@@ -629,9 +634,8 @@ func _check_battle_end() -> bool:
 	return false
 
 
-## 清场后生成下一波敌人并开始新的玩家回合。
+## Start next wave.
 func _start_next_wave() -> void:
-	# 清场后立即生成下一波并开启新的我方回合，敌方不会抢先行动。
 	var next_wave_index: int = state.current_wave
 	var next_enemies: Array[EnemyData] = GameDataFactory.create_level_wave(active_level, next_wave_index, rng)
 	state.replace_enemy_wave(next_enemies, state.current_wave + 1)
@@ -640,9 +644,8 @@ func _start_next_wave() -> void:
 	_emit_log(tr("LOG_NEXT_PLAYER_TURN") % state.turn_count)
 
 
-## 在敌人首次死亡时结算 TOEFL 和随机通用卡奖励。
+## Collect reward if dead.
 func _collect_reward_if_dead(enemy: EnemyData) -> void:
-	# 独立标记确保每名敌人的货币与通用卡掉落都只结算一次。
 	if enemy.is_alive() or enemy.rewards_collected:
 		return
 	enemy.rewards_collected = true
@@ -658,7 +661,7 @@ func _collect_reward_if_dead(enemy: EnemyData) -> void:
 		_emit_log(tr("LOG_ENEMY_CARD_DROP") % [tr(enemy.display_name), tr(dropped_card.display_name)])
 
 
-## 按索引获取敌人目标，索引无效时回退到第一名存活敌人。
+## Get enemy or first alive.
 func _get_enemy_or_first_alive(index: int) -> EnemyData:
 	if index >= 0 and index < state.enemy_team.size() and state.enemy_team[index].is_alive():
 		return state.enemy_team[index]
@@ -668,14 +671,14 @@ func _get_enemy_or_first_alive(index: int) -> EnemyData:
 	return null
 
 
-## 按索引获取我方目标，索引无效时回退到行动者。
+## Get ally or actor.
 func _get_ally_or_actor(index: int, actor: CharacterData) -> CharacterData:
 	if index >= 0 and index < state.player_team.size() and state.player_team[index].is_alive():
 		return state.player_team[index]
 	return actor if actor != null and actor.is_alive() else null
 
 
-## 从当前存活我方角色中随机选择一个。
+## Get random alive player.
 func _get_random_alive_player() -> CharacterData:
 	var alive := state.get_alive_players()
 	if alive.is_empty():
@@ -683,30 +686,29 @@ func _get_random_alive_player() -> CharacterData:
 	return alive[rng.randi_range(0, alive.size() - 1)]
 
 
-## 判断卡牌请求是否必须带有敌方目标。
+## Card needs enemy.
 func _card_needs_enemy(card: CardData) -> bool:
 	return card.targets_single_enemy()
 
 
-## 判断卡牌请求是否必须带有我方目标。
+## Card needs ally.
 func _card_needs_ally(card: CardData) -> bool:
 	return card.targets_ally()
 
 
-## 写入战斗日志并通知 UI 增量刷新。
+## Emit log.
 func _emit_log(message: String) -> void:
 	state.push_log(message)
 	log_added.emit(message)
 
 
-## 从通用卡池随机生成商店本轮货架。
+## Roll shop offers.
 func _roll_shop_offers() -> void:
 	state.shop_offer_cards = GameDataFactory.create_shop_general_offers(rng, 4)
 
 
-## 根据 UI 索引取出角色专属卡或队伍通用卡。
+## Get card for request.
 func _get_card_for_request(character: CharacterData, card_index: int) -> CardData:
-	# 负数编码区分队伍通用卡与角色 cards 数组，保持现有 UI 信号格式。
 	if _is_team_general_card_index(card_index):
 		var team_card_index: int = _decode_team_general_card_index(card_index)
 		if team_card_index >= 0 and team_card_index < state.team_general_cards.size():
@@ -717,17 +719,17 @@ func _get_card_for_request(character: CharacterData, card_index: int) -> CardDat
 	return null
 
 
-## 判断 UI 索引是否指向队伍通用牌。
+## Is team general card index.
 func _is_team_general_card_index(card_index: int) -> bool:
 	return card_index <= -TEAM_GENERAL_CARD_INDEX_OFFSET
 
 
-## 将队伍通用牌 UI 负数索引还原成数组索引。
+## Decode team general card index.
 func _decode_team_general_card_index(card_index: int) -> int:
 	return -card_index - TEAM_GENERAL_CARD_INDEX_OFFSET
 
 
-## 将难度 id 转为本地化显示文本。
+## Difficulty label.
 func _difficulty_label(difficulty: String) -> String:
 	match difficulty:
 		"easy":

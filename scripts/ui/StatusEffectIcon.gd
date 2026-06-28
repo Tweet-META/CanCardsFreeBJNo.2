@@ -1,5 +1,5 @@
 extends Control
-## 单个持续性效果图标；图片缺失时仍显示数值和剩余回合，方便先行开发逻辑。
+## Defines the StatusEffectIcon script.
 class_name StatusEffectIcon
 
 @onready var icon: TextureRect = $Icon
@@ -16,7 +16,6 @@ func setup(effect: StatusEffectData) -> void:
 	var effect_description: String = tr(effect.description)
 	if effect.value_format == "percent":
 		effect_description = effect_description % roundi(effect.value * 100.0)
-	# Tooltip 只保留来源与效果，避免在紧凑战场中显示过长。
 	tooltip_text = tr("EFFECT_TOOLTIP_FORMAT") % [source_text, effect_description]
 	if not effect.icon_path.is_empty() and ResourceLoader.exists(effect.icon_path):
 		icon.texture = load(effect.icon_path) as Texture2D

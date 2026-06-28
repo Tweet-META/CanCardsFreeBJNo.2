@@ -1,11 +1,10 @@
 extends RefCounted
-## 从 enemies.json 创建敌人定义；实际关卡阵容由 levels.json 的波次决定。
+## Defines the EnemyDatabase script.
 class_name EnemyDatabase
 
 const DATA_PATH: String = "res://data/enemies.json"
 
 static var _loaded: bool = false
-# 每次 create_enemy 都从定义生成新实例，避免奖励和生命跨局残留。
 static var _definitions: Dictionary = {}
 
 
@@ -57,7 +56,6 @@ static func reload() -> void:
 
 
 static func _ensure_loaded() -> void:
-	# 数据首次使用时加载并校验重复 ID。
 	if _loaded:
 		return
 	_loaded = true

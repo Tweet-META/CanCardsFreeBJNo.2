@@ -1,5 +1,5 @@
 extends Resource
-## 一道题目的内容、选项和正确答案索引。
+## Defines the QuestionData script.
 class_name QuestionData
 
 @export var id: String = ""
@@ -22,7 +22,6 @@ func get_correct_answer_text() -> String:
 
 
 func create_shuffled_copy(rng: RandomNumberGenerator) -> QuestionData:
-	# 通过原索引洗牌，确保即使两个选项文本相同也能准确追踪正确答案。
 	var shuffled_question: QuestionData = QuestionData.new()
 	shuffled_question.id = id
 	shuffled_question.category = category

@@ -1,5 +1,5 @@
 extends HBoxContainer
-## 顶部 AP 条、回合状态、暂停入口和商店入口。
+## Defines the BattleTopBar script.
 class_name BattleTopBar
 
 signal menu_requested
@@ -25,7 +25,6 @@ func _ready() -> void:
 
 
 func refresh(ap: float, phase: BattleState.Phase, turn_count: int, current_wave: int, total_waves: int) -> void:
-	# AP 满时整条切换为金色，与技能卡解锁状态保持一致。
 	ap_bar.value = ap
 	ap_label.text = "%.1f / 5.0" % ap
 	if ap >= 5.0:
@@ -43,7 +42,6 @@ func refresh(ap: float, phase: BattleState.Phase, turn_count: int, current_wave:
 
 
 func begin_sell_mode(sell_price: float) -> void:
-	# 拖动通用牌时复用商店按钮作为出售落点，第二行只显示本次售价数字。
 	sell_mode = true
 	sell_drop_hovered = false
 	shop_button.text = "%s\n%s" % [tr("UI_SELL"), _format_amount(sell_price)]
@@ -98,7 +96,6 @@ func _apply_styles() -> void:
 
 
 func _on_shop_button_pressed() -> void:
-	# 出售拖拽期间按钮只是落点，不能同时打开商店面板。
 	if not sell_mode:
 		shop_requested.emit()
 
@@ -114,7 +111,6 @@ func _apply_shop_button_style(highlighted: bool) -> void:
 
 
 func _format_amount(amount: float) -> String:
-	# 最多显示两位小数，并去掉无意义的末尾零。
 	var text: String = "%.2f" % amount
 	while text.contains(".") and text.ends_with("0"):
 		text = text.left(text.length() - 1)

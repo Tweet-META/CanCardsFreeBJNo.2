@@ -26,7 +26,7 @@ anchor_bottom = 0.0
 offset_left = -275.0
 offset_top = 98.0
 offset_right = -70.0
-offset_bottom = 286.0
+offset_bottom = 386.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
 script = ExtResource("1")
 
@@ -55,3 +55,13 @@ text = "DEV_ADD_GENERAL_CARD"
 custom_minimum_size = Vector2(240, 40)
 layout_mode = 2
 text = "DEV_ADD_SIX_SEVEN"
+
+[node name="ClearEnemiesButton" type="Button" parent="Box"]
+custom_minimum_size = Vector2(240, 40)
+layout_mode = 2
+text = "DEV_CLEAR_ENEMIES"
+
+[node name="DefeatPlayersButton" type="Button" parent="Box"]
+custom_minimum_size = Vector2(240, 40)
+layout_mode = 2
+text = "DEV_DEFEAT_PLAYERS"

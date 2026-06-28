@@ -1,5 +1,5 @@
 extends Resource
-## 地图关卡的静态配置；坐标为 LevelLayer 内的归一化位置。
+## Defines the LevelData script.
 class_name LevelData
 
 @export var id: String = ""

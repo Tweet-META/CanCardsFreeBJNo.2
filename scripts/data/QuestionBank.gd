@@ -1,5 +1,5 @@
 extends RefCounted
-## 负责加载 questions.json，并按属性与难度随机提供题目。
+## Defines the QuestionBank script.
 class_name QuestionBank
 
 const QUESTIONS_PATH: String = "res://data/questions.json"
@@ -13,7 +13,6 @@ func _init() -> void:
 
 
 func load_from_json(path: String) -> bool:
-	# JSON 加载失败时返回 false，由构造函数回退到内置最小题库。
 	if not FileAccess.file_exists(path):
 		push_warning("Question JSON not found: %s" % path)
 		return false
@@ -46,7 +45,6 @@ func load_from_json(path: String) -> bool:
 
 
 func get_random_question(category: String, difficulty: String, rng: RandomNumberGenerator) -> QuestionData:
-	# 优先精确匹配；该难度无题时退回同属性题目，保证战斗可继续。
 	var candidates: Array[QuestionData] = []
 	for question: QuestionData in questions:
 		if question.category == category and question.difficulty == difficulty:
@@ -64,7 +62,6 @@ func get_random_question(category: String, difficulty: String, rng: RandomNumber
 
 
 func get_random_question_by_difficulty(difficulty: String, rng: RandomNumberGenerator) -> QuestionData:
-	# 战斗抽题只按难度池筛选，题目属性不受出牌角色或卡牌属性限制。
 	var candidates: Array[QuestionData] = get_questions_for_difficulty(difficulty)
 	if candidates.is_empty():
 		return questions[0].create_shuffled_copy(rng)
@@ -80,7 +77,6 @@ func get_questions_for_difficulty(difficulty: String) -> Array[QuestionData]:
 
 
 func _setup_default_questions() -> void:
-	# 只用于 questions.json 缺失或损坏时维持 MVP 可玩。
 	questions = [
 		_make_question("py_easy_1", "拼音", "easy", "“你好”的拼音是哪一个？", ["ni hao", "wo ai", "xie xie", "zai jian"], 0, "你好 = ni hao。"),
 		_make_question("py_easy_2", "拼音", "easy", "“谢谢”的拼音是哪一个？", ["qing wen", "xie xie", "lao shi", "peng you"], 1, "谢谢 = xie xie。"),
@@ -136,7 +132,6 @@ func _question_from_dictionary(data: Dictionary) -> QuestionData:
 
 
 func _assign_translation_keys(question: QuestionData) -> void:
-	# JSON 保存原文，运行时使用稳定键从 translations.csv 取得当前语言文本。
 	var translation_prefix: String = "Q_%s" % question.id.to_upper()
 	question.prompt = "%s_PROMPT" % translation_prefix
 	question.explanation = "%s_EXPLANATION" % translation_prefix

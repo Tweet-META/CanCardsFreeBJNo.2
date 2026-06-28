@@ -1,5 +1,5 @@
 extends RefCounted
-## 从 maps.json 加载可扩展地图列表，并为地图场景创建独立数据实例。
+## Defines the MapDatabase script.
 class_name MapDatabase
 
 const DATA_PATH: String = "res://data/maps.json"
@@ -10,7 +10,7 @@ static var _map_order: Array[String] = []
 static var _definitions: Dictionary = {}
 
 
-## 创建所有地图数据，并保留 JSON 中的显示顺序。
+## Documents this script block.
 static func get_maps() -> Array[MapData]:
 	_ensure_loaded()
 	var maps: Array[MapData] = []
@@ -21,7 +21,7 @@ static func get_maps() -> Array[MapData]:
 	return maps
 
 
-## 在当前地图列表中查找默认地图的下标。
+## Documents this script block.
 static func get_default_map_index(maps: Array[MapData]) -> int:
 	for index in maps.size():
 		if maps[index].id == _default_map_id:
@@ -29,7 +29,7 @@ static func get_default_map_index(maps: Array[MapData]) -> int:
 	return 0
 
 
-## 按地图 ID 创建一份新的 MapData 实例。
+## Documents this script block.
 static func create_map(map_id: String) -> MapData:
 	_ensure_loaded()
 	var raw_value: Variant = _definitions.get(map_id)
@@ -47,7 +47,7 @@ static func create_map(map_id: String) -> MapData:
 	return map_data
 
 
-## 清空缓存并重新读取 maps.json。
+## Documents this script block.
 static func reload() -> void:
 	_loaded = false
 	_default_map_id = ""
@@ -56,7 +56,7 @@ static func reload() -> void:
 	_ensure_loaded()
 
 
-## 延迟读取 maps.json，并建立 ID 到原始字典的索引。
+## Documents this script block.
 static func _ensure_loaded() -> void:
 	if _loaded:
 		return
@@ -93,7 +93,7 @@ static func _ensure_loaded() -> void:
 		_map_order.append(map_id)
 
 
-## 把 JSON 数组安全转换为字符串数组。
+## Documents this script block.
 static func _to_string_array(value: Variant) -> Array[String]:
 	var result: Array[String] = []
 	if not value is Array:

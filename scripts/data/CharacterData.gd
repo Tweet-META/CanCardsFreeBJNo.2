@@ -1,5 +1,5 @@
 extends Resource
-## 我方角色的静态资料与单局运行状态；队伍共享 AP 存放在 BattleState。
+## Defines the CharacterData script.
 class_name CharacterData
 
 @export var id: String = ""
@@ -11,7 +11,6 @@ class_name CharacterData
 @export var cards: Array[CardData] = []
 
 var base_max_hp: int = 0
-# 以下字段只在当前战斗中变化，不写回 JSON。
 var current_hp: int = 100
 var has_acted: bool = false
 var current_shield: int = 0
@@ -21,7 +20,6 @@ var last_damage_was_immune: bool = false
 
 
 func setup_runtime(max_hp_multiplier: float = 1.0) -> void:
-	# base_max_hp 防止重开战斗时重复把拼音生命加成乘到已放大的 max_hp 上。
 	if base_max_hp <= 0:
 		base_max_hp = max_hp
 	max_hp = maxi(1, roundi(float(base_max_hp) * maxf(max_hp_multiplier, 0.0)))
@@ -44,7 +42,6 @@ func heal(amount: int) -> int:
 
 
 func take_damage(raw_damage: int, incoming_attribute: String = "") -> int:
-	# 首次伤害免疫优先于减伤和护盾结算，并在触发后立即消耗一个实例。
 	last_damage_was_immune = false
 	if raw_damage > 0 and consume_status_effect("damage_immunity"):
 		last_damage_was_immune = true
@@ -77,7 +74,6 @@ func add_turn_damage_reduction(amount: float) -> void:
 
 
 func add_shield(amount: int) -> int:
-	# 固定护盾可以叠加，并在受击吸收完毕后自然归零。
 	var gained_shield: int = maxi(0, amount)
 	current_shield += gained_shield
 	return gained_shield
@@ -159,7 +155,6 @@ func advance_status_effect_turns() -> void:
 
 
 func lose_hp_direct(amount: int) -> int:
-	# 直接扣血不触发伤害免疫、减伤或护盾。
 	var lost_hp: int = mini(current_hp, maxi(amount, 0))
 	current_hp -= lost_hp
 	return lost_hp

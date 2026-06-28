@@ -1,5 +1,5 @@
 extends Resource
-## 单张卡牌的静态数据与通用规则；具体效果由 BattleManager 根据 effect_id 执行。
+## Defines the CardData script.
 class_name CardData
 
 enum CardType {
@@ -46,48 +46,45 @@ enum TargetType {
 @export var shop_price: float = 0.0
 
 
-## 判断卡牌是否为技能卡。
+## Is skill.
 func is_skill() -> bool:
 	return card_type == CardType.SKILL
 
 
-## 判断卡牌是否为队伍通用卡。
+## Is general.
 func is_general() -> bool:
 	return card_type == CardType.GENERAL
 
 
-## 判断卡牌是否需要拖到单个敌人身上。
+## Targets single enemy.
 func targets_single_enemy() -> bool:
 	return target_type == TargetType.SINGLE_ENEMY
 
 
-## 判断卡牌是否需要拖到我方角色身上。
+## Targets ally.
 func targets_ally() -> bool:
 	return card_type == CardType.DEFENSE or target_type == TargetType.SINGLE_ALLY
 
 
-## 判断当前 AP 是否满足卡牌使用条件。
+## Can use.
 func can_use(current_ap: float) -> bool:
 	if is_skill():
 		return current_ap >= skill_ap_cost
 	return true
 
 
-## 计算卖牌获得的 New TOEFL。
+## Get sell price.
 func get_sell_price() -> float:
-	# 出售价格为买入价的 60%，并向上取整到一位小数。
 	return ceilf(shop_price * 0.6 * 10.0) / 10.0
 
 
-## 返回本次卡牌实际使用的答题难度。
+## Get question difficulty.
 func get_question_difficulty(default_difficulty: String) -> String:
-	# 技能始终使用困难题，其余卡牌沿用玩家选择的难度。
 	return "hard" if is_skill() else default_difficulty
 
 
-## 返回答对攻击题时获得的伤害倍率。
+## Get damage bonus for difficulty.
 func get_damage_bonus_for_difficulty(difficulty: String) -> float:
-	# 普通攻击卡答对后的倍率加成。
 	match difficulty:
 		"easy":
 			return 0.05
@@ -99,9 +96,8 @@ func get_damage_bonus_for_difficulty(difficulty: String) -> float:
 			return 0.0
 
 
-## 返回答对防御题时获得的额外减伤。
+## Get block bonus for difficulty.
 func get_block_bonus_for_difficulty(difficulty: String) -> float:
-	# 防御卡答对后叠加到基础减伤上的比例。
 	match difficulty:
 		"easy":
 			return 0.10
@@ -113,9 +109,8 @@ func get_block_bonus_for_difficulty(difficulty: String) -> float:
 			return 0.0
 
 
-## 返回答对题目时获得的额外 AP。
+## Get correct answer ap bonus.
 func get_correct_answer_ap_bonus(difficulty: String) -> float:
-	# 答对后获得的额外队伍 AP，不包含卡牌基础 AP 与文化被动。
 	match difficulty:
 		"easy":
 			return 0.5

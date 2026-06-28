@@ -1,5 +1,5 @@
 extends PanelContainer
-## 商店弹窗，展示随机通用卡并管理刷新与购买入口。
+## Defines the ShopPanel script.
 class_name ShopPanel
 
 signal refresh_requested
@@ -31,7 +31,6 @@ func _ready() -> void:
 
 
 func _apply_export_safe_layout() -> void:
-	# 独立面板在导出包中重新实例化时，显式恢复屏幕中央锚点与设计尺寸。
 	anchor_left = 0.5
 	anchor_top = 0.5
 	anchor_right = 0.5
@@ -53,7 +52,6 @@ func close() -> void:
 
 
 func refresh(balance: float, offers: Array[CardData], current_ap: float) -> void:
-	# 每次商店状态变化都重建报价项，避免旧价格和禁用状态残留。
 	balance_label.text = tr("UI_BALANCE_FORMAT") % _format_amount(balance)
 	refresh_button.disabled = balance + 0.001 < 0.5
 	if not visible:
@@ -78,7 +76,6 @@ func _clear_cards() -> void:
 
 
 func _format_amount(amount: float) -> String:
-	# New TOEFL 可能由六折售价产生两位小数，显示时去掉无意义的末尾零。
 	var text: String = "%.2f" % amount
 	while text.contains(".") and text.ends_with("0"):
 		text = text.left(text.length() - 1)

@@ -1,5 +1,5 @@
 extends Resource
-## 单个关卡波次，由多个独立随机怪物位置组成。
+## Defines the LevelWaveData script.
 class_name LevelWaveData
 
 @export var monster_slots: Array[MonsterSlotData] = []

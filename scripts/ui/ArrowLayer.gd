@@ -1,5 +1,5 @@
 extends Control
-## 拖动卡牌时绘制从卡牌到鼠标位置的指向箭头，本身不接收输入。
+## Defines the ArrowLayer script.
 class_name ArrowLayer
 
 var active: bool = false

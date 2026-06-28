@@ -1,5 +1,5 @@
 extends RefCounted
-## 从 effects.json 创建独立的持续性效果实例。
+## Defines the EffectDatabase script.
 class_name EffectDatabase
 
 const DATA_PATH: String = "res://data/effects.json"

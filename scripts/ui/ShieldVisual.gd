@@ -1,5 +1,5 @@
 extends Control
-## 双方共用的护盾表现，同时支持固定护盾值与百分比减伤。
+## Defines the ShieldVisual script.
 class_name ShieldVisual
 
 @onready var shield_label: Label = $ShieldLabel

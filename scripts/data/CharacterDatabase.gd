@@ -1,11 +1,10 @@
 extends RefCounted
-## 从 characters.json 创建我方角色，并解析角色持有的卡牌 ID。
+## Defines the CharacterDatabase script.
 class_name CharacterDatabase
 
 const DATA_PATH: String = "res://data/characters.json"
 
 static var _loaded: bool = false
-# 定义缓存只保存 JSON 字典；create_character 每次都会创建全新运行实例。
 static var _root_data: Dictionary = {}
 static var _definitions: Dictionary = {}
 static var _character_order: Array[String] = []
@@ -31,12 +30,11 @@ static func create_character(character_id: String) -> CharacterData:
 
 
 static func create_default_team() -> Array[CharacterData]:
-	# player_team 数组决定当前关卡默认阵容及其显示顺序。
 	_ensure_loaded()
 	return create_team(_to_string_array(_root_data.get("player_team", [])))
 
 
-## 按指定角色 ID 顺序创建出战队伍。
+## Documents this script block.
 static func create_team(character_ids: Array[String]) -> Array[CharacterData]:
 	_ensure_loaded()
 	var team: Array[CharacterData] = []
@@ -47,7 +45,7 @@ static func create_team(character_ids: Array[String]) -> Array[CharacterData]:
 	return team
 
 
-## 创建当前可在准备页选择的角色列表。
+## Documents this script block.
 static func create_available_characters() -> Array[CharacterData]:
 	_ensure_loaded()
 	return create_team(_character_order)
@@ -62,7 +60,6 @@ static func reload() -> void:
 
 
 static func _ensure_loaded() -> void:
-	# 数据首次使用时加载并校验重复 ID。
 	if _loaded:
 		return
 	_loaded = true

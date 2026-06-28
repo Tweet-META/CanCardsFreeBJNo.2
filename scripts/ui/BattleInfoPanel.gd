@@ -1,5 +1,5 @@
 extends Label
-## 左下角角色/敌人信息面板，并根据当前语言调整字号。
+## Defines the BattleInfoPanel script.
 class_name BattleInfoPanel
 
 const PAPER: Color = Color(0.86, 0.78, 0.64, 0.96)
@@ -15,7 +15,6 @@ func _ready() -> void:
 
 
 func _apply_export_safe_layout() -> void:
-	# 导出包必须重新实例化子场景；显式恢复锚点，避免根节点退回左上角。
 	anchor_left = 0.0
 	anchor_top = 1.0
 	anchor_right = 0.0

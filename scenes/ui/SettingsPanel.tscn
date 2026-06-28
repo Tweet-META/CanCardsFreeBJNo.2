@@ -44,16 +44,6 @@ theme_override_font_sizes/font_size = 28
 text = "SETTINGS_TITLE"
 horizontal_alignment = 1
 
-[node name="DeveloperModeCheckBox" type="CheckBox" parent="Box"]
-custom_minimum_size = Vector2(360, 48)
-layout_mode = 2
-text = "SETTINGS_DEVELOPER_MODE"
-
-[node name="DeveloperModeDescription" type="Label" parent="Box"]
-layout_mode = 2
-text = "SETTINGS_DEVELOPER_DESCRIPTION"
-autowrap_mode = 3
-
 [node name="CloseButton" type="Button" parent="Box"]
 custom_minimum_size = Vector2(180, 44)
 layout_mode = 2

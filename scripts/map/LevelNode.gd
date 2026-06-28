@@ -1,5 +1,5 @@
 extends Control
-## 单个地图关卡节点，显示解锁状态并向地图场景发送关卡选择。
+## Defines the LevelNode script.
 class_name LevelNode
 
 signal level_selected(level: LevelData)
@@ -13,13 +13,13 @@ const INK: Color = Color(0.18, 0.11, 0.04)
 var level_data: LevelData
 
 
-## 初始化关卡按钮点击信号和纸张风格。
+## Ready.
 func _ready() -> void:
 	level_button.pressed.connect(_on_pressed)
 	_apply_styles()
 
 
-## 绑定关卡数据并刷新按钮数字、标题和解锁状态。
+## Setup.
 func setup(level: LevelData) -> void:
 	level_data = level
 	level_button.disabled = not level.unlocked
@@ -28,20 +28,20 @@ func setup(level: LevelData) -> void:
 	modulate = Color.WHITE if level.unlocked else Color(0.55, 0.55, 0.55, 0.85)
 
 
-## 语言切换时刷新关卡标题。
+## Refresh language.
 func refresh_language() -> void:
 	if level_data == null:
 		return
 	level_label.text = tr(level_data.display_name)
 
 
-## 点击已解锁关卡时通知地图场景进入关卡。
+## On pressed.
 func _on_pressed() -> void:
 	if level_data != null and level_data.unlocked:
 		level_selected.emit(level_data)
 
 
-## 应用地图关卡按钮的统一样式。
+## Apply styles.
 func _apply_styles() -> void:
 	level_button.add_theme_stylebox_override("normal", _style(PAPER, 29, 4))
 	level_button.add_theme_stylebox_override("hover", _style(Color(1.0, 0.86, 0.45), 29, 4))
@@ -49,7 +49,7 @@ func _apply_styles() -> void:
 	level_button.add_theme_color_override("font_color", INK)
 
 
-## 生成关卡按钮纸张样式。
+## Style.
 func _style(color: Color, radius: int, border_width: int) -> StyleBoxFlat:
 	var style: StyleBoxFlat = StyleBoxFlat.new()
 	style.bg_color = color

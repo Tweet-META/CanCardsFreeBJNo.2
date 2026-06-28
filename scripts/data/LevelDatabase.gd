@@ -1,5 +1,5 @@
 extends RefCounted
-## 从 levels.json 创建关卡数据，并供地图按 ID 获取关卡定义。
+## Defines the LevelDatabase script.
 class_name LevelDatabase
 
 const DATA_PATH: String = "res://data/levels.json"
@@ -10,7 +10,7 @@ static var _active_level_id: String = "level1"
 static var _active_player_ids: Array[String] = []
 
 
-## 按关卡 ID 创建一份新的 LevelData 实例。
+## Documents this script block.
 static func create_level(level_id: String) -> LevelData:
 	_ensure_loaded()
 	var raw_value: Variant = _definitions.get(level_id)
@@ -33,7 +33,7 @@ static func create_level(level_id: String) -> LevelData:
 	return level
 
 
-## 记录地图选中的关卡，供 BattleManager 进入战斗时读取。
+## Documents this script block.
 static func set_active_level(level_id: String) -> void:
 	_ensure_loaded()
 	if not _definitions.has(level_id):
@@ -42,22 +42,22 @@ static func set_active_level(level_id: String) -> void:
 	_active_level_id = level_id
 
 
-## 创建当前被地图激活的关卡数据。
+## Documents this script block.
 static func get_active_level() -> LevelData:
 	return create_level(_active_level_id)
 
 
-## 记录准备页选择的出战角色 ID 顺序。
+## Documents this script block.
 static func set_active_player_ids(character_ids: Array[String]) -> void:
 	_active_player_ids = character_ids.duplicate()
 
 
-## 读取准备页选择的出战角色 ID；为空时战斗会使用默认队伍。
+## Documents this script block.
 static func get_active_player_ids() -> Array[String]:
 	return _active_player_ids.duplicate()
 
 
-## 按一组关卡 ID 创建关卡列表，忽略无效 ID。
+## Documents this script block.
 static func create_levels(level_ids: Array[String]) -> Array[LevelData]:
 	var levels: Array[LevelData] = []
 	for level_id: String in level_ids:
@@ -67,14 +67,14 @@ static func create_levels(level_ids: Array[String]) -> Array[LevelData]:
 	return levels
 
 
-## 清空缓存并重新读取 levels.json。
+## Documents this script block.
 static func reload() -> void:
 	_loaded = false
 	_definitions.clear()
 	_ensure_loaded()
 
 
-## 延迟读取 levels.json，并建立 ID 到原始字典的索引。
+## Documents this script block.
 static func _ensure_loaded() -> void:
 	if _loaded:
 		return
@@ -108,7 +108,7 @@ static func _ensure_loaded() -> void:
 		_definitions[level_id] = raw
 
 
-## 把 JSON 中的归一化坐标解析为 Vector2。
+## Documents this script block.
 static func _parse_position(value: Variant) -> Vector2:
 	if not value is Array:
 		return Vector2(0.5, 0.5)
@@ -118,7 +118,7 @@ static func _parse_position(value: Variant) -> Vector2:
 	return Vector2(clampf(float(values[0]), 0.0, 1.0), clampf(float(values[1]), 0.0, 1.0))
 
 
-## 解析关卡波次，并把每个 monster 位置转换为候选怪物槽。
+## Documents this script block.
 static func _parse_waves(value: Variant, level_id: String) -> Array[LevelWaveData]:
 	var waves: Array[LevelWaveData] = []
 	if not value is Array:
@@ -144,7 +144,7 @@ static func _parse_waves(value: Variant, level_id: String) -> Array[LevelWaveDat
 	return waves
 
 
-## 把 JSON 数组安全转换为字符串数组。
+## Documents this script block.
 static func _to_string_array(value: Variant) -> Array[String]:
 	var result: Array[String] = []
 	if not value is Array:

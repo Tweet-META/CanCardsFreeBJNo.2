@@ -1,5 +1,5 @@
 extends PanelContainer
-## 拖牌期间显示的取消投放区，并负责自身悬停视觉。
+## Defines the CancelDropArea script.
 class_name CancelDropArea
 
 const INK: Color = Color(0.12, 0.10, 0.08)
@@ -7,7 +7,7 @@ const INK: Color = Color(0.12, 0.10, 0.08)
 @onready var label: Label = $Label
 
 
-## 初始化取消区的导出稳定布局、层级和默认隐藏状态。
+## Ready.
 func _ready() -> void:
 	_apply_export_safe_layout()
 	visible = false
@@ -16,26 +16,26 @@ func _ready() -> void:
 	set_hovered(false)
 
 
-## 显示取消区并重置悬停视觉。
+## Show area.
 func show_area() -> void:
 	_apply_export_safe_layout()
 	visible = true
 	set_hovered(false)
 
 
-## 隐藏取消区并重置悬停视觉。
+## Hide area.
 func hide_area() -> void:
 	visible = false
 	set_hovered(false)
 
 
-## 根据鼠标是否位于取消区上方切换视觉状态。
+## Set hovered.
 func set_hovered(hovered: bool) -> void:
 	add_theme_stylebox_override("panel", _cancel_drop_style(hovered))
 	label.add_theme_color_override("font_color", Color.WHITE if hovered else INK)
 
 
-## 在运行时重申锚点和偏移，避免导出构建丢失实例布局覆盖。
+## Apply export safe layout.
 func _apply_export_safe_layout() -> void:
 	set_anchors_preset(Control.PRESET_CENTER_BOTTOM, false)
 	offset_left = -71.0
@@ -46,7 +46,7 @@ func _apply_export_safe_layout() -> void:
 	grow_vertical = Control.GROW_DIRECTION_BEGIN
 
 
-## 创建取消区普通和悬停状态的样式。
+## Cancel drop style.
 func _cancel_drop_style(hovered: bool) -> StyleBoxFlat:
 	var color: Color = Color(0.88, 0.80, 0.68, 0.90)
 	var border_color: Color = Color(0.13, 0.10, 0.08)
@@ -62,7 +62,7 @@ func _cancel_drop_style(hovered: bool) -> StyleBoxFlat:
 	return style
 
 
-## 生成圆角纸张样式盒。
+## Style.
 func _style(color: Color, radius: int, border_width: int) -> StyleBoxFlat:
 	var style: StyleBoxFlat = StyleBoxFlat.new()
 	style.bg_color = color

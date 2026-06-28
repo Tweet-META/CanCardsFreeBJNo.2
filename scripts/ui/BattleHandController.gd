@@ -1,5 +1,5 @@
 extends RefCounted
-## 手牌显示控制器；只处理卡牌按钮创建、扇形布局、悬停、拖动视觉和通用卡消失动画。
+## Defines the BattleHandController script.
 class_name BattleHandController
 
 signal card_clicked(card_index: int)
@@ -28,13 +28,13 @@ var hover_restore_time_left: float = 0.0
 var interaction_locked: bool = false
 
 
-## 绑定 BattleUI 场景中已经存在的两个手牌容器。
+## Setup.
 func setup(exclusive_parent: Control, general_parent: Control) -> void:
 	exclusive_cards = exclusive_parent
 	general_cards = general_parent
 
 
-## 在取消拖动后的短时间内同步鼠标下方卡牌，修复悬停状态丢失。
+## Process hover restore.
 func process_hover_restore(delta: float, global_mouse_position: Vector2) -> void:
 	if dragging_card_index != -1:
 		return
@@ -44,7 +44,7 @@ func process_hover_restore(delta: float, global_mouse_position: Vector2) -> void
 	_sync_hovered_card_with_mouse(global_mouse_position)
 
 
-## 根据当前角色和队伍通用牌重建两堆手牌。
+## Refresh.
 func refresh(state: BattleState, character: CharacterData, selected_character_index: int, rendered_character_index: int) -> int:
 	_clear_children(exclusive_cards)
 	_clear_children(general_cards)
@@ -66,7 +66,7 @@ func refresh(state: BattleState, character: CharacterData, selected_character_in
 	return selected_character_index
 
 
-## 设置卡牌交互锁；锁定时会清掉拖动和悬停视觉。
+## Set interaction locked.
 func set_interaction_locked(locked: bool) -> void:
 	if interaction_locked == locked:
 		return
@@ -79,7 +79,7 @@ func set_interaction_locked(locked: bool) -> void:
 		_apply_card_interaction_lock_to_group(general_cards)
 
 
-## 取消当前手牌交互状态，不处理箭头、目标高亮等外部 UI。
+## Cancel current interaction.
 func cancel_current_interaction() -> void:
 	if dragging_card_index != -1:
 		reset_card_drag_state(dragging_card_index)
@@ -92,20 +92,20 @@ func cancel_current_interaction() -> void:
 	_apply_card_interaction_lock_to_group(general_cards)
 
 
-## 拖动结束后复位对应卡牌自身输入状态。
+## Finish drag.
 func finish_drag(card_index: int) -> void:
 	dragging_card_index = -1
 	reset_card_drag_state(card_index)
 
 
-## 取消拖动后尝试恢复鼠标所在卡牌的悬停动画。
+## Restore hover after cancel.
 func restore_hover_after_cancel(global_position: Vector2) -> void:
 	hover_restore_time_left = 0.36
 	hovered_card_index = -1
 	_sync_hovered_card_with_mouse(global_position)
 
 
-## 返回 UI 编码索引对应的卡牌数据。
+## Get card for ui index.
 func get_card_for_ui_index(state: BattleState, character: CharacterData, card_index: int) -> CardData:
 	if is_team_general_card_index(card_index):
 		var team_card_index: int = decode_team_general_card_index(card_index)
@@ -117,22 +117,22 @@ func get_card_for_ui_index(state: BattleState, character: CharacterData, card_in
 	return null
 
 
-## 把队伍通用牌索引编码成不会与角色专属牌冲突的负数。
+## Encode team general card index.
 func encode_team_general_card_index(team_card_index: int) -> int:
 	return -team_card_index - TEAM_GENERAL_CARD_INDEX_OFFSET
 
 
-## 判断一个 UI 索引是否指向队伍通用牌。
+## Is team general card index.
 func is_team_general_card_index(card_index: int) -> bool:
 	return card_index <= -TEAM_GENERAL_CARD_INDEX_OFFSET
 
 
-## 从 UI 负数索引还原队伍通用牌数组索引。
+## Decode team general card index.
 func decode_team_general_card_index(card_index: int) -> int:
 	return -card_index - TEAM_GENERAL_CARD_INDEX_OFFSET
 
 
-## 通用卡使用成功前播放逐渐消失并上浮的粒子反馈。
+## Play general card consume animation.
 func play_general_card_consume_animation(owner: Control, card_index: int) -> Signal:
 	var completed: Signal = owner.get_tree().process_frame
 	var card_button: CardButton = _find_card_button(general_cards, card_index)
@@ -167,20 +167,20 @@ func play_general_card_consume_animation(owner: Control, card_index: int) -> Sig
 	return card_tween.finished
 
 
-## 重排当前已存在的两组卡牌，不重新实例化。
+## Relayout existing cards.
 func relayout_existing_cards() -> void:
 	_relayout_card_group(exclusive_cards, true)
 	_relayout_card_group(general_cards, true)
 
 
-## 接收 CardButton 点击信号并转发给 BattleUI。
+## On card clicked.
 func _on_card_clicked(card_index: int) -> void:
 	if interaction_locked:
 		return
 	card_clicked.emit(card_index)
 
 
-## 接收 CardButton 拖动开始信号并切换手牌到拖动视觉状态。
+## On card drag started.
 func _on_card_drag_started(card_index: int, global_position: Vector2) -> void:
 	if interaction_locked:
 		reset_card_drag_state(card_index)
@@ -191,14 +191,14 @@ func _on_card_drag_started(card_index: int, global_position: Vector2) -> void:
 	drag_started.emit(card_index, global_position)
 
 
-## 接收 CardButton 拖动移动信号并转发给 BattleUI。
+## On card drag moved.
 func _on_card_drag_moved(global_position: Vector2) -> void:
 	if interaction_locked:
 		return
 	drag_moved.emit(global_position)
 
 
-## 接收 CardButton 拖动松开信号并交给 BattleUI 判断落点。
+## On card drag released.
 func _on_card_drag_released(card_index: int, global_position: Vector2) -> void:
 	if interaction_locked:
 		reset_card_drag_state(card_index)
@@ -206,7 +206,7 @@ func _on_card_drag_released(card_index: int, global_position: Vector2) -> void:
 	drag_released.emit(card_index, global_position)
 
 
-## 接收 CardButton 悬停变化并重排扇形手牌。
+## On card hover changed.
 func _on_card_hover_changed(card_index: int, hovered: bool) -> void:
 	if interaction_locked or dragging_card_index != -1:
 		return
@@ -221,7 +221,7 @@ func _on_card_hover_changed(card_index: int, hovered: bool) -> void:
 	relayout_existing_cards()
 
 
-## 在指定容器中按扇形创建卡牌按钮。
+## Layout card fan.
 func _layout_card_fan(parent: Control, state: BattleState, character: CharacterData, indices: Array[int], animate: bool, entry_offset: Vector2 = Vector2.ZERO) -> void:
 	var can_click: bool = state.phase == BattleState.Phase.PLAYER_TURN and character.is_alive() and not character.has_acted and not interaction_locked
 	var count: int = indices.size()
@@ -245,7 +245,7 @@ func _layout_card_fan(parent: Control, state: BattleState, character: CharacterD
 		_apply_card_arc_pose(parent, card_button, slot, count, animate, entry_offset)
 
 
-## 仅重排某一组已经实例化的卡牌。
+## Relayout card group.
 func _relayout_card_group(parent: Control, animate: bool) -> void:
 	var card_buttons: Array[CardButton] = []
 	for child: Node in parent.get_children():
@@ -258,7 +258,7 @@ func _relayout_card_group(parent: Control, animate: bool) -> void:
 		_apply_card_arc_pose(parent, card_buttons[slot], slot, count, animate)
 
 
-## 计算单张卡牌在扇形手牌中的位置、旋转、缩放和层级。
+## Apply card arc pose.
 func _apply_card_arc_pose(parent: Control, card_button: CardButton, slot: int, count: int, animate: bool, entry_offset: Vector2 = Vector2.ZERO) -> void:
 	var parent_size: Vector2 = parent.size
 	if parent_size.x <= 1.0 or parent_size.y <= 1.0:
@@ -314,7 +314,7 @@ func _apply_card_arc_pose(parent: Control, card_button: CardButton, slot: int, c
 	card_button.set_focus_state(card_button.card_index == hovered_card_index, hovered_card_index != -1 and card_button.card_index != hovered_card_index and dragging_card_index == -1)
 
 
-## 根据卡牌数量决定扇形角度，避免少量牌过散。
+## Max hand angle degrees for count.
 func _max_hand_angle_degrees_for_count(count: int) -> float:
 	if count <= 1:
 		return 0.0
@@ -329,7 +329,7 @@ func _max_hand_angle_degrees_for_count(count: int) -> float:
 	return minf(14.0, 11.0 + float(count - 5) * 1.0)
 
 
-## 查找当前悬停卡牌在某一组手牌中的槽位。
+## Find slot for hovered card.
 func _find_slot_for_hovered_card(parent: Control) -> int:
 	var slot: int = 0
 	for child: Node in parent.get_children():
@@ -341,7 +341,7 @@ func _find_slot_for_hovered_card(parent: Control) -> int:
 	return -1
 
 
-## 将以旋转轴为中心的坐标转换成 Control 左上角坐标。
+## Convert pivot to top left.
 func _convert_pivot_to_top_left(pivot_position: Vector2, pivot_offset: Vector2, rotation_degrees_value: float, scale_value: Vector2) -> Vector2:
 	var uniform_scale: float = (scale_value.x + scale_value.y) * 0.5
 	var scaled_pivot: Vector2 = pivot_offset * uniform_scale
@@ -349,7 +349,7 @@ func _convert_pivot_to_top_left(pivot_position: Vector2, pivot_offset: Vector2, 
 	return pivot_position - rotated_pivot
 
 
-## 将鼠标下方的卡牌设为悬停状态。
+## Sync hovered card with mouse.
 func _sync_hovered_card_with_mouse(global_position: Vector2) -> void:
 	var next_hovered_card_index: int = _card_index_at_global_position(global_position)
 	if next_hovered_card_index == hovered_card_index:
@@ -358,7 +358,7 @@ func _sync_hovered_card_with_mouse(global_position: Vector2) -> void:
 	relayout_existing_cards()
 
 
-## 返回鼠标位置命中的最上层卡牌索引。
+## Card index at global position.
 func _card_index_at_global_position(global_position: Vector2) -> int:
 	var card_index: int = _card_index_at_global_position_in_group(general_cards, global_position)
 	if card_index != -1:
@@ -366,7 +366,7 @@ func _card_index_at_global_position(global_position: Vector2) -> int:
 	return _card_index_at_global_position_in_group(exclusive_cards, global_position)
 
 
-## 在指定手牌组中从上到下查找鼠标命中的卡牌。
+## Card index at global position in group.
 func _card_index_at_global_position_in_group(parent: Control, global_position: Vector2) -> int:
 	if parent == null:
 		return -1
@@ -380,13 +380,13 @@ func _card_index_at_global_position_in_group(parent: Control, global_position: V
 	return -1
 
 
-## 判断 Control 的本地矩形是否包含某个全局坐标。
+## Control contains global point.
 func _control_contains_global_point(control: Control, global_position: Vector2) -> bool:
 	var local_position: Vector2 = control.get_global_transform_with_canvas().affine_inverse() * global_position
 	return Rect2(Vector2.ZERO, control.size).has_point(local_position)
 
 
-## 在两组手牌中查找指定 UI 索引对应的 CardButton。
+## Find card button.
 func _find_card_button(parent: Control, card_index: int) -> CardButton:
 	if parent == null:
 		return null
@@ -398,7 +398,7 @@ func _find_card_button(parent: Control, card_index: int) -> CardButton:
 	return null
 
 
-## 重置指定卡牌的拖动输入状态。
+## Reset card drag state.
 func reset_card_drag_state(card_index: int) -> void:
 	var card_button: CardButton = _find_card_button(exclusive_cards, card_index)
 	if card_button == null:
@@ -407,7 +407,7 @@ func reset_card_drag_state(card_index: int) -> void:
 		card_button.reset_drag_state()
 
 
-## 把交互锁同步给某一组已经存在的卡牌按钮。
+## Apply card interaction lock to group.
 func _apply_card_interaction_lock_to_group(parent: Control) -> void:
 	if parent == null:
 		return
@@ -417,7 +417,7 @@ func _apply_card_interaction_lock_to_group(parent: Control) -> void:
 			card_button.set_interaction_locked(interaction_locked)
 
 
-## 清空一个容器的全部运行时卡牌节点。
+## Clear children.
 func _clear_children(node: Node) -> void:
 	if node == null:
 		return
