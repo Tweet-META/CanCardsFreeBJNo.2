@@ -195,7 +195,10 @@ func _count_unlocked_characters(save_data: SaveSlotData) -> int:
 func _default_character_levels() -> Dictionary:
 	var levels: Dictionary = {}
 	for character_id: String in CharacterDatabase.get_default_player_ids():
-		levels[character_id] = 1
+		if character_id == "budding":
+			levels[character_id] = 1
+		else:
+			levels[character_id] = 0
 	return levels
 
 
