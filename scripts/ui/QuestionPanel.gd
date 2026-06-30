@@ -82,17 +82,17 @@ func _submit_answer(index: int) -> void:
 
 
 ## Set difficulty controls visible.
-func _set_difficulty_controls_visible(is_visible: bool) -> void:
-	difficulty_title.visible = is_visible
+func _set_difficulty_controls_visible(should_show: bool) -> void:
+	difficulty_title.visible = should_show
 	for button: Button in difficulty_buttons:
-		button.visible = is_visible
+		button.visible = should_show
 
 
 ## Set question controls visible.
-func _set_question_controls_visible(is_visible: bool) -> void:
-	prompt_label.visible = is_visible
+func _set_question_controls_visible(should_show: bool) -> void:
+	prompt_label.visible = should_show
 	for button: Button in option_buttons:
-		button.visible = is_visible
+		button.visible = should_show
 
 
 ## Category label.

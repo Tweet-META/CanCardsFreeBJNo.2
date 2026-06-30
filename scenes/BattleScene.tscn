@@ -2,8 +2,8 @@
 
 [ext_resource type="Script" uid="uid://l22r5yb4on2k" path="res://scripts/battle/BattleScene.gd" id="1"]
 [ext_resource type="Script" uid="uid://cne86khh3pdob" path="res://scripts/battle/BattleManager.gd" id="2"]
-[ext_resource type="PackedScene" path="res://scenes/ui/BattleUI.tscn" id="3"]
-[ext_resource type="PackedScene" path="res://scenes/ui/QuestionPanel.tscn" id="4"]
+[ext_resource type="PackedScene" uid="uid://c3rjhlqttg0va" path="res://scenes/ui/BattleUI.tscn" id="3"]
+[ext_resource type="PackedScene" uid="uid://o181gkesw61w" path="res://scenes/ui/QuestionPanel.tscn" id="4"]
 [ext_resource type="PackedScene" path="res://scenes/ui/ResultPanel.tscn" id="5"]
 
 [node name="BattleScene" type="Node2D" unique_id=808680317]
@@ -16,36 +16,13 @@ script = ExtResource("2")
 
 [node name="BattleUI" parent="CanvasLayer" unique_id=711404731 instance=ExtResource("3")]
 
-[node name="QuestionLayer" type="CanvasLayer" parent="."]
+[node name="QuestionLayer" type="CanvasLayer" parent="." unique_id=466251806]
 layer = 100
 
 [node name="QuestionPanel" parent="QuestionLayer" unique_id=1869777140 instance=ExtResource("4")]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -310.0
-offset_top = -180.0
-offset_right = 310.0
-offset_bottom = 180.0
-grow_horizontal = 2
-grow_vertical = 2
 
 [node name="ResultPanel" parent="QuestionLayer" unique_id=1322894633 instance=ExtResource("5")]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -260.0
-offset_top = -130.0
-offset_right = 260.0
-offset_bottom = 130.0
-grow_horizontal = 2
-grow_vertical = 2
+layout_mode = 3
 
 [node name="PlayerTeam" type="Node2D" parent="." unique_id=930007036]
 

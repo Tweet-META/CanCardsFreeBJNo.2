@@ -1,37 +1,34 @@
-extends RefCounted
-## Defines the BattleHandController script.
-class_name BattleHandController
+extends HBoxContainer
+## Displays and lays out the runtime battle hand.
+class_name BattleHandView
 
 signal card_clicked(card_index: int)
-signal drag_started(card_index: int, global_position: Vector2)
-signal drag_moved(global_position: Vector2)
-signal drag_released(card_index: int, global_position: Vector2)
+signal drag_started(card_index: int, mouse_global_position: Vector2)
+signal drag_moved(mouse_global_position: Vector2)
+signal drag_released(card_index: int, mouse_global_position: Vector2)
 
-const CARD_SIZE: Vector2 = Vector2(144, 188)
-const HOVERED_HAND_Z_INDEX: int = 100
-const HAND_ARC_RADIUS_MIN: float = 360.0
-const HAND_ARC_RADIUS_MAX: float = 900.0
-const HAND_PIVOT_Y_OFFSET_FACTOR: float = 0.92
-const HAND_BOTTOM_PADDING: float = 6.0
-const HAND_HOVER_LIFT: float = 38.0
-const HAND_HOVER_NEIGHBOR_PUSH: float = 14.0
-const HAND_HOVER_SECONDARY_PUSH: float = 6.0
-const GENERAL_HAND_LEFT_SHIFT: float = 24.0
 const TEAM_GENERAL_CARD_INDEX_OFFSET: int = 1000
-const CARD_BUTTON_SCENE: PackedScene = preload("res://scenes/CardButton.tscn")
 
-var exclusive_cards: Control
-var general_cards: Control
+@export var card_button_scene: PackedScene = preload("res://scenes/CardButton.tscn")
+@export var card_size: Vector2 = Vector2(144, 188)
+@export var hovered_hand_z_index: int = 100
+@export var hand_arc_radius_min: float = 360.0
+@export var hand_arc_radius_max: float = 900.0
+@export var hand_pivot_y_offset_factor: float = 0.92
+@export var hand_bottom_padding: float = 6.0
+@export var hand_hover_lift: float = 38.0
+@export var hand_hover_neighbor_push: float = 14.0
+@export var hand_hover_secondary_push: float = 6.0
+@export var general_hand_left_shift: float = 24.0
+@export var exclusive_entry_offset: Vector2 = Vector2(230, 28)
+
 var dragging_card_index: int = -1
 var hovered_card_index: int = -1
 var hover_restore_time_left: float = 0.0
 var interaction_locked: bool = false
 
-
-## Setup.
-func setup(exclusive_parent: Control, general_parent: Control) -> void:
-	exclusive_cards = exclusive_parent
-	general_cards = general_parent
+@onready var exclusive_cards: Control = $ExclusiveCards
+@onready var general_cards: Control = $GeneralCards
 
 
 ## Process hover restore.
@@ -60,7 +57,7 @@ func refresh(state: BattleState, character: CharacterData, selected_character_in
 		general.append(encode_team_general_card_index(i))
 
 	var should_slide_exclusive: bool = rendered_character_index != -1 and rendered_character_index != selected_character_index
-	var entry_offset: Vector2 = Vector2(230, 28) if should_slide_exclusive else Vector2.ZERO
+	var entry_offset: Vector2 = exclusive_entry_offset if should_slide_exclusive else Vector2.ZERO
 	_layout_card_fan(exclusive_cards, state, character, exclusive, should_slide_exclusive, entry_offset)
 	_layout_card_fan(general_cards, state, character, general, false)
 	return selected_character_index
@@ -99,10 +96,10 @@ func finish_drag(card_index: int) -> void:
 
 
 ## Restore hover after cancel.
-func restore_hover_after_cancel(global_position: Vector2) -> void:
+func restore_hover_after_cancel(mouse_global_position: Vector2) -> void:
 	hover_restore_time_left = 0.36
 	hovered_card_index = -1
-	_sync_hovered_card_with_mouse(global_position)
+	_sync_hovered_card_with_mouse(mouse_global_position)
 
 
 ## Get card for ui index.
@@ -133,20 +130,20 @@ func decode_team_general_card_index(card_index: int) -> int:
 
 
 ## Play general card consume animation.
-func play_general_card_consume_animation(owner: Control, card_index: int) -> Signal:
-	var completed: Signal = owner.get_tree().process_frame
+func play_general_card_consume_animation(owner_control: Control, card_index: int) -> Signal:
+	var completed: Signal = owner_control.get_tree().process_frame
 	var card_button: CardButton = _find_card_button(general_cards, card_index)
 	if card_button == null:
 		return completed
 	card_button.disabled = true
-	card_button.z_index = HOVERED_HAND_Z_INDEX + 2
+	card_button.z_index = hovered_hand_z_index + 2
 
 	for i in 12:
 		var particle := ColorRect.new()
 		particle.color = Color(0.88, 0.78, 0.55, 0.95)
 		particle.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		particle.size = Vector2(5, 5)
-		particle.position = Vector2(CARD_SIZE.x * (0.25 + float(i % 4) * 0.16), CARD_SIZE.y * (0.25 + float(i / 4) * 0.16))
+		particle.position = Vector2(card_size.x * (0.25 + float(i % 4) * 0.16), card_size.y * (0.25 + float(i) / 4.0 * 0.16))
 		card_button.add_child(particle)
 
 		var drift: Vector2 = Vector2(float((i % 5) - 2) * 15.0, -44.0 - float(i) * 3.5)
@@ -181,29 +178,29 @@ func _on_card_clicked(card_index: int) -> void:
 
 
 ## On card drag started.
-func _on_card_drag_started(card_index: int, global_position: Vector2) -> void:
+func _on_card_drag_started(card_index: int, mouse_global_position: Vector2) -> void:
 	if interaction_locked:
 		reset_card_drag_state(card_index)
 		return
 	dragging_card_index = card_index
 	hovered_card_index = -1
 	relayout_existing_cards()
-	drag_started.emit(card_index, global_position)
+	drag_started.emit(card_index, mouse_global_position)
 
 
 ## On card drag moved.
-func _on_card_drag_moved(global_position: Vector2) -> void:
+func _on_card_drag_moved(mouse_global_position: Vector2) -> void:
 	if interaction_locked:
 		return
-	drag_moved.emit(global_position)
+	drag_moved.emit(mouse_global_position)
 
 
 ## On card drag released.
-func _on_card_drag_released(card_index: int, global_position: Vector2) -> void:
+func _on_card_drag_released(card_index: int, mouse_global_position: Vector2) -> void:
 	if interaction_locked:
 		reset_card_drag_state(card_index)
 		return
-	drag_released.emit(card_index, global_position)
+	drag_released.emit(card_index, mouse_global_position)
 
 
 ## On card hover changed.
@@ -230,10 +227,10 @@ func _layout_card_fan(parent: Control, state: BattleState, character: CharacterD
 		var card_data: CardData = get_card_for_ui_index(state, character, card_index)
 		if card_data == null:
 			continue
-		var card_button: CardButton = CARD_BUTTON_SCENE.instantiate() as CardButton
-		card_button.custom_minimum_size = CARD_SIZE
+		var card_button: CardButton = card_button_scene.instantiate() as CardButton
+		card_button.custom_minimum_size = card_size
 		card_button.size = card_button.custom_minimum_size
-		card_button.pivot_offset = Vector2(CARD_SIZE.x * 0.5, CARD_SIZE.y * HAND_PIVOT_Y_OFFSET_FACTOR)
+		card_button.pivot_offset = Vector2(card_size.x * 0.5, card_size.y * hand_pivot_y_offset_factor)
 		card_button.card_selected.connect(_on_card_clicked)
 		card_button.drag_started.connect(_on_card_drag_started)
 		card_button.drag_moved.connect(_on_card_drag_moved)
@@ -264,18 +261,17 @@ func _apply_card_arc_pose(parent: Control, card_button: CardButton, slot: int, c
 	if parent_size.x <= 1.0 or parent_size.y <= 1.0:
 		parent_size = parent.custom_minimum_size
 
-	var card_size: Vector2 = CARD_SIZE
-	var pivot_offset: Vector2 = Vector2(card_size.x * 0.5, card_size.y * HAND_PIVOT_Y_OFFSET_FACTOR)
-	var pivot_base_y: float = parent_size.y - (card_size.y - pivot_offset.y) - HAND_BOTTOM_PADDING
+	var hand_pivot_offset: Vector2 = Vector2(card_size.x * 0.5, card_size.y * hand_pivot_y_offset_factor)
+	var pivot_base_y: float = parent_size.y - (card_size.y - hand_pivot_offset.y) - hand_bottom_padding
 	var center_x: float = parent_size.x * 0.5
 	if parent == general_cards:
-		center_x -= GENERAL_HAND_LEFT_SHIFT
+		center_x -= general_hand_left_shift
 	var max_angle_degrees: float = _max_hand_angle_degrees_for_count(count)
 	var max_angle: float = deg_to_rad(max_angle_degrees)
 	var group_span: float = card_size.x * 0.32 * float(maxi(count - 1, 1))
 	var available_span: float = minf(maxf(parent_size.x - card_size.x * 1.10, card_size.x * 0.30), group_span)
 	var radius_by_width: float = available_span / maxf(2.0 * sin(max_angle), 0.01)
-	var radius: float = clampf(radius_by_width, HAND_ARC_RADIUS_MIN, HAND_ARC_RADIUS_MAX)
+	var radius: float = clampf(radius_by_width, hand_arc_radius_min, hand_arc_radius_max)
 	var start_angle: float = -max_angle
 	var angle_step: float = 0.0 if count <= 1 else (max_angle * 2.0) / float(count - 1)
 	var angle: float = 0.0 if count <= 1 else start_angle + angle_step * float(slot)
@@ -292,20 +288,20 @@ func _apply_card_arc_pose(parent: Control, card_button: CardButton, slot: int, c
 		if slot == hovered_slot:
 			rotation_degrees_value *= 0.22
 		elif distance == 1:
-			pivot_x += direction * HAND_HOVER_NEIGHBOR_PUSH
+			pivot_x += direction * hand_hover_neighbor_push
 			rotation_degrees_value *= 0.65
 		elif distance == 2:
-			pivot_x += direction * HAND_HOVER_SECONDARY_PUSH
+			pivot_x += direction * hand_hover_secondary_push
 
 	var scale_value: Vector2 = Vector2.ONE
 	var z_index_value: int = slot
 	if card_button.card_index == hovered_card_index and not any_dragging:
-		pivot_y -= HAND_HOVER_LIFT
+		pivot_y -= hand_hover_lift
 		scale_value = Vector2(1.10, 1.10)
 		rotation_degrees_value = 0.0
-		z_index_value = HOVERED_HAND_Z_INDEX
+		z_index_value = hovered_hand_z_index
 
-	var top_left: Vector2 = _convert_pivot_to_top_left(Vector2(pivot_x, pivot_y), pivot_offset, rotation_degrees_value, scale_value)
+	var top_left: Vector2 = _convert_pivot_to_top_left(Vector2(pivot_x, pivot_y), hand_pivot_offset, rotation_degrees_value, scale_value)
 	if animate and entry_offset != Vector2.ZERO:
 		card_button.set_hand_pose(top_left + entry_offset, rotation_degrees_value + 7.0, scale_value * 0.96, z_index_value, false)
 		card_button.set_hand_pose(top_left, rotation_degrees_value, scale_value, z_index_value, true, 0.26, float(slot) * 0.035)
@@ -342,16 +338,16 @@ func _find_slot_for_hovered_card(parent: Control) -> int:
 
 
 ## Convert pivot to top left.
-func _convert_pivot_to_top_left(pivot_position: Vector2, pivot_offset: Vector2, rotation_degrees_value: float, scale_value: Vector2) -> Vector2:
+func _convert_pivot_to_top_left(pivot_position: Vector2, hand_pivot_offset: Vector2, rotation_degrees_value: float, scale_value: Vector2) -> Vector2:
 	var uniform_scale: float = (scale_value.x + scale_value.y) * 0.5
-	var scaled_pivot: Vector2 = pivot_offset * uniform_scale
+	var scaled_pivot: Vector2 = hand_pivot_offset * uniform_scale
 	var rotated_pivot: Vector2 = scaled_pivot.rotated(deg_to_rad(rotation_degrees_value))
 	return pivot_position - rotated_pivot
 
 
 ## Sync hovered card with mouse.
-func _sync_hovered_card_with_mouse(global_position: Vector2) -> void:
-	var next_hovered_card_index: int = _card_index_at_global_position(global_position)
+func _sync_hovered_card_with_mouse(mouse_global_position: Vector2) -> void:
+	var next_hovered_card_index: int = _card_index_at_global_position(mouse_global_position)
 	if next_hovered_card_index == hovered_card_index:
 		return
 	hovered_card_index = next_hovered_card_index
@@ -359,15 +355,15 @@ func _sync_hovered_card_with_mouse(global_position: Vector2) -> void:
 
 
 ## Card index at global position.
-func _card_index_at_global_position(global_position: Vector2) -> int:
-	var card_index: int = _card_index_at_global_position_in_group(general_cards, global_position)
+func _card_index_at_global_position(mouse_global_position: Vector2) -> int:
+	var card_index: int = _card_index_at_global_position_in_group(general_cards, mouse_global_position)
 	if card_index != -1:
 		return card_index
-	return _card_index_at_global_position_in_group(exclusive_cards, global_position)
+	return _card_index_at_global_position_in_group(exclusive_cards, mouse_global_position)
 
 
 ## Card index at global position in group.
-func _card_index_at_global_position_in_group(parent: Control, global_position: Vector2) -> int:
+func _card_index_at_global_position_in_group(parent: Control, mouse_global_position: Vector2) -> int:
 	if parent == null:
 		return -1
 	var children: Array[Node] = parent.get_children()
@@ -375,14 +371,14 @@ func _card_index_at_global_position_in_group(parent: Control, global_position: V
 		var child: Node = children[i]
 		if child is CardButton:
 			var card_button: CardButton = child
-			if _control_contains_global_point(card_button, global_position):
+			if _control_contains_global_point(card_button, mouse_global_position):
 				return card_button.card_index
 	return -1
 
 
 ## Control contains global point.
-func _control_contains_global_point(control: Control, global_position: Vector2) -> bool:
-	var local_position: Vector2 = control.get_global_transform_with_canvas().affine_inverse() * global_position
+func _control_contains_global_point(control: Control, mouse_global_position: Vector2) -> bool:
+	var local_position: Vector2 = control.get_global_transform_with_canvas().affine_inverse() * mouse_global_position
 	return Rect2(Vector2.ZERO, control.size).has_point(local_position)
 
 

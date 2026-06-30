@@ -147,32 +147,36 @@ It must not manipulate UI nodes. It publishes:
 
 `BattleUI` owns transient battle-screen presentation state: selected indices, target highlights, card interaction locks, and panel refresh coordination. It emits user intentions and must not resolve combat.
 
-`BattleHandController` owns the runtime hand UI only: `CardButton` instancing, exclusive/general fan layouts, hover recovery, drag visual state, negative team-card index encoding on the UI side, and the general-card consume particle animation. It does not apply card rules.
+`BattlefieldView` is the battle-field node attached inside `BattleUI.tscn`. It creates `CharacterStandee` and `EnemyStandee` instances, performs hit testing, and reads editor-owned slot nodes for player and enemy placement. Dead enemies are omitted when the battlefield is refreshed.
+
+`BattleHandView` is the hand node attached to `CardsArea` in `BattleUI.tscn`. It owns the runtime hand UI only: `CardButton` instancing, exclusive/general fan layouts, hover recovery, drag visual state, negative team-card index encoding on the UI side, and the general-card consume particle animation. It does not apply card rules. Its layout tuning values are exported so the Godot editor can adjust them without editing script constants.
 
 Focused UI scenes own their own visuals and local behavior:
 
 - `BattleTopBar`
+- `BattlefieldView`
+- `BattleHandView`
 - `BattleInfoPanel`
 - `BattleLogPanel`
 - `QuestionPanel`
 - `ResultPanel`
+- `PreparationPanel`
 - `ShopPanel` / `ShopCardItem`
 - `SettingsPanel`
 - `DeveloperControls`
 - `CancelDropArea`
 - `CardButton`
+- `CharacterSelectButton`
 - `CharacterStandee`
 - `EnemyStandee`
 - `ShieldVisual`, shared by both standees for fixed and percentage shields
 - `StatusEffectIcon`, instantiated inside a standee for each persistent effect
 
-`BattlefieldController` creates standee scene instances, performs hit testing, and calculates layouts for one to eight enemies. Dead enemies are omitted when the battlefield is refreshed.
-
 `ShieldVisual` receives a fixed shield value and a percentage reduction value. It is visible when either is positive and uses additive blending for `assets/effects/shield.png`.
 
 `EnemyStandee` reads `EnemyData.active_effects` and instantiates one `StatusEffectIcon` per effect. Effect icons load their configured texture only when the asset exists, allowing effect logic to be implemented before final art is imported.
 
-`BattleHandController` creates `CardButton` instances because hand contents are runtime data. `ShopPanel` similarly creates `ShopCardItem` instances. Static panel structure belongs in `.tscn`; repeated data-driven items are allowed to be instantiated from reusable scenes.
+`BattleHandView` creates `CardButton` instances because hand contents are runtime data. `ShopPanel` similarly creates `ShopCardItem` instances. Static panel structure belongs in `.tscn`; repeated data-driven items are allowed to be instantiated from reusable scenes.
 
 ## Important Data Contracts
 

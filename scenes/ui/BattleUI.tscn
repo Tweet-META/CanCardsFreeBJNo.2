@@ -4,11 +4,13 @@
 [ext_resource type="Texture2D" uid="uid://h1kue4kbnf2h" path="res://assets/ui/conversation_room.png" id="2_p1o0s"]
 [ext_resource type="PackedScene" path="res://scenes/ui/BattleTopBar.tscn" id="3"]
 [ext_resource type="Script" uid="uid://cf0mqi6h4l0bb" path="res://scripts/ui/ArrowLayer.gd" id="4"]
-[ext_resource type="PackedScene" path="res://scenes/ui/CancelDropArea.tscn" id="5"]
+[ext_resource type="PackedScene" uid="uid://lv7i6q1iophy" path="res://scenes/ui/CancelDropArea.tscn" id="5"]
 [ext_resource type="PackedScene" path="res://scenes/ui/BattleLogPanel.tscn" id="6"]
 [ext_resource type="PackedScene" path="res://scenes/ui/BattleInfoPanel.tscn" id="7"]
 [ext_resource type="PackedScene" path="res://scenes/ui/ShopPanel.tscn" id="8"]
-[ext_resource type="PackedScene" path="res://scenes/ui/DeveloperControls.tscn" id="9"]
+[ext_resource type="PackedScene" uid="uid://cgpedcfjh4dk0" path="res://scenes/ui/DeveloperControls.tscn" id="9"]
+[ext_resource type="Script" uid="uid://b26wnu27orw70" path="res://scripts/ui/BattlefieldView.gd" id="10"]
+[ext_resource type="Script" uid="uid://e5wu6cf4bcyf" path="res://scripts/ui/BattleHandView.gd" id="11"]
 
 [node name="BattleUI" type="Control" unique_id=1235082704]
 layout_mode = 3
@@ -61,6 +63,187 @@ layout_mode = 2
 [node name="Battlefield" type="Control" parent="Root" unique_id=1936223552]
 layout_mode = 2
 size_flags_vertical = 3
+script = ExtResource("10")
+
+[node name="Slots" type="Control" parent="Root/Battlefield" unique_id=2116896652]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="PlayerSlots" type="Control" parent="Root/Battlefield/Slots" unique_id=915522059]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="PlayerTopSlot" type="Control" parent="Root/Battlefield/Slots/PlayerSlots" unique_id=494680251]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 70.0
+offset_top = 32.0
+offset_right = 70.0
+offset_bottom = 32.0
+mouse_filter = 2
+
+[node name="PlayerMiddleSlot" type="Control" parent="Root/Battlefield/Slots/PlayerSlots" unique_id=170193782]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 210.0
+offset_top = 107.0
+offset_right = 210.0
+offset_bottom = 107.0
+mouse_filter = 2
+
+[node name="PlayerBottomSlot" type="Control" parent="Root/Battlefield/Slots/PlayerSlots" unique_id=36475825]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 70.0
+offset_top = 182.0
+offset_right = 70.0
+offset_bottom = 182.0
+mouse_filter = 2
+
+[node name="EnemySlots" type="Control" parent="Root/Battlefield/Slots" unique_id=684363158]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="EnemyOneSlots" type="Control" parent="Root/Battlefield/Slots/EnemySlots" unique_id=1238631967]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="EnemyOneSlot1" type="Control" parent="Root/Battlefield/Slots/EnemySlots/EnemyOneSlots" unique_id=981556988]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 871.0
+offset_top = 73.0
+offset_right = 871.0
+offset_bottom = 73.0
+mouse_filter = 2
+
+[node name="EnemyTwoSlots" type="Control" parent="Root/Battlefield/Slots/EnemySlots" unique_id=1614126687]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="EnemyTwoSlot1" type="Control" parent="Root/Battlefield/Slots/EnemySlots/EnemyTwoSlots" unique_id=94393375]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 766.0
+offset_top = 12.0
+offset_right = 766.0
+offset_bottom = 12.0
+mouse_filter = 2
+
+[node name="EnemyTwoSlot2" type="Control" parent="Root/Battlefield/Slots/EnemySlots/EnemyTwoSlots" unique_id=151109652]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 935.0
+offset_top = 127.0
+offset_right = 935.0
+offset_bottom = 127.0
+mouse_filter = 2
+
+[node name="EnemyManySlots" type="Control" parent="Root/Battlefield/Slots/EnemySlots" unique_id=1039554966]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="EnemyManySlot1" type="Control" parent="Root/Battlefield/Slots/EnemySlots/EnemyManySlots" unique_id=521329385]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 840.0
+offset_top = -16.0
+offset_right = 840.0
+offset_bottom = -16.0
+mouse_filter = 2
+
+[node name="EnemyManySlot2" type="Control" parent="Root/Battlefield/Slots/EnemySlots/EnemyManySlots" unique_id=745395389]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 671.0
+offset_top = 93.0
+offset_right = 671.0
+offset_bottom = 93.0
+mouse_filter = 2
+
+[node name="EnemyManySlot3" type="Control" parent="Root/Battlefield/Slots/EnemySlots/EnemyManySlots" unique_id=756282474]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 829.0
+offset_top = 219.0
+offset_right = 829.0
+offset_bottom = 219.0
+mouse_filter = 2
+
+[node name="EnemyManySlot4" type="Control" parent="Root/Battlefield/Slots/EnemySlots/EnemyManySlots" unique_id=306848036]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 660.0
+offset_top = 232.0
+offset_right = 660.0
+offset_bottom = 232.0
+mouse_filter = 2
+
+[node name="EnemyManySlot5" type="Control" parent="Root/Battlefield/Slots/EnemySlots/EnemyManySlots" unique_id=1744244638]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 682.0
+offset_top = -39.0
+offset_right = 682.0
+offset_bottom = -39.0
+mouse_filter = 2
+
+[node name="EnemyManySlot6" type="Control" parent="Root/Battlefield/Slots/EnemySlots/EnemyManySlots" unique_id=1133595772]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 835.0
+offset_top = 93.0
+offset_right = 835.0
+offset_bottom = 93.0
+mouse_filter = 2
+
+[node name="EnemyManySlot7" type="Control" parent="Root/Battlefield/Slots/EnemySlots/EnemyManySlots" unique_id=1178414634]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 998.0
+offset_top = 12.0
+offset_right = 998.0
+offset_bottom = 12.0
+mouse_filter = 2
+
+[node name="EnemyManySlot8" type="Control" parent="Root/Battlefield/Slots/EnemySlots/EnemyManySlots" unique_id=1195243322]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 988.0
+offset_top = 175.0
+offset_right = 988.0
+offset_bottom = 175.0
+mouse_filter = 2
 
 [node name="PlayerLayer" type="Control" parent="Root/Battlefield" unique_id=1871391193]
 layout_mode = 1
@@ -92,15 +275,8 @@ script = ExtResource("4")
 
 [node name="CancelDropArea" parent="Root/Battlefield" unique_id=893653263 instance=ExtResource("5")]
 layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -71.0
-offset_top = -92.0
-offset_right = 71.0
-offset_bottom = -40.0
+offset_top = 95.0
+offset_bottom = 147.0
 grow_horizontal = 2
 grow_vertical = 0
 
@@ -116,6 +292,7 @@ layout_mode = 2
 [node name="CardsArea" type="HBoxContainer" parent="Root/Bottom" unique_id=1898617768]
 layout_mode = 2
 size_flags_horizontal = 3
+script = ExtResource("11")
 
 [node name="ExclusiveCards" type="Control" parent="Root/Bottom/CardsArea" unique_id=449322381]
 custom_minimum_size = Vector2(310, 205)
@@ -134,40 +311,10 @@ layout_mode = 2
 [node name="BattleLogPanel" parent="Root/Bottom" unique_id=537367660 instance=ExtResource("6")]
 
 [node name="BattleInfoPanel" parent="." unique_id=721176377 instance=ExtResource("7")]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.0
-anchor_top = 1.0
-anchor_right = 0.0
-anchor_bottom = 1.0
-offset_left = 26.0
-offset_top = -118.0
-offset_right = 216.0
-offset_bottom = -16.0
-grow_vertical = 0
 
 [node name="ShopPanel" parent="." unique_id=1946349324 instance=ExtResource("8")]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -370.0
-offset_top = -210.0
-offset_right = 370.0
-offset_bottom = 210.0
-grow_horizontal = 2
-grow_vertical = 2
 
 [node name="DeveloperControls" parent="." unique_id=229202676 instance=ExtResource("9")]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.5
-anchor_top = 0.0
-anchor_right = 0.5
-anchor_bottom = 0.0
 offset_left = -275.0
-offset_top = 98.0
 offset_right = -70.0
 offset_bottom = 286.0

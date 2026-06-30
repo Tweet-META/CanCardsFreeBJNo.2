@@ -48,10 +48,10 @@ func begin_sell_mode(sell_price: float) -> void:
 	_apply_shop_button_style(false)
 
 
-func update_sell_drop_hover(global_position: Vector2) -> void:
+func update_sell_drop_hover(mouse_global_position: Vector2) -> void:
 	if not sell_mode:
 		return
-	var next_hovered: bool = is_sell_drop_target(global_position)
+	var next_hovered: bool = is_sell_drop_target(mouse_global_position)
 	if next_hovered == sell_drop_hovered:
 		return
 	sell_drop_hovered = next_hovered
@@ -67,10 +67,10 @@ func end_sell_mode() -> void:
 	_apply_shop_button_style(false)
 
 
-func is_sell_drop_target(global_position: Vector2) -> bool:
+func is_sell_drop_target(mouse_global_position: Vector2) -> bool:
 	if not sell_mode:
 		return false
-	var local_position: Vector2 = shop_button.get_global_transform_with_canvas().affine_inverse() * global_position
+	var local_position: Vector2 = shop_button.get_global_transform_with_canvas().affine_inverse() * mouse_global_position
 	return Rect2(Vector2.ZERO, shop_button.size).has_point(local_position)
 
 

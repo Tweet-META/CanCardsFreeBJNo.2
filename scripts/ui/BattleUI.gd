@@ -28,18 +28,13 @@ var cancel_drop_hovered: bool = false
 var flow_cards_interaction_locked: bool = false
 var cards_interaction_locked: bool = false
 var hidden_code_buffer: String = ""
-var battlefield_controller: BattlefieldController = BattlefieldController.new()
-var hand_controller: BattleHandController = BattleHandController.new()
 
 @onready var background: TextureRect = $Background
 @onready var top_bar: BattleTopBar = $Root/BattleTopBar
-@onready var battlefield: Control = $Root/Battlefield
-@onready var player_layer: Control = $Root/Battlefield/PlayerLayer
-@onready var enemy_layer: Control = $Root/Battlefield/EnemyLayer
+@onready var battlefield: BattlefieldView = $Root/Battlefield
 @onready var arrow_layer: ArrowLayer = $Root/Battlefield/ArrowLayer
 @onready var cancel_drop_area: CancelDropArea = $Root/Battlefield/CancelDropArea
-@onready var exclusive_cards: Control = $Root/Bottom/CardsArea/ExclusiveCards
-@onready var general_cards: Control = $Root/Bottom/CardsArea/GeneralCards
+@onready var hand_view: BattleHandView = $Root/Bottom/CardsArea
 @onready var log_panel: BattleLogPanel = $Root/Bottom/BattleLogPanel
 @onready var selected_hint: BattleInfoPanel = $BattleInfoPanel
 @onready var shop_panel: ShopPanel = $ShopPanel
@@ -51,14 +46,13 @@ func _ready() -> void:
 	set_process(true)
 	set_process_input(true)
 	_apply_export_safe_layout()
-	battlefield_controller.setup(self, battlefield, player_layer, enemy_layer)
-	battlefield_controller.character_selected.connect(_select_character)
-	battlefield_controller.enemy_selected.connect(_select_enemy)
-	hand_controller.setup(exclusive_cards, general_cards)
-	hand_controller.card_clicked.connect(_on_card_clicked)
-	hand_controller.drag_started.connect(_on_card_drag_started)
-	hand_controller.drag_moved.connect(_on_card_drag_moved)
-	hand_controller.drag_released.connect(_on_card_drag_released)
+	battlefield.setup(self)
+	battlefield.character_selected.connect(_select_character)
+	battlefield.enemy_selected.connect(_select_enemy)
+	hand_view.card_clicked.connect(_on_card_clicked)
+	hand_view.drag_started.connect(_on_card_drag_started)
+	hand_view.drag_moved.connect(_on_card_drag_moved)
+	hand_view.drag_released.connect(_on_card_drag_released)
 	top_bar.menu_requested.connect(func() -> void: get_tree().change_scene_to_file("res://scenes/MapScene.tscn"))
 	top_bar.shop_requested.connect(_toggle_shop_panel)
 	shop_panel.refresh_requested.connect(func() -> void: shop_refresh_requested.emit())
@@ -75,8 +69,8 @@ func _ready() -> void:
 
 ## Process.
 func _process(delta: float) -> void:
-	if hand_controller.dragging_card_index == -1:
-		hand_controller.process_hover_restore(delta, get_global_mouse_position())
+	if hand_view.dragging_card_index == -1:
+		hand_view.process_hover_restore(delta, get_global_mouse_position())
 		return
 	var mouse_position: Vector2 = get_global_mouse_position()
 	arrow_layer.update_arrow(mouse_position)
@@ -89,10 +83,10 @@ func _process(delta: float) -> void:
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
 		_process_hidden_code_key(event as InputEventKey)
-	if hand_controller.dragging_card_index == -1:
+	if hand_view.dragging_card_index == -1:
 		return
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
-		_release_dragging_card(hand_controller.dragging_card_index, get_global_mouse_position())
+		_release_dragging_card(hand_view.dragging_card_index, get_global_mouse_position())
 		accept_event()
 
 
@@ -157,7 +151,7 @@ func _refresh_battle_background() -> void:
 
 ## Refresh battlefield.
 func _refresh_battlefield() -> void:
-	battlefield_controller.refresh(
+	battlefield.refresh_view(
 		state,
 		selected_character_index,
 		previous_character_index,
@@ -173,7 +167,7 @@ func _refresh_battlefield() -> void:
 ## Refresh cards.
 func _refresh_cards() -> void:
 	var character: CharacterData = _get_selected_character()
-	rendered_character_index = hand_controller.refresh(state, character, selected_character_index, rendered_character_index)
+	rendered_character_index = hand_view.refresh(state, character, selected_character_index, rendered_character_index)
 
 
 ## Set card interaction locked.
@@ -196,7 +190,7 @@ func _set_effective_card_interaction_locked(locked: bool) -> void:
 	if cards_interaction_locked:
 		_cancel_current_card_interaction()
 	else:
-		hand_controller.set_interaction_locked(false)
+		hand_view.set_interaction_locked(false)
 		if state != null:
 			_select_next_ready_character_if_needed()
 			_refresh_status()
@@ -206,12 +200,12 @@ func _set_effective_card_interaction_locked(locked: bool) -> void:
 
 ## Cancel current card interaction.
 func _cancel_current_card_interaction() -> void:
-	if hand_controller.dragging_card_index != -1:
+	if hand_view.dragging_card_index != -1:
 		arrow_layer.end_arrow()
 		top_bar.end_sell_mode()
 		_set_cancel_drop_visible(false)
 		_clear_drag_target_highlight()
-	hand_controller.set_interaction_locked(true)
+	hand_view.set_interaction_locked(true)
 
 
 ## Refresh logs.
@@ -227,66 +221,66 @@ func _on_card_clicked(card_index: int) -> void:
 	var character: CharacterData = _get_selected_character()
 	if character == null:
 		return
-	var card: CardData = hand_controller.get_card_for_ui_index(state, character, card_index)
+	var card: CardData = hand_view.get_card_for_ui_index(state, character, card_index)
 	if card == null:
 		return
 	if card.targets_single_enemy() or card.targets_ally():
 		return
 	if card.is_general():
-		await hand_controller.play_general_card_consume_animation(self, card_index)
+		await hand_view.play_general_card_consume_animation(self, card_index)
 		if state == null or state.phase != BattleState.Phase.PLAYER_TURN:
 			return
 	card_use_requested.emit(selected_character_index, card_index, -1, -1, "")
 
 
 ## On card drag started.
-func _on_card_drag_started(card_index: int, global_position: Vector2) -> void:
+func _on_card_drag_started(card_index: int, mouse_global_position: Vector2) -> void:
 	if cards_interaction_locked:
-		hand_controller.reset_card_drag_state(card_index)
+		hand_view.reset_card_drag_state(card_index)
 		return
 	hovered_player_target_index = -1
 	hovered_enemy_target_index = -1
 	_set_cancel_drop_visible(true)
-	arrow_layer.begin_arrow(global_position, global_position)
+	arrow_layer.begin_arrow(mouse_global_position, mouse_global_position)
 	var character: CharacterData = _get_selected_character()
-	var card: CardData = hand_controller.get_card_for_ui_index(state, character, card_index) if character != null else null
+	var card: CardData = hand_view.get_card_for_ui_index(state, character, card_index) if character != null else null
 	if card != null and card.is_general():
 		top_bar.begin_sell_mode(card.get_sell_price())
 
 
 ## On card drag moved.
-func _on_card_drag_moved(global_position: Vector2) -> void:
+func _on_card_drag_moved(mouse_global_position: Vector2) -> void:
 	if cards_interaction_locked:
 		return
-	arrow_layer.update_arrow(global_position)
-	_update_drag_target_highlight(global_position)
-	top_bar.update_sell_drop_hover(global_position)
+	arrow_layer.update_arrow(mouse_global_position)
+	_update_drag_target_highlight(mouse_global_position)
+	top_bar.update_sell_drop_hover(mouse_global_position)
 
 
 ## On card drag released.
-func _on_card_drag_released(card_index: int, global_position: Vector2) -> void:
+func _on_card_drag_released(card_index: int, mouse_global_position: Vector2) -> void:
 	if cards_interaction_locked:
-		hand_controller.reset_card_drag_state(card_index)
+		hand_view.reset_card_drag_state(card_index)
 		return
-	_release_dragging_card(card_index, global_position)
+	_release_dragging_card(card_index, mouse_global_position)
 
 
 ## Set cancel drop visible.
-func _set_cancel_drop_visible(visible: bool) -> void:
+func _set_cancel_drop_visible(should_show: bool) -> void:
 	if cancel_drop_area == null:
 		return
 	cancel_drop_hovered = false
-	if visible:
+	if should_show:
 		cancel_drop_area.show_area()
 	else:
 		cancel_drop_area.hide_area()
 
 
 ## Update cancel drop hover.
-func _update_cancel_drop_hover(global_position: Vector2) -> void:
+func _update_cancel_drop_hover(mouse_global_position: Vector2) -> void:
 	if cancel_drop_area == null or not cancel_drop_area.visible:
 		return
-	var next_hovered: bool = _is_over_cancel_drop_area(global_position)
+	var next_hovered: bool = _is_over_cancel_drop_area(mouse_global_position)
 	if next_hovered == cancel_drop_hovered:
 		return
 	cancel_drop_hovered = next_hovered
@@ -294,94 +288,94 @@ func _update_cancel_drop_hover(global_position: Vector2) -> void:
 
 
 ## Is over cancel drop area.
-func _is_over_cancel_drop_area(global_position: Vector2) -> bool:
+func _is_over_cancel_drop_area(mouse_global_position: Vector2) -> bool:
 	if cancel_drop_area == null or not cancel_drop_area.visible:
 		return false
-	return _control_contains_global_point(cancel_drop_area, global_position)
+	return _control_contains_global_point(cancel_drop_area, mouse_global_position)
 
 
 ## Release dragging card.
-func _release_dragging_card(card_index: int, global_position: Vector2) -> void:
-	if cards_interaction_locked or hand_controller.dragging_card_index == -1:
+func _release_dragging_card(card_index: int, mouse_global_position: Vector2) -> void:
+	if cards_interaction_locked or hand_view.dragging_card_index == -1:
 		return
-	var sold_to_shop: bool = top_bar.is_sell_drop_target(global_position)
-	var cancelled_by_drop_area: bool = _is_over_cancel_drop_area(global_position)
+	var sold_to_shop: bool = top_bar.is_sell_drop_target(mouse_global_position)
+	var cancelled_by_drop_area: bool = _is_over_cancel_drop_area(mouse_global_position)
 	arrow_layer.end_arrow()
 	top_bar.end_sell_mode()
-	hand_controller.finish_drag(card_index)
+	hand_view.finish_drag(card_index)
 	_set_cancel_drop_visible(false)
 	_clear_drag_target_highlight()
 	if cancelled_by_drop_area:
-		hand_controller.restore_hover_after_cancel(global_position)
+		hand_view.restore_hover_after_cancel(mouse_global_position)
 		return
 
 	var character: CharacterData = _get_selected_character()
 	if character == null:
-		hand_controller.restore_hover_after_cancel(global_position)
+		hand_view.restore_hover_after_cancel(mouse_global_position)
 		return
-	var card: CardData = hand_controller.get_card_for_ui_index(state, character, card_index)
+	var card: CardData = hand_view.get_card_for_ui_index(state, character, card_index)
 	if card == null:
-		hand_controller.restore_hover_after_cancel(global_position)
+		hand_view.restore_hover_after_cancel(mouse_global_position)
 		return
 	if sold_to_shop and card.is_general():
 		general_card_sell_requested.emit(card_index)
 		return
 	if card.targets_ally():
-		_try_use_ally_target_card(card, card_index, global_position)
+		_try_use_ally_target_card(card, card_index, mouse_global_position)
 		return
 	if card.targets_single_enemy():
-		_try_use_enemy_target_card(card, card_index, global_position)
+		_try_use_enemy_target_card(card, card_index, mouse_global_position)
 		return
 	if card.target_type == CardData.TargetType.ALL_ENEMIES or card.is_general():
 		card_use_requested.emit(selected_character_index, card_index, -1, -1, "")
 		return
-	hand_controller.restore_hover_after_cancel(global_position)
+	hand_view.restore_hover_after_cancel(mouse_global_position)
 
 
 ## Try use ally target card.
-func _try_use_ally_target_card(card: CardData, card_index: int, global_position: Vector2) -> void:
-	var ally_index: int = _player_index_at(global_position)
+func _try_use_ally_target_card(card: CardData, card_index: int, mouse_global_position: Vector2) -> void:
+	var ally_index: int = _player_index_at(mouse_global_position)
 	if ally_index == -1:
-		hand_controller.restore_hover_after_cancel(global_position)
+		hand_view.restore_hover_after_cancel(mouse_global_position)
 		return
 	if card.is_general():
-		await hand_controller.play_general_card_consume_animation(self, card_index)
+		await hand_view.play_general_card_consume_animation(self, card_index)
 		if state == null or state.phase != BattleState.Phase.PLAYER_TURN:
 			return
 	card_use_requested.emit(selected_character_index, card_index, -1, ally_index, "")
 
 
 ## Try use enemy target card.
-func _try_use_enemy_target_card(card: CardData, card_index: int, global_position: Vector2) -> void:
-	var enemy_index: int = _enemy_index_at(global_position)
+func _try_use_enemy_target_card(card: CardData, card_index: int, mouse_global_position: Vector2) -> void:
+	var enemy_index: int = _enemy_index_at(mouse_global_position)
 	if enemy_index == -1:
-		hand_controller.restore_hover_after_cancel(global_position)
+		hand_view.restore_hover_after_cancel(mouse_global_position)
 		return
 	selected_enemy_index = enemy_index
 	if card.is_general():
-		await hand_controller.play_general_card_consume_animation(self, card_index)
+		await hand_view.play_general_card_consume_animation(self, card_index)
 		if state == null or state.phase != BattleState.Phase.PLAYER_TURN:
 			return
 	card_use_requested.emit(selected_character_index, card_index, enemy_index, -1, "")
 
 
 ## Enemy index at.
-func _enemy_index_at(global_position: Vector2) -> int:
-	return battlefield_controller.enemy_index_at(global_position)
+func _enemy_index_at(mouse_global_position: Vector2) -> int:
+	return battlefield.enemy_index_at(mouse_global_position)
 
 
 ## Player index at.
-func _player_index_at(global_position: Vector2) -> int:
-	return battlefield_controller.player_index_at(global_position)
+func _player_index_at(mouse_global_position: Vector2) -> int:
+	return battlefield.player_index_at(mouse_global_position)
 
 
 ## Update drag target highlight.
-func _update_drag_target_highlight(global_position: Vector2) -> void:
+func _update_drag_target_highlight(mouse_global_position: Vector2) -> void:
 	var character: CharacterData = _get_selected_character()
-	if character == null or hand_controller.dragging_card_index == -1:
+	if character == null or hand_view.dragging_card_index == -1:
 		_clear_drag_target_highlight()
 		return
-	var card: CardData = hand_controller.get_card_for_ui_index(state, character, hand_controller.dragging_card_index)
+	var card: CardData = hand_view.get_card_for_ui_index(state, character, hand_view.dragging_card_index)
 	if card == null:
 		_clear_drag_target_highlight()
 		return
@@ -389,9 +383,9 @@ func _update_drag_target_highlight(global_position: Vector2) -> void:
 	var next_player_index: int = -1
 	var next_enemy_index: int = -1
 	if card.targets_ally():
-		next_player_index = _player_index_at(global_position)
+		next_player_index = _player_index_at(mouse_global_position)
 	elif card.targets_single_enemy():
-		next_enemy_index = _enemy_index_at(global_position)
+		next_enemy_index = _enemy_index_at(mouse_global_position)
 
 	if next_player_index == hovered_player_target_index and next_enemy_index == hovered_enemy_target_index:
 		return
@@ -534,6 +528,6 @@ func _select_next_ready_character_if_needed() -> void:
 
 
 ## Control contains global point.
-func _control_contains_global_point(control: Control, global_position: Vector2) -> bool:
-	var local_position: Vector2 = control.get_global_transform_with_canvas().affine_inverse() * global_position
+func _control_contains_global_point(control: Control, mouse_global_position: Vector2) -> bool:
+	var local_position: Vector2 = control.get_global_transform_with_canvas().affine_inverse() * mouse_global_position
 	return Rect2(Vector2.ZERO, control.size).has_point(local_position)

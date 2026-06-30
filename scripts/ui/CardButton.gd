@@ -43,7 +43,7 @@ func setup(card: CardData, index: int, current_ap: float, enabled: bool) -> void
 	locked_by_ap = card.is_skill() and current_ap < card.skill_ap_cost
 	disabled = not enabled or not card.can_use(current_ap)
 	tooltip_text = tr(card.description)
-	_update_text(card, current_ap)
+	_update_text(card)
 	_update_typography()
 	_update_art(card)
 	_update_lock_state()
@@ -142,7 +142,7 @@ func _on_mouse_exited() -> void:
 		hover_changed.emit(card_index, false)
 
 
-func _update_text(card: CardData, current_ap: float) -> void:
+func _update_text(card: CardData) -> void:
 	title_label.text = tr(card.display_name)
 	if card.is_skill():
 		body_label.text = "%s\n%s" % [tr("CARD_SKILL_COST") % card.skill_ap_cost, tr("CARD_SKILL_BASE_EFFECT")]

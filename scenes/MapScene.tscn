@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scripts/map/MapScene.gd" id="1"]
 [ext_resource type="Texture2D" path="res://assets/ui/map1.png" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/ui/PreparationPanel.tscn" id="3"]
 
 [node name="MapScene" type="Control"]
 layout_mode = 3
@@ -85,106 +86,4 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 1
 
-[node name="PrepOverlay" type="Control" parent="."]
-visible = false
-z_index = 200
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-
-[node name="Dimmer" type="ColorRect" parent="PrepOverlay"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 0
-color = Color(0, 0, 0, 0.45)
-
-[node name="PrepPanel" type="PanelContainer" parent="PrepOverlay"]
-custom_minimum_size = Vector2(1, 345)
-layout_mode = 1
-anchors_preset = 12
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = -345.0
-grow_horizontal = 2
-grow_vertical = 0
-mouse_filter = 0
-
-[node name="PrepContent" type="VBoxContainer" parent="PrepOverlay/PrepPanel"]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="Header" type="VBoxContainer" parent="PrepOverlay/PrepPanel/PrepContent"]
-layout_mode = 2
-theme_override_constants/separation = 4
-
-[node name="LevelTitle" type="Label" parent="PrepOverlay/PrepPanel/PrepContent/Header"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 28
-text = "PREP_LEVEL_FORMAT"
-horizontal_alignment = 1
-
-[node name="WaveLabel" type="Label" parent="PrepOverlay/PrepPanel/PrepContent/Header"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "PREP_WAVE_COUNT"
-horizontal_alignment = 1
-
-[node name="DescriptionLabel" type="Label" parent="PrepOverlay/PrepPanel/PrepContent/Header"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "LEVEL_1_DESCRIPTION"
-horizontal_alignment = 1
-autowrap_mode = 3
-
-[node name="SlotRow" type="HBoxContainer" parent="PrepOverlay/PrepPanel/PrepContent"]
-custom_minimum_size = Vector2(1, 84)
-layout_mode = 2
-alignment = 1
-theme_override_constants/separation = 18
-
-[node name="SlotTop" type="Button" parent="PrepOverlay/PrepPanel/PrepContent/SlotRow"]
-custom_minimum_size = Vector2(185, 76)
-layout_mode = 2
-text = "PREP_EMPTY_SLOT"
-
-[node name="SlotMiddle" type="Button" parent="PrepOverlay/PrepPanel/PrepContent/SlotRow"]
-custom_minimum_size = Vector2(185, 76)
-layout_mode = 2
-text = "PREP_EMPTY_SLOT"
-
-[node name="SlotBottom" type="Button" parent="PrepOverlay/PrepPanel/PrepContent/SlotRow"]
-custom_minimum_size = Vector2(185, 76)
-layout_mode = 2
-text = "PREP_EMPTY_SLOT"
-
-[node name="CharacterList" type="HBoxContainer" parent="PrepOverlay/PrepPanel/PrepContent"]
-custom_minimum_size = Vector2(1, 62)
-layout_mode = 2
-alignment = 1
-theme_override_constants/separation = 12
-
-[node name="Footer" type="HBoxContainer" parent="PrepOverlay/PrepPanel/PrepContent"]
-layout_mode = 2
-theme_override_constants/separation = 12
-
-[node name="FooterSpacer" type="Control" parent="PrepOverlay/PrepPanel/PrepContent/Footer"]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="PrepBackButton" type="Button" parent="PrepOverlay/PrepPanel/PrepContent/Footer"]
-custom_minimum_size = Vector2(130, 54)
-layout_mode = 2
-text = "MAP_BACK"
-
-[node name="PrepStartButton" type="Button" parent="PrepOverlay/PrepPanel/PrepContent/Footer"]
-custom_minimum_size = Vector2(165, 54)
-layout_mode = 2
-text = "PREP_START_LEVEL"
+[node name="PreparationPanel" parent="." instance=ExtResource("3")]

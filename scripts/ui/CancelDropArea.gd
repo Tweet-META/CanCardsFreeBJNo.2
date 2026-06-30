@@ -9,7 +9,6 @@ const INK: Color = Color(0.12, 0.10, 0.08)
 
 ## Ready.
 func _ready() -> void:
-	_apply_export_safe_layout()
 	visible = false
 	z_index = 250
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -18,7 +17,6 @@ func _ready() -> void:
 
 ## Show area.
 func show_area() -> void:
-	_apply_export_safe_layout()
 	visible = true
 	set_hovered(false)
 
@@ -33,17 +31,6 @@ func hide_area() -> void:
 func set_hovered(hovered: bool) -> void:
 	add_theme_stylebox_override("panel", _cancel_drop_style(hovered))
 	label.add_theme_color_override("font_color", Color.WHITE if hovered else INK)
-
-
-## Apply export safe layout.
-func _apply_export_safe_layout() -> void:
-	set_anchors_preset(Control.PRESET_CENTER_BOTTOM, false)
-	offset_left = -71.0
-	offset_top = -92.0
-	offset_right = 71.0
-	offset_bottom = -40.0
-	grow_horizontal = Control.GROW_DIRECTION_BOTH
-	grow_vertical = Control.GROW_DIRECTION_BEGIN
 
 
 ## Cancel drop style.

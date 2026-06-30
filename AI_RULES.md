@@ -10,8 +10,9 @@
 6. Keep static UI structure in `.tscn` scenes. Do not reconstruct panels with large blocks of `Button.new()`, `Label.new()`, `Control.new()`, or `TextureRect.new()`.
 7. Runtime collections may instantiate reusable packed scenes such as `CardButton`, `ShopCardItem`, `CharacterStandee`, and `EnemyStandee`.
 8. Bind existing scene nodes with typed `@onready` paths. If a node path changes, update its bound script and instantiate the scene before considering the change complete.
-9. Preserve current UI appearance and battle values unless the requested task explicitly changes them.
-10. Add concise Chinese comments before new or modified functions explaining their purpose. Keep extra inline comments for non-obvious state transitions, data contracts, formulas, and interaction recovery logic; do not narrate trivial assignments.
+9. Prefer editor-adjustable scene nodes for positions, layer order, panel size, slot placement, and animation tuning values that designers will likely tweak. Do not hide frequently adjusted UI layout constants in parent scripts when a `.tscn` node, slot, marker, theme, or exported property would make the value editable in Godot.
+10. Preserve current UI appearance and battle values unless the requested task explicitly changes them.
+11. Add concise English comments before new or modified functions explaining their purpose. Keep extra inline comments for non-obvious state transitions, data contracts, formulas, and interaction recovery logic; do not narrate trivial assignments.
 
 ## Before Editing
 
@@ -19,7 +20,8 @@
 - State the scene-tree change before any scene or UI edit. If no scene tree changes, say so.
 - Check `git status`; do not revert unrelated user changes or generated files.
 - Do not edit or delete `项目日志.docx`.
-- Prefer extending existing scenes, databases, signals, and controllers over introducing parallel systems.
+- Prefer extending existing scenes, databases, signals, and node components over introducing parallel systems.
+- Before changing UI layout code, ask whether the same value should become an editor-owned node, slot, marker, theme resource, or exported property instead.
 
 ## Data Changes
 
@@ -81,6 +83,7 @@
 - Shop and log panels must remain usable above normal battle content but below question/result overlays.
 - Opening the shop must lock and cancel all hand interaction; closing it must not clear an active question/result flow lock.
 - Team general cards must render above enemy standees and below the shop.
+- Things users commonly drag or tune in the editor, such as battle standee slots, card hand anchors, panel positions, cancel-drop areas, and overlay layers, should live in `.tscn` scene structure rather than only in script constants.
 - Independent UI panel scenes must set `layout_mode = 1` and explicit root anchors/offsets in their own `.tscn`. Their host-scene instance must repeat the final layout overrides, and export-sensitive overlays must restore the same anchors/offsets in `_ready()`; never rely on implicit root-layout inheritance.
 
 ## Localization
