@@ -100,11 +100,11 @@ func get_damage_bonus_for_difficulty(difficulty: String) -> float:
 func get_block_bonus_for_difficulty(difficulty: String) -> float:
 	match difficulty:
 		"easy":
-			return 0.10
+			return 0.02
 		"medium":
-			return 0.15
+			return 0.03
 		"hard":
-			return 0.20
+			return 0.05
 		_:
 			return 0.0
 
@@ -113,10 +113,10 @@ func get_block_bonus_for_difficulty(difficulty: String) -> float:
 func get_correct_answer_ap_bonus(difficulty: String) -> float:
 	match difficulty:
 		"easy":
-			return 0.5
+			return 0.2
 		"medium":
-			return 0.7
+			return 0.3
 		"hard":
-			return 1.0
+			return 0.5
 		_:
 			return 0.0

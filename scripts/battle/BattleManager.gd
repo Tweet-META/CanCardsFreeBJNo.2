@@ -595,8 +595,8 @@ func _run_enemy_action(enemy: EnemyData) -> void:
 			_run_slime_support(enemy, ability.power)
 		"bun_group_attack":
 			_run_bun_group_attack(enemy, ability.power)
-		"mask_single_attack":
-			_run_mask_single_attack(enemy, ability.power)
+		"single_attack":
+			_run_single_attack(enemy, ability.power)
 		"nian_weakening_strike":
 			_run_nian_weakening_strike(enemy, ability.power)
 		"nian_charge_attack":
@@ -624,8 +624,8 @@ func _run_bun_group_attack(enemy: EnemyData, power: int) -> void:
 			_emit_log(tr("LOG_ENEMY_GROUP_ATTACK") % [tr(enemy.display_name), tr(target.display_name), dealt])
 
 
-## Run mask single attack.
-func _run_mask_single_attack(enemy: EnemyData, power: int) -> void:
+## Run single attack.
+func _run_single_attack(enemy: EnemyData, power: int) -> void:
 	var target: CharacterData = _get_random_alive_player()
 	if target == null:
 		return

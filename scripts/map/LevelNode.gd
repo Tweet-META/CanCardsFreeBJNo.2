@@ -25,7 +25,7 @@ func setup(level: LevelData) -> void:
 	level_button.disabled = not level.unlocked
 	level_button.text = level.marker_text
 	level_label.text = tr(level.display_name)
-	modulate = Color.WHITE if level.unlocked else Color(0.55, 0.55, 0.55, 0.85)
+	modulate = Color.WHITE if level.unlocked else Color.TRANSPARENT
 
 
 ## Refresh language.

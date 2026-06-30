@@ -47,7 +47,8 @@
       "description": "ENEMY_PINYIN_SLIME_DESCRIPTION",
       "max_hp": 140,
       "abilities": [
-        {"id": "slime_team_shield", "power": 10, "weight": 1.0}
+        {"id": "slime_team_shield", "power": 10, "weight": 1.0},
+        {"id": "single_attack", "power": 5, "weight": 2.0}
       ],
       "toefl_reward": 1.0,
       "portrait_path": "res://assets/enemies/pinyin_slime.png"
@@ -60,7 +61,8 @@
       "description": "ENEMY_VOCAB_SLIME_DESCRIPTION",
       "max_hp": 140,
       "abilities": [
-        {"id": "slime_team_shield", "power": 10, "weight": 1.0}
+        {"id": "slime_team_shield", "power": 10, "weight": 1.0},
+        {"id": "single_attack", "power": 5, "weight": 2.0}
       ],
       "toefl_reward": 1.0,
       "portrait_path": "res://assets/enemies/vocab_slime.png"
@@ -73,7 +75,8 @@
       "description": "ENEMY_CULTURE_SLIME_DESCRIPTION",
       "max_hp": 140,
       "abilities": [
-        {"id": "slime_team_shield", "power": 10, "weight": 1.0}
+        {"id": "slime_team_shield", "power": 10, "weight": 1.0},
+        {"id": "single_attack", "power": 5, "weight": 2.0}
       ],
       "toefl_reward": 1.0,
       "portrait_path": "res://assets/enemies/culture_slime.png"
@@ -86,7 +89,7 @@
       "description": "ENEMY_PINYIN_MASK_DESCRIPTION",
       "max_hp": 90,
       "abilities": [
-        {"id": "mask_single_attack", "power": 15, "weight": 1.0}
+        {"id": "single_attack", "power": 15, "weight": 1.0}
       ],
       "toefl_reward": 1.5,
       "portrait_path": "res://assets/enemies/pinyin_mask.png"
@@ -99,7 +102,7 @@
       "description": "ENEMY_VOCAB_MASK_DESCRIPTION",
       "max_hp": 90,
       "abilities": [
-        {"id": "mask_single_attack", "power": 15, "weight": 1.0}
+        {"id": "single_attack", "power": 15, "weight": 1.0}
       ],
       "toefl_reward": 1.5,
       "portrait_path": "res://assets/enemies/vocab_mask.png"
@@ -112,7 +115,7 @@
       "description": "ENEMY_CULTURE_MASK_DESCRIPTION",
       "max_hp": 90,
       "abilities": [
-        {"id": "mask_single_attack", "power": 15, "weight": 1.0}
+        {"id": "single_attack", "power": 15, "weight": 1.0}
       ],
       "toefl_reward": 1.5,
       "portrait_path": "res://assets/enemies/culture_mask.png"
@@ -126,7 +129,7 @@
       "max_hp": 460,
       "abilities": [
         {"id": "nian_weakening_strike", "power": 22, "weight": 1.0},
-        {"id": "nian_charge_attack", "power": 100, "weight": 1.0}
+        {"id": "nian_charge_attack", "power": 100, "weight": 2.0}
       ],
       "toefl_reward": 3.0,
       "portrait_path": "res://assets/enemies/nian_beast.png"
