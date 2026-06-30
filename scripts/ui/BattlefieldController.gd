@@ -180,16 +180,16 @@ func _refresh_enemies(
 
 func _enemy_slot_pattern(count: int) -> Array[Vector2]:
 	var mirrored_three: Array[Vector2] = [
-		Vector2(0.52, 0.285),
-		Vector2(0.08, 0.56),
-		Vector2(0.50, 0.83)
+		Vector2(0.52, 0.24),
+		Vector2(0.20, 0.56),
+		Vector2(0.50, 0.93)
 	]
 	var expansion_slots: Array[Vector2] = [
-		Vector2(0.45, 0.51),
-		Vector2(0.70, 0.82),
-		Vector2(0.72, 0.29),
-		Vector2(0.82, 0.52),
-		Vector2(0.83, 0.80)
+		Vector2(0.18, 0.97),
+		Vector2(0.22, 0.17),
+		Vector2(0.51, 0.56),
+		Vector2(0.82, 0.32),
+		Vector2(0.8, 0.80)
 	]
 	match count:
 		1:

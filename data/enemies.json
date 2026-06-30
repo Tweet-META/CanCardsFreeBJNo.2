@@ -6,9 +6,9 @@
       "attribute": "pinyin",
       "prototype": "bun",
       "description": "ENEMY_PINYIN_BUN_DESCRIPTION",
-      "max_hp": 140,
+      "max_hp": 100,
       "abilities": [
-        {"id": "bun_group_attack", "power": 15, "weight": 1.0}
+        {"id": "bun_group_attack", "power": 7, "weight": 1.0}
       ],
       "toefl_reward": 1.0,
       "portrait_path": "res://assets/enemies/pinyin_bun.png"
@@ -19,9 +19,9 @@
       "attribute": "vocabulary",
       "prototype": "bun",
       "description": "ENEMY_VOCAB_BUN_DESCRIPTION",
-      "max_hp": 140,
+      "max_hp": 100,
       "abilities": [
-        {"id": "bun_group_attack", "power": 15, "weight": 1.0}
+        {"id": "bun_group_attack", "power": 7, "weight": 1.0}
       ],
       "toefl_reward": 1.0,
       "portrait_path": "res://assets/enemies/vocab_bun.png"
@@ -32,9 +32,9 @@
       "attribute": "culture",
       "prototype": "bun",
       "description": "ENEMY_CULTURE_BUN_DESCRIPTION",
-      "max_hp": 140,
+      "max_hp": 100,
       "abilities": [
-        {"id": "bun_group_attack", "power": 15, "weight": 1.0}
+        {"id": "bun_group_attack", "power": 7, "weight": 1.0}
       ],
       "toefl_reward": 1.0,
       "portrait_path": "res://assets/enemies/culture_bun.png"
@@ -45,9 +45,9 @@
       "attribute": "pinyin",
       "prototype": "slime",
       "description": "ENEMY_PINYIN_SLIME_DESCRIPTION",
-      "max_hp": 200,
+      "max_hp": 140,
       "abilities": [
-        {"id": "slime_team_shield", "power": 20, "weight": 1.0}
+        {"id": "slime_team_shield", "power": 10, "weight": 1.0}
       ],
       "toefl_reward": 1.0,
       "portrait_path": "res://assets/enemies/pinyin_slime.png"
@@ -58,9 +58,9 @@
       "attribute": "vocabulary",
       "prototype": "slime",
       "description": "ENEMY_VOCAB_SLIME_DESCRIPTION",
-      "max_hp": 200,
+      "max_hp": 140,
       "abilities": [
-        {"id": "slime_team_shield", "power": 20, "weight": 1.0}
+        {"id": "slime_team_shield", "power": 10, "weight": 1.0}
       ],
       "toefl_reward": 1.0,
       "portrait_path": "res://assets/enemies/vocab_slime.png"
@@ -71,9 +71,9 @@
       "attribute": "culture",
       "prototype": "slime",
       "description": "ENEMY_CULTURE_SLIME_DESCRIPTION",
-      "max_hp": 200,
+      "max_hp": 140,
       "abilities": [
-        {"id": "slime_team_shield", "power": 20, "weight": 1.0}
+        {"id": "slime_team_shield", "power": 10, "weight": 1.0}
       ],
       "toefl_reward": 1.0,
       "portrait_path": "res://assets/enemies/culture_slime.png"
@@ -86,7 +86,7 @@
       "description": "ENEMY_PINYIN_MASK_DESCRIPTION",
       "max_hp": 90,
       "abilities": [
-        {"id": "mask_single_attack", "power": 31, "weight": 1.0}
+        {"id": "mask_single_attack", "power": 15, "weight": 1.0}
       ],
       "toefl_reward": 1.5,
       "portrait_path": "res://assets/enemies/pinyin_mask.png"
@@ -99,7 +99,7 @@
       "description": "ENEMY_VOCAB_MASK_DESCRIPTION",
       "max_hp": 90,
       "abilities": [
-        {"id": "mask_single_attack", "power": 31, "weight": 1.0}
+        {"id": "mask_single_attack", "power": 15, "weight": 1.0}
       ],
       "toefl_reward": 1.5,
       "portrait_path": "res://assets/enemies/vocab_mask.png"
@@ -112,7 +112,7 @@
       "description": "ENEMY_CULTURE_MASK_DESCRIPTION",
       "max_hp": 90,
       "abilities": [
-        {"id": "mask_single_attack", "power": 31, "weight": 1.0}
+        {"id": "mask_single_attack", "power": 15, "weight": 1.0}
       ],
       "toefl_reward": 1.5,
       "portrait_path": "res://assets/enemies/culture_mask.png"
@@ -125,8 +125,8 @@
       "description": "ENEMY_NIAN_BEAST_DESCRIPTION",
       "max_hp": 460,
       "abilities": [
-        {"id": "nian_weakening_strike", "power": 32, "weight": 1.0},
-        {"id": "nian_charge_attack", "power": 150, "weight": 1.0}
+        {"id": "nian_weakening_strike", "power": 22, "weight": 1.0},
+        {"id": "nian_charge_attack", "power": 100, "weight": 1.0}
       ],
       "toefl_reward": 3.0,
       "portrait_path": "res://assets/enemies/nian_beast.png"
