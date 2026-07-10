@@ -1,6 +1,90 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/SaveSlotPanel.gd" id="1"]
+
+[sub_resource type="StyleBoxFlat" id="StyleSavePanel"]
+bg_color = Color(0.86, 0.78, 0.64, 0.98)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.13, 0.1, 0.08, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.24)
+shadow_size = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleSaveSelectNormal"]
+bg_color = Color(0.91, 0.74, 0.35, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.13, 0.1, 0.08, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+shadow_color = Color(0, 0, 0, 0.24)
+shadow_size = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleSaveSelectHover"]
+bg_color = Color(1, 0.86, 0.45, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.13, 0.1, 0.08, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+shadow_color = Color(0, 0, 0, 0.24)
+shadow_size = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleSaveDeleteNormal"]
+bg_color = Color(0.72, 0.44, 0.35, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.13, 0.1, 0.08, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+shadow_color = Color(0, 0, 0, 0.24)
+shadow_size = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleSaveDeleteHover"]
+bg_color = Color(0.88, 0.54, 0.42, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.13, 0.1, 0.08, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+shadow_color = Color(0, 0, 0, 0.24)
+shadow_size = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleSaveClose"]
+bg_color = Color(0.86, 0.78, 0.64, 0.98)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.13, 0.1, 0.08, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+shadow_color = Color(0, 0, 0, 0.24)
+shadow_size = 6
 
 [node name="SaveSlotPanel" type="Control"]
 visible = false
@@ -38,6 +122,7 @@ offset_right = 320.0
 offset_bottom = 215.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleSavePanel")
 
 [node name="Content" type="VBoxContainer" parent="Panel"]
 layout_mode = 2
@@ -77,11 +162,17 @@ autowrap_mode = 3
 [node name="SelectButton" type="Button" parent="Panel/Content/SlotList/Slot1"]
 custom_minimum_size = Vector2(128, 52)
 layout_mode = 2
+theme_override_colors/font_color = Color(0.12, 0.1, 0.08, 1)
+theme_override_styles/normal = SubResource("StyleSaveSelectNormal")
+theme_override_styles/hover = SubResource("StyleSaveSelectHover")
 text = "SAVE_NEW"
 
 [node name="DeleteButton" type="Button" parent="Panel/Content/SlotList/Slot1"]
 custom_minimum_size = Vector2(96, 52)
 layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_styles/normal = SubResource("StyleSaveDeleteNormal")
+theme_override_styles/hover = SubResource("StyleSaveDeleteHover")
 text = "SAVE_DELETE"
 
 [node name="Slot2" type="HBoxContainer" parent="Panel/Content/SlotList"]
@@ -100,11 +191,17 @@ autowrap_mode = 3
 [node name="SelectButton" type="Button" parent="Panel/Content/SlotList/Slot2"]
 custom_minimum_size = Vector2(128, 52)
 layout_mode = 2
+theme_override_colors/font_color = Color(0.12, 0.1, 0.08, 1)
+theme_override_styles/normal = SubResource("StyleSaveSelectNormal")
+theme_override_styles/hover = SubResource("StyleSaveSelectHover")
 text = "SAVE_NEW"
 
 [node name="DeleteButton" type="Button" parent="Panel/Content/SlotList/Slot2"]
 custom_minimum_size = Vector2(96, 52)
 layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_styles/normal = SubResource("StyleSaveDeleteNormal")
+theme_override_styles/hover = SubResource("StyleSaveDeleteHover")
 text = "SAVE_DELETE"
 
 [node name="Slot3" type="HBoxContainer" parent="Panel/Content/SlotList"]
@@ -123,17 +220,25 @@ autowrap_mode = 3
 [node name="SelectButton" type="Button" parent="Panel/Content/SlotList/Slot3"]
 custom_minimum_size = Vector2(128, 52)
 layout_mode = 2
+theme_override_colors/font_color = Color(0.12, 0.1, 0.08, 1)
+theme_override_styles/normal = SubResource("StyleSaveSelectNormal")
+theme_override_styles/hover = SubResource("StyleSaveSelectHover")
 text = "SAVE_NEW"
 
 [node name="DeleteButton" type="Button" parent="Panel/Content/SlotList/Slot3"]
 custom_minimum_size = Vector2(96, 52)
 layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_styles/normal = SubResource("StyleSaveDeleteNormal")
+theme_override_styles/hover = SubResource("StyleSaveDeleteHover")
 text = "SAVE_DELETE"
 
 [node name="CloseButton" type="Button" parent="Panel/Content"]
 custom_minimum_size = Vector2(180, 48)
 layout_mode = 2
 size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0.12, 0.1, 0.08, 1)
+theme_override_styles/normal = SubResource("StyleSaveClose")
 text = "COMMON_CANCEL"
 
 [node name="DeleteConfirmDialog" type="ConfirmationDialog" parent="."]

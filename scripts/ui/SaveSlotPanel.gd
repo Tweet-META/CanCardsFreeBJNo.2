@@ -9,9 +9,6 @@ enum Mode {
 	LOAD
 }
 
-const PAPER: Color = Color(0.86, 0.78, 0.64, 0.98)
-const INK: Color = Color(0.12, 0.10, 0.08)
-
 @onready var panel: PanelContainer = $Panel
 @onready var title_label: Label = $Panel/Content/TitleLabel
 @onready var subtitle_label: Label = $Panel/Content/SubtitleLabel
@@ -49,7 +46,6 @@ func _ready() -> void:
 	delete_confirm_dialog.confirmed.connect(_confirm_delete_slot)
 	LanguageManager.language_changed.connect(func(_locale: String) -> void: _refresh())
 	SaveManager.slot_list_changed.connect(_refresh)
-	_apply_styles()
 	close()
 
 
@@ -141,36 +137,3 @@ func _confirm_delete_slot() -> void:
 	SaveManager.delete_slot(pending_delete_slot)
 	pending_delete_slot = 0
 	_refresh()
-
-
-## Applies the existing paper-button style to the save panel.
-func _apply_styles() -> void:
-	panel.add_theme_stylebox_override("panel", _style(PAPER, 16, 4))
-	for button: Button in select_buttons:
-		button.add_theme_stylebox_override("normal", _style(Color(0.91, 0.74, 0.35, 1.0), 10, 2))
-		button.add_theme_stylebox_override("hover", _style(Color(1.0, 0.86, 0.45), 10, 2))
-		button.add_theme_color_override("font_color", INK)
-	for button: Button in delete_buttons:
-		button.add_theme_stylebox_override("normal", _style(Color(0.72, 0.44, 0.35, 1.0), 10, 2))
-		button.add_theme_stylebox_override("hover", _style(Color(0.88, 0.54, 0.42, 1.0), 10, 2))
-		button.add_theme_color_override("font_color", Color.WHITE)
-	close_button.add_theme_stylebox_override("normal", _style(PAPER, 10, 2))
-	close_button.add_theme_color_override("font_color", INK)
-
-
-## Creates a reusable flat paper style.
-func _style(color: Color, radius: int, border_width: int) -> StyleBoxFlat:
-	var style: StyleBoxFlat = StyleBoxFlat.new()
-	style.bg_color = color
-	style.corner_radius_top_left = radius
-	style.corner_radius_top_right = radius
-	style.corner_radius_bottom_left = radius
-	style.corner_radius_bottom_right = radius
-	style.border_width_left = border_width
-	style.border_width_right = border_width
-	style.border_width_top = border_width
-	style.border_width_bottom = border_width
-	style.border_color = Color(0.13, 0.10, 0.08)
-	style.shadow_color = Color(0, 0, 0, 0.24)
-	style.shadow_size = 6
-	return style

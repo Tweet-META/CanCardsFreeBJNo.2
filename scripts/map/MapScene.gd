@@ -2,8 +2,6 @@ extends Control
 ## Defines the MapScene script.
 class_name MapScene
 
-const PAPER: Color = Color(0.86, 0.78, 0.64, 0.96)
-const INK: Color = Color(0.12, 0.10, 0.08)
 const LEVEL_NODE_SCENE: PackedScene = preload("res://scenes/ui/LevelNode.tscn")
 
 @onready var map_texture: TextureRect = $MapTexture
@@ -25,7 +23,6 @@ func _ready() -> void:
 	level_layer.resized.connect(_layout_level_nodes)
 	LanguageManager.language_changed.connect(_on_language_changed)
 	preparation_panel.enter_level_requested.connect(_confirm_enter_level)
-	_apply_styles()
 	_load_map_list()
 
 
@@ -132,33 +129,3 @@ func _confirm_enter_level(level: LevelData, selected_character_ids: Array[String
 	LevelDatabase.set_active_level(level.id)
 	LevelDatabase.set_active_player_ids(selected_character_ids)
 	get_tree().change_scene_to_file(level.scene_path)
-
-
-## Apply styles.
-func _apply_styles() -> void:
-	back_button.add_theme_stylebox_override("normal", _style(PAPER, 12, 3))
-	back_button.add_theme_stylebox_override("hover", _style(Color(0.94, 0.87, 0.72), 12, 3))
-	back_button.add_theme_color_override("font_color", INK)
-	map_selector.add_theme_stylebox_override("normal", _style(PAPER, 12, 3))
-	map_selector.add_theme_color_override("font_color", INK)
-	map_title.add_theme_color_override("font_color", Color(0.96, 0.91, 0.80))
-	map_title.add_theme_color_override("font_outline_color", Color(0.08, 0.06, 0.04))
-	map_title.add_theme_constant_override("outline_size", 6)
-
-
-## Style.
-func _style(color: Color, radius: int, border_width: int) -> StyleBoxFlat:
-	var style: StyleBoxFlat = StyleBoxFlat.new()
-	style.bg_color = color
-	style.corner_radius_top_left = radius
-	style.corner_radius_top_right = radius
-	style.corner_radius_bottom_left = radius
-	style.corner_radius_bottom_right = radius
-	style.border_width_left = border_width
-	style.border_width_right = border_width
-	style.border_width_top = border_width
-	style.border_width_bottom = border_width
-	style.border_color = Color(0.13, 0.10, 0.08)
-	style.shadow_color = Color(0, 0, 0, 0.24)
-	style.shadow_size = 6
-	return style

@@ -23,6 +23,16 @@
 - Prefer extending existing scenes, databases, signals, and node components over introducing parallel systems.
 - Before changing UI layout code, ask whether the same value should become an editor-owned node, slot, marker, theme resource, or exported property instead.
 
+## Godot MCP Usage
+
+- Godot MCP is available as a development tool for this project. Use it to inspect Godot version, project metadata, scene validity, debug output, and simple scene-node operations when that is safer than editing `.tscn` text directly.
+- Prefer `mcp__godot.get_project_info` and `mcp__godot.get_godot_version` for environment checks instead of guessing the active Godot version or project structure.
+- Prefer MCP scene operations such as adding nodes, saving scenes, and loading Sprite2D textures when changing straightforward scene structure. Manual `.tscn` edits are still allowed for small, reviewable text changes, but avoid hand-writing large scene trees.
+- Use `mcp__godot.get_debug_output` when investigating editor/runtime errors after the user has reproduced an issue.
+- Do not launch the Godot editor with MCP unless the user explicitly asks for a visible editor action.
+- Do not run gameplay smoke tests or long play sessions through MCP unless the user explicitly asks. The user performs manual gameplay validation by default.
+- MCP is an editing and inspection aid, not an architecture exception: UI still belongs in `.tscn`, battle rules still belong outside UI scripts, and data still belongs in JSON/localization files.
+
 ## Data Changes
 
 - Cards: edit `data/cards.json`; add translation keys to `data/localization/translations.csv`.

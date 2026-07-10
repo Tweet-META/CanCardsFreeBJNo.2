@@ -1,15 +1,165 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/BattleTopBar.gd" id="1"]
+
+[sub_resource type="StyleBoxFlat" id="StyleTopMenuNormal"]
+bg_color = Color(0.86, 0.78, 0.64, 0.96)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.13, 0.1, 0.08, 1)
+corner_radius_top_left = 28
+corner_radius_top_right = 28
+corner_radius_bottom_right = 28
+corner_radius_bottom_left = 28
+shadow_color = Color(0, 0, 0, 0.2)
+shadow_size = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleTopMenuHover"]
+bg_color = Color(0.94, 0.87, 0.72, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.13, 0.1, 0.08, 1)
+corner_radius_top_left = 28
+corner_radius_top_right = 28
+corner_radius_bottom_right = 28
+corner_radius_bottom_left = 28
+shadow_color = Color(0, 0, 0, 0.2)
+shadow_size = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleApBackground"]
+bg_color = Color(0.4, 0.36, 0.29, 0.98)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.13, 0.1, 0.08, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.2)
+shadow_size = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleApNormalFill"]
+bg_color = Color(0.24, 0.58, 0.9, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.13, 0.1, 0.08, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+shadow_color = Color(0, 0, 0, 0.2)
+shadow_size = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleApReadyFill"]
+bg_color = Color(0.96, 0.7, 0.22, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.13, 0.1, 0.08, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+shadow_color = Color(0, 0, 0, 0.2)
+shadow_size = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleTopStatus"]
+bg_color = Color(0.86, 0.78, 0.64, 0.96)
+content_margin_left = 14.0
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.13, 0.1, 0.08, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.2)
+shadow_size = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleShopNormal"]
+bg_color = Color(0.91, 0.78, 0.54, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.13, 0.1, 0.08, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.2)
+shadow_size = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleShopHover"]
+bg_color = Color(1, 0.86, 0.6, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.13, 0.1, 0.08, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.2)
+shadow_size = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleSellNormal"]
+bg_color = Color(0.72, 0.9, 0.62, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.13, 0.1, 0.08, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.2)
+shadow_size = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleSellHover"]
+bg_color = Color(0.84, 1, 0.7, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.13, 0.1, 0.08, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.2)
+shadow_size = 5
 
 [node name="BattleTopBar" type="HBoxContainer"]
 custom_minimum_size = Vector2(1, 72)
 theme_override_constants/separation = 14
 script = ExtResource("1")
+ap_normal_fill_style = SubResource("StyleApNormalFill")
+ap_ready_fill_style = SubResource("StyleApReadyFill")
+shop_normal_style = SubResource("StyleShopNormal")
+shop_hover_style = SubResource("StyleShopHover")
+sell_normal_style = SubResource("StyleSellNormal")
+sell_hover_style = SubResource("StyleSellHover")
 
 [node name="MenuButton" type="Button" parent="."]
 custom_minimum_size = Vector2(62, 58)
 layout_mode = 2
+theme_override_font_sizes/font_size = 24
+theme_override_styles/normal = SubResource("StyleTopMenuNormal")
+theme_override_styles/hover = SubResource("StyleTopMenuHover")
 text = "II"
 
 [node name="ApBox" type="HBoxContainer" parent="."]
@@ -40,6 +190,8 @@ grow_horizontal = 2
 grow_vertical = 2
 max_value = 5.0
 show_percentage = false
+theme_override_styles/background = SubResource("StyleApBackground")
+theme_override_styles/fill = SubResource("StyleApNormalFill")
 
 [node name="ApLabel" type="Label" parent="ApBox/ApWrap"]
 layout_mode = 1
@@ -50,6 +202,10 @@ offset_top = 5.0
 offset_bottom = -5.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.42)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 2
 theme_override_font_sizes/font_size = 22
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -57,11 +213,17 @@ vertical_alignment = 1
 [node name="StatusLabel" type="Label" parent="."]
 custom_minimum_size = Vector2(210, 58)
 layout_mode = 2
+theme_override_colors/font_color = Color(0.12, 0.1, 0.08, 1)
 theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleTopStatus")
 horizontal_alignment = 0
 vertical_alignment = 1
 
 [node name="ShopButton" type="Button" parent="."]
 custom_minimum_size = Vector2(86, 58)
 layout_mode = 2
+theme_override_colors/font_color = Color(0.12, 0.1, 0.08, 1)
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleShopNormal")
+theme_override_styles/hover = SubResource("StyleShopHover")
 text = "UI_SHOP"

@@ -9,6 +9,26 @@
   - `LanguageManager`: builds translations from CSV and persists locale.
   - `SettingsManager`: persists developer-mode state in `user://settings.cfg`.
 
+## Development Tooling
+
+Codex has access to a Godot MCP server for this project. The MCP is configured
+against the project-local Godot executable:
+
+```text
+Godot_v4.6.3-stable_win64.exe
+```
+
+Use MCP for editor-aware inspection and simple scene operations:
+
+- Confirm Godot version and project metadata.
+- Read current debug output after the user reproduces an issue.
+- Create or save scenes when needed.
+- Add straightforward scene nodes and load Sprite2D textures.
+
+The MCP is not a runtime dependency and does not change the architecture rules.
+Scene structure should remain editor-owned, combat rules should remain outside
+UI scripts, and gameplay validation remains manual unless explicitly requested.
+
 ## Directory Responsibilities
 
 ```text

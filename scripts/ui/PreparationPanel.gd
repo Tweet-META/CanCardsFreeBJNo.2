@@ -4,8 +4,6 @@ class_name PreparationPanel
 
 signal enter_level_requested(level: LevelData, selected_character_ids: Array[String])
 
-const PAPER: Color = Color(0.86, 0.78, 0.64, 0.96)
-const INK: Color = Color(0.12, 0.10, 0.08)
 const CHARACTER_SELECT_BUTTON_SCENE: PackedScene = preload("res://scenes/ui/CharacterSelectButton.tscn")
 
 @export var panel_height: float = 345.0
@@ -37,7 +35,6 @@ func _ready() -> void:
 	back_button.pressed.connect(close.bind(true))
 	start_button.pressed.connect(_confirm_enter_level)
 	LanguageManager.language_changed.connect(_on_language_changed)
-	_apply_styles()
 	close(false)
 
 
@@ -110,8 +107,6 @@ func _refresh_slots() -> void:
 		button.visible = selected_index != -1 or should_show_empty_middle
 		button.disabled = selected_index == -1
 		button.text = tr("PREP_EMPTY_SLOT") if selected_index == -1 else _character_name_for_id(selected_character_ids[selected_index])
-		button.add_theme_stylebox_override("normal", _style(Color(0.90, 0.82, 0.68, 0.96), 14, 3))
-		button.add_theme_stylebox_override("hover", _style(Color(0.98, 0.88, 0.62, 0.98), 14, 3))
 	start_button.disabled = selected_character_ids.is_empty()
 
 
@@ -193,30 +188,3 @@ func _set_open(open: bool, animated: bool) -> void:
 	prep_tween.parallel().tween_property(panel, "offset_bottom", target_bottom, 0.22)
 	if not open:
 		prep_tween.finished.connect(func() -> void: visible = false)
-
-
-## Applies local paper-style button and panel overrides.
-func _apply_styles() -> void:
-	panel.add_theme_stylebox_override("panel", _style(Color(0.86, 0.78, 0.64, 0.98), 18, 4))
-	back_button.add_theme_stylebox_override("normal", _style(PAPER, 12, 3))
-	start_button.add_theme_stylebox_override("normal", _style(Color(0.91, 0.74, 0.35, 1.0), 12, 3))
-	back_button.add_theme_color_override("font_color", INK)
-	start_button.add_theme_color_override("font_color", INK)
-
-
-## Creates one flat paper stylebox.
-func _style(color: Color, radius: int, border_width: int) -> StyleBoxFlat:
-	var style: StyleBoxFlat = StyleBoxFlat.new()
-	style.bg_color = color
-	style.corner_radius_top_left = radius
-	style.corner_radius_top_right = radius
-	style.corner_radius_bottom_left = radius
-	style.corner_radius_bottom_right = radius
-	style.border_width_left = border_width
-	style.border_width_right = border_width
-	style.border_width_top = border_width
-	style.border_width_bottom = border_width
-	style.border_color = Color(0.13, 0.10, 0.08)
-	style.shadow_color = Color(0, 0, 0, 0.24)
-	style.shadow_size = 6
-	return style

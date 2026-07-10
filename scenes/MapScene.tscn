@@ -1,8 +1,50 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/map/MapScene.gd" id="1"]
-[ext_resource type="Texture2D" path="res://assets/ui/map1.png" id="2"]
+[ext_resource type="Texture2D" path="res://assets/ui/first_floor.png" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/ui/PreparationPanel.tscn" id="3"]
+
+[sub_resource type="StyleBoxFlat" id="StyleMapButtonNormal"]
+bg_color = Color(0.86, 0.78, 0.64, 0.96)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.13, 0.1, 0.08, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_color = Color(0, 0, 0, 0.24)
+shadow_size = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleMapButtonHover"]
+bg_color = Color(0.94, 0.87, 0.72, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.13, 0.1, 0.08, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_color = Color(0, 0, 0, 0.24)
+shadow_size = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleMapSelectorNormal"]
+bg_color = Color(0.86, 0.78, 0.64, 0.96)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.13, 0.1, 0.08, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_color = Color(0, 0, 0, 0.24)
+shadow_size = 6
 
 [node name="MapScene" type="Control"]
 layout_mode = 3
@@ -59,11 +101,17 @@ theme_override_constants/separation = 16
 [node name="BackButton" type="Button" parent="Header"]
 custom_minimum_size = Vector2(120, 58)
 layout_mode = 2
+theme_override_colors/font_color = Color(0.12, 0.1, 0.08, 1)
+theme_override_styles/normal = SubResource("StyleMapButtonNormal")
+theme_override_styles/hover = SubResource("StyleMapButtonHover")
 text = "MAP_BACK"
 
 [node name="MapTitle" type="Label" parent="Header"]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.96, 0.91, 0.8, 1)
+theme_override_colors/font_outline_color = Color(0.08, 0.06, 0.04, 1)
+theme_override_constants/outline_size = 6
 theme_override_font_sizes/font_size = 30
 text = "MAP_1_NAME"
 horizontal_alignment = 1
@@ -72,6 +120,8 @@ vertical_alignment = 1
 [node name="MapSelector" type="OptionButton" parent="Header"]
 custom_minimum_size = Vector2(190, 58)
 layout_mode = 2
+theme_override_colors/font_color = Color(0.12, 0.1, 0.08, 1)
+theme_override_styles/normal = SubResource("StyleMapSelectorNormal")
 
 [node name="LevelLayer" type="Control" parent="."]
 layout_mode = 1

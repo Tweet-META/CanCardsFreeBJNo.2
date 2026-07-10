@@ -4,7 +4,7 @@
     {
       "id": "map1",
       "display_name": "MAP_1_NAME",
-      "image_path": "res://assets/ui/map1.png",
+      "image_path": "res://assets/ui/first_floor.png",
       "unlocked": true,
       "levels": [
         "level1",

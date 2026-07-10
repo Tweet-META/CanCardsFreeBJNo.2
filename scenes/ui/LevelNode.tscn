@@ -1,6 +1,48 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/map/LevelNode.gd" id="1"]
+
+[sub_resource type="StyleBoxFlat" id="StyleLevelNormal"]
+bg_color = Color(0.91, 0.74, 0.35, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.2, 0.13, 0.06, 1)
+corner_radius_top_left = 29
+corner_radius_top_right = 29
+corner_radius_bottom_right = 29
+corner_radius_bottom_left = 29
+shadow_color = Color(0, 0, 0, 0.32)
+shadow_size = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleLevelHover"]
+bg_color = Color(1, 0.86, 0.45, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.2, 0.13, 0.06, 1)
+corner_radius_top_left = 29
+corner_radius_top_right = 29
+corner_radius_bottom_right = 29
+corner_radius_bottom_left = 29
+shadow_color = Color(0, 0, 0, 0.32)
+shadow_size = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleLevelPressed"]
+bg_color = Color(0.8, 0.6, 0.22, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.2, 0.13, 0.06, 1)
+corner_radius_top_left = 29
+corner_radius_top_right = 29
+corner_radius_bottom_right = 29
+corner_radius_bottom_left = 29
+shadow_color = Color(0, 0, 0, 0.32)
+shadow_size = 8
 
 [node name="LevelNode" type="Control"]
 custom_minimum_size = Vector2(104, 96)
@@ -19,7 +61,11 @@ offset_left = -29.0
 offset_right = 29.0
 offset_bottom = 58.0
 grow_horizontal = 2
+theme_override_colors/font_color = Color(0.18, 0.11, 0.04, 1)
 theme_override_font_sizes/font_size = 24
+theme_override_styles/normal = SubResource("StyleLevelNormal")
+theme_override_styles/hover = SubResource("StyleLevelHover")
+theme_override_styles/pressed = SubResource("StyleLevelPressed")
 text = "1"
 
 [node name="LevelLabel" type="Label" parent="."]

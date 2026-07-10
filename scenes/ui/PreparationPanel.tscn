@@ -1,6 +1,76 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/PreparationPanel.gd" id="1"]
+
+[sub_resource type="StyleBoxFlat" id="StylePreparationPanel"]
+bg_color = Color(0.86, 0.78, 0.64, 0.98)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.13, 0.1, 0.08, 1)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+shadow_color = Color(0, 0, 0, 0.24)
+shadow_size = 6
+
+[sub_resource type="StyleBoxFlat" id="StylePreparationBack"]
+bg_color = Color(0.86, 0.78, 0.64, 0.96)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.13, 0.1, 0.08, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_color = Color(0, 0, 0, 0.24)
+shadow_size = 6
+
+[sub_resource type="StyleBoxFlat" id="StylePreparationStart"]
+bg_color = Color(0.91, 0.74, 0.35, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.13, 0.1, 0.08, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_color = Color(0, 0, 0, 0.24)
+shadow_size = 6
+
+[sub_resource type="StyleBoxFlat" id="StylePreparationSlotNormal"]
+bg_color = Color(0.9, 0.82, 0.68, 0.96)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.13, 0.1, 0.08, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+shadow_color = Color(0, 0, 0, 0.24)
+shadow_size = 6
+
+[sub_resource type="StyleBoxFlat" id="StylePreparationSlotHover"]
+bg_color = Color(0.98, 0.88, 0.62, 0.98)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.13, 0.1, 0.08, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+shadow_color = Color(0, 0, 0, 0.24)
+shadow_size = 6
 
 [node name="PreparationPanel" type="Control"]
 visible = false
@@ -34,6 +104,8 @@ offset_top = -345.0
 grow_horizontal = 2
 grow_vertical = 0
 mouse_filter = 0
+theme_override_styles/panel = SubResource("StylePreparationPanel")
+theme_override_styles/panel = SubResource("StylePreparationPanel")
 
 [node name="PrepContent" type="VBoxContainer" parent="PrepPanel"]
 layout_mode = 2
@@ -71,16 +143,22 @@ theme_override_constants/separation = 18
 [node name="SlotTop" type="Button" parent="PrepPanel/PrepContent/SlotRow"]
 custom_minimum_size = Vector2(185, 76)
 layout_mode = 2
+theme_override_styles/normal = SubResource("StylePreparationSlotNormal")
+theme_override_styles/hover = SubResource("StylePreparationSlotHover")
 text = "PREP_EMPTY_SLOT"
 
 [node name="SlotMiddle" type="Button" parent="PrepPanel/PrepContent/SlotRow"]
 custom_minimum_size = Vector2(185, 76)
 layout_mode = 2
+theme_override_styles/normal = SubResource("StylePreparationSlotNormal")
+theme_override_styles/hover = SubResource("StylePreparationSlotHover")
 text = "PREP_EMPTY_SLOT"
 
 [node name="SlotBottom" type="Button" parent="PrepPanel/PrepContent/SlotRow"]
 custom_minimum_size = Vector2(185, 76)
 layout_mode = 2
+theme_override_styles/normal = SubResource("StylePreparationSlotNormal")
+theme_override_styles/hover = SubResource("StylePreparationSlotHover")
 text = "PREP_EMPTY_SLOT"
 
 [node name="CharacterList" type="HBoxContainer" parent="PrepPanel/PrepContent"]
@@ -100,9 +178,13 @@ size_flags_horizontal = 3
 [node name="PrepBackButton" type="Button" parent="PrepPanel/PrepContent/Footer"]
 custom_minimum_size = Vector2(130, 54)
 layout_mode = 2
+theme_override_colors/font_color = Color(0.12, 0.1, 0.08, 1)
+theme_override_styles/normal = SubResource("StylePreparationBack")
 text = "MAP_BACK"
 
 [node name="PrepStartButton" type="Button" parent="PrepPanel/PrepContent/Footer"]
 custom_minimum_size = Vector2(165, 54)
 layout_mode = 2
+theme_override_colors/font_color = Color(0.12, 0.1, 0.08, 1)
+theme_override_styles/normal = SubResource("StylePreparationStart")
 text = "PREP_START_LEVEL"
