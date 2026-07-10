@@ -32,3 +32,6 @@ desktop.ini
 
 # Logs
 *.log
+
+# Others
+自存/images/

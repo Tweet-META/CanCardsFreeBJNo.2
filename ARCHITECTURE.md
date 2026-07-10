@@ -55,8 +55,6 @@ BattleScene (Node2D, BattleScene.gd)
 ├── QuestionLayer (CanvasLayer, layer 100)
 │   ├── QuestionPanel
 │   └── ResultPanel
-├── PlayerTeam
-└── EnemyTeam
 ```
 
 `QuestionLayer` deliberately renders above battle cards, units, the shop, and developer controls.

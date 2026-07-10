@@ -1,6 +1,50 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/BattleLogPanel.gd" id="1"]
+
+[sub_resource type="StyleBoxFlat" id="StyleLogPanel"]
+bg_color = Color(0.91, 0.84, 0.7, 0.92)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.13, 0.1, 0.08, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.2)
+shadow_size = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleLogCloseNormal"]
+bg_color = Color(0.94, 0.87, 0.72, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.13, 0.1, 0.08, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+shadow_color = Color(0, 0, 0, 0.2)
+shadow_size = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleLogCloseHover"]
+bg_color = Color(1, 0.78, 0.68, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.13, 0.1, 0.08, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+shadow_color = Color(0, 0, 0, 0.2)
+shadow_size = 5
+
+[sub_resource type="StyleBoxEmpty" id="StyleLogText"]
 
 [node name="BattleLogPanel" type="PanelContainer"]
 custom_minimum_size = Vector2(64, 64)
@@ -9,6 +53,7 @@ size_flags_vertical = 8
 clip_contents = true
 mouse_filter = 0
 script = ExtResource("1")
+theme_override_styles/panel = SubResource("StyleLogPanel")
 
 [node name="LogStack" type="Control" parent="."]
 layout_mode = 2
@@ -40,6 +85,9 @@ offset_right = -6.0
 offset_bottom = 34.0
 grow_horizontal = 0
 theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.12, 0.1, 0.08, 1)
+theme_override_styles/normal = SubResource("StyleLogCloseNormal")
+theme_override_styles/hover = SubResource("StyleLogCloseHover")
 text = "X"
 
 [node name="LogLabel" type="RichTextLabel" parent="LogStack"]
@@ -57,3 +105,4 @@ grow_vertical = 2
 mouse_filter = 0
 fit_content = false
 scroll_following = true
+theme_override_styles/normal = SubResource("StyleLogText")

@@ -23,7 +23,3 @@ layer = 100
 
 [node name="ResultPanel" parent="QuestionLayer" unique_id=1322894633 instance=ExtResource("5")]
 layout_mode = 3
-
-[node name="PlayerTeam" type="Node2D" parent="." unique_id=930007036]
-
-[node name="EnemyTeam" type="Node2D" parent="." unique_id=1162073122]
