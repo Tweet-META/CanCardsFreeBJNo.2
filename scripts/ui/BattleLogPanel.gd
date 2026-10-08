@@ -1,6 +1,7 @@
 extends PanelContainer
 ## Defines the BattleLogPanel script.
 class_name BattleLogPanel
+signal log_opened()
 
 @onready var collapsed_label: Label = $LogStack/CollapsedLabel
 @onready var close_button: Button = $LogStack/CloseButton
@@ -8,10 +9,12 @@ class_name BattleLogPanel
 
 @export var collapsed_size: Vector2 = Vector2(64, 64)
 @export var expanded_size: Vector2 = Vector2(250, 190)
+@export var tutorial_expanded_size: Vector2 = Vector2(360, 260)
 @export var size_tween_duration: float = 0.16
 
 var expanded: bool = false
 var size_tween: Tween
+var tutorial_mode: bool = false
 
 
 ## Initializes the collapsed log panel and connects its local controls.
@@ -37,7 +40,17 @@ func expand() -> void:
 	collapsed_label.visible = false
 	close_button.visible = true
 	log_label.visible = true
-	_tween_size(expanded_size)
+	_tween_size(tutorial_expanded_size if tutorial_mode else expanded_size)
+	log_opened.emit()
+
+
+## Gives the first tutorial enough reading space without changing normal battle logs.
+func set_tutorial_mode(enabled: bool) -> void:
+	if tutorial_mode == enabled:
+		return
+	tutorial_mode = enabled
+	if expanded:
+		_tween_size(tutorial_expanded_size if tutorial_mode else expanded_size)
 
 
 ## Collapses the log back to its editor-configured compact size.

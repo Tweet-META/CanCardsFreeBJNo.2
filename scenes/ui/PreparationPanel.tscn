@@ -1,6 +1,8 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/PreparationPanel.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/ui/LearningGoalButton.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/ui/LearningGoalDrawer.tscn" id="3"]
 
 [sub_resource type="StyleBoxFlat" id="StylePreparationPanel"]
 bg_color = Color(0.86, 0.78, 0.64, 0.98)
@@ -105,7 +107,6 @@ grow_horizontal = 2
 grow_vertical = 0
 mouse_filter = 0
 theme_override_styles/panel = SubResource("StylePreparationPanel")
-theme_override_styles/panel = SubResource("StylePreparationPanel")
 
 [node name="PrepContent" type="VBoxContainer" parent="PrepPanel"]
 layout_mode = 2
@@ -134,38 +135,71 @@ text = "LEVEL_1_DESCRIPTION"
 horizontal_alignment = 1
 autowrap_mode = 3
 
-[node name="SlotRow" type="HBoxContainer" parent="PrepPanel/PrepContent"]
+[node name="MainRow" type="Control" parent="PrepPanel/PrepContent"]
+custom_minimum_size = Vector2(1, 152)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="PartyCenter" type="CenterContainer" parent="PrepPanel/PrepContent/MainRow"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="PartyColumn" type="VBoxContainer" parent="PrepPanel/PrepContent/MainRow/PartyCenter"]
+custom_minimum_size = Vector2(720, 146)
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="SlotRow" type="HBoxContainer" parent="PrepPanel/PrepContent/MainRow/PartyCenter/PartyColumn"]
 custom_minimum_size = Vector2(1, 84)
 layout_mode = 2
 alignment = 1
 theme_override_constants/separation = 18
 
-[node name="SlotTop" type="Button" parent="PrepPanel/PrepContent/SlotRow"]
+[node name="SlotTop" type="Button" parent="PrepPanel/PrepContent/MainRow/PartyCenter/PartyColumn/SlotRow"]
 custom_minimum_size = Vector2(185, 76)
 layout_mode = 2
 theme_override_styles/normal = SubResource("StylePreparationSlotNormal")
 theme_override_styles/hover = SubResource("StylePreparationSlotHover")
 text = "PREP_EMPTY_SLOT"
 
-[node name="SlotMiddle" type="Button" parent="PrepPanel/PrepContent/SlotRow"]
+[node name="SlotMiddle" type="Button" parent="PrepPanel/PrepContent/MainRow/PartyCenter/PartyColumn/SlotRow"]
 custom_minimum_size = Vector2(185, 76)
 layout_mode = 2
 theme_override_styles/normal = SubResource("StylePreparationSlotNormal")
 theme_override_styles/hover = SubResource("StylePreparationSlotHover")
 text = "PREP_EMPTY_SLOT"
 
-[node name="SlotBottom" type="Button" parent="PrepPanel/PrepContent/SlotRow"]
+[node name="SlotBottom" type="Button" parent="PrepPanel/PrepContent/MainRow/PartyCenter/PartyColumn/SlotRow"]
 custom_minimum_size = Vector2(185, 76)
 layout_mode = 2
 theme_override_styles/normal = SubResource("StylePreparationSlotNormal")
 theme_override_styles/hover = SubResource("StylePreparationSlotHover")
 text = "PREP_EMPTY_SLOT"
 
-[node name="CharacterList" type="HBoxContainer" parent="PrepPanel/PrepContent"]
+[node name="CharacterList" type="HBoxContainer" parent="PrepPanel/PrepContent/MainRow/PartyCenter/PartyColumn"]
 custom_minimum_size = Vector2(1, 62)
 layout_mode = 2
 alignment = 1
 theme_override_constants/separation = 12
+
+[node name="LearningGoalButton" parent="PrepPanel/PrepContent/MainRow" instance=ExtResource("2")]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -280.0
+offset_top = -75.0
+offset_right = -10.0
+offset_bottom = 75.0
+grow_horizontal = 0
+grow_vertical = 2
 
 [node name="Footer" type="HBoxContainer" parent="PrepPanel/PrepContent"]
 layout_mode = 2
@@ -188,3 +222,6 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.12, 0.1, 0.08, 1)
 theme_override_styles/normal = SubResource("StylePreparationStart")
 text = "PREP_START_LEVEL"
+
+[node name="LearningGoalDrawer" parent="." instance=ExtResource("3")]
+layout_mode = 1

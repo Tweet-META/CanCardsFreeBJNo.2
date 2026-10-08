@@ -43,3 +43,11 @@ func _apply_export_safe_layout() -> void:
 
 func _on_developer_mode_changed(enabled: bool) -> void:
 	visible = enabled
+
+
+## Prevents test controls from bypassing early-level general-card restrictions.
+func set_general_cards_enabled(enabled: bool) -> void:
+	add_general_card_button.disabled = not enabled
+	add_six_seven_button.disabled = not enabled
+	add_general_card_button.tooltip_text = "" if enabled else tr("GENERAL_CARDS_LOCKED_HINT")
+	add_six_seven_button.tooltip_text = "" if enabled else tr("GENERAL_CARDS_LOCKED_HINT")

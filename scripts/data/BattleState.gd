@@ -7,18 +7,15 @@ enum Phase {
 	PLAYER_TURN,
 	DIFFICULTY_SELECTION,
 	QUESTION,
+	ANSWER_RESULT,
+	ACTION_RESOLUTION,
 	ENEMY_TURN,
 	VICTORY,
 	DEFEAT
 }
 
-const ATTRIBUTE_PINYIN: String = LearningAttribute.PINYIN
-const ATTRIBUTE_VOCABULARY: String = LearningAttribute.VOCABULARY
-const ATTRIBUTE_CULTURE: String = LearningAttribute.CULTURE
-
 var phase: Phase = Phase.SETUP
 var turn_count: int = 0
-var level_id: String = ""
 var battle_background: String = ""
 var current_wave: int = 1
 var total_waves: int = 1
@@ -30,17 +27,29 @@ var selected_enemy: EnemyData
 var pending_card: CardData
 var pending_question: QuestionData
 var pending_difficulty: String = "easy"
+var pending_answer_correct: bool = false
+var pending_answer_bonus_triggered: bool = false
 var ap: float = 0.0
 var new_toefl: float = 0.0
 var team_general_cards: Array[CardData] = []
 var shop_offer_cards: Array[CardData] = []
 var battle_log: Array[String] = []
+var learning_goal: LearningGoalData
+var general_cards_enabled: bool = false
+var tutorial: TutorialData
+var tutorial_steps_seen: Dictionary = {}
+var tutorial_log_unread: bool = false
 
 
-func setup(players: Array[CharacterData], enemies: Array[EnemyData], level: LevelData, rng: RandomNumberGenerator = null) -> void:
+## Initializes a battle with one optional goal that remains active for the full battle.
+func setup(players: Array[CharacterData], enemies: Array[EnemyData], level: LevelData, goal: LearningGoalData, rng: RandomNumberGenerator = null) -> void:
 	player_team = players
 	enemy_team = enemies
-	level_id = level.id
+	learning_goal = goal
+	general_cards_enabled = level.general_cards_enabled
+	tutorial = TutorialDatabase.create_for_level(level) if SaveManager.needs_first_tutorial() else null
+	tutorial_steps_seen.clear()
+	tutorial_log_unread = false
 	battle_background = level.battle_background
 	current_wave = 1
 	total_waves = maxi(1, level.waves.size())
@@ -48,12 +57,13 @@ func setup(players: Array[CharacterData], enemies: Array[EnemyData], level: Leve
 	turn_count = 0
 	ap = 0.0
 	new_toefl = 0.0
-	team_general_cards = GameDataFactory.create_starting_general_cards(rng)
+	team_general_cards.clear()
+	if general_cards_enabled:
+		team_general_cards = GameDataFactory.create_starting_general_cards(rng)
 	shop_offer_cards.clear()
 	battle_log.clear()
 
-	var pinyin_passive_count: int = get_attribute_count(ATTRIBUTE_PINYIN, false)
-	var max_hp_multiplier: float = 1.0 + float(pinyin_passive_count) * 0.20
+	var max_hp_multiplier: float = get_team_stat_multiplier()
 	for character: CharacterData in player_team:
 		character.setup_runtime(max_hp_multiplier)
 	for enemy: EnemyData in enemy_team:
@@ -76,6 +86,8 @@ func start_player_turn() -> void:
 	pending_card = null
 	pending_question = null
 	pending_difficulty = "easy"
+	pending_answer_correct = false
+	pending_answer_bonus_triggered = false
 
 	for character: CharacterData in player_team:
 		if character.is_alive():
@@ -117,38 +129,19 @@ func did_all_living_players_act() -> bool:
 	return true
 
 
-func get_pinyin_passive_count() -> int:
-	return get_attribute_count(ATTRIBUTE_PINYIN)
-
-
-func get_vocabulary_passive_count() -> int:
-	return get_attribute_count(ATTRIBUTE_VOCABULARY)
-
-
-func get_culture_passive_count() -> int:
-	return get_attribute_count(ATTRIBUTE_CULTURE)
-
-
-func get_attribute_count(attribute: String, alive_only: bool = true) -> int:
-	var count: int = 0
-	for character: CharacterData in player_team:
-		if character.attribute != attribute:
-			continue
-		if alive_only and not character.is_alive():
-			continue
-		count += 1
-	return count
-
+## Returns the selected goal's team HP and card-damage multiplier.
 func get_team_stat_multiplier() -> float:
-	return 1.0 + float(get_pinyin_passive_count()) * 0.20
+	return learning_goal.team_stat_multiplier if learning_goal != null else 1.0
 
 
+## Returns the selected goal's wrong-answer compensation chance.
 func get_wrong_answer_bonus_chance() -> float:
-	return clampf(float(get_vocabulary_passive_count()) * 0.25, 0.0, 1.0)
+	return clampf(learning_goal.wrong_answer_bonus_chance, 0.0, 1.0) if learning_goal != null else 0.0
 
 
+## Returns the selected goal's flat bonus added to AP gains.
 func get_ap_growth_bonus() -> float:
-	return float(get_culture_passive_count()) * 0.25
+	return learning_goal.ap_growth_bonus if learning_goal != null else 0.0
 
 
 func add_ap(amount: float) -> void:
@@ -183,3 +176,5 @@ func clear_pending_action() -> void:
 	pending_card = null
 	pending_question = null
 	pending_difficulty = "easy"
+	pending_answer_correct = false
+	pending_answer_bonus_triggered = false

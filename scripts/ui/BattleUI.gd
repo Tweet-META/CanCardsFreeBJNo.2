@@ -2,7 +2,7 @@ extends Control
 ## Defines the BattleUI script.
 class_name BattleUI
 
-signal card_use_requested(character_index: int, card_index: int, enemy_index: int, ally_index: int, difficulty: String)
+signal card_use_requested(character_index: int, card_index: int, enemy_index: int, ally_index: int)
 signal shop_refresh_requested()
 signal shop_buy_requested(offer_index: int, character_index: int)
 signal general_card_sell_requested(card_index: int)
@@ -12,16 +12,16 @@ signal six_seven_requested()
 signal developer_clear_enemies_requested()
 signal developer_defeat_players_requested()
 signal developer_skip_turn_requested()
+signal tutorial_log_opened()
 
 const SIX_SEVEN_CODE: String = "676767"
 
 var state: BattleState
 var selected_character_index: int = 0
 var selected_enemy_index: int = 0
-var previous_character_index: int = -1
 var rendered_character_index: int = -1
 var showing_enemy_info: bool = false
-var selection_transition_pending: bool = false
+var selection_jump_pending: bool = false
 var hovered_player_target_index: int = -1
 var hovered_enemy_target_index: int = -1
 var cancel_drop_hovered: bool = false
@@ -39,6 +39,10 @@ var hidden_code_buffer: String = ""
 @onready var selected_hint: BattleInfoPanel = $BattleInfoPanel
 @onready var shop_panel: ShopPanel = $ShopPanel
 @onready var developer_controls: DeveloperControls = $DeveloperControls
+@onready var turn_banner: TurnBanner = $TurnBanner
+@onready var tutorial_log_hint: Label = $TutorialLogHint
+
+@export_range(0.0, 2.0, 0.05) var skipped_enemy_delay: float = 0.35
 
 
 ## Ready.
@@ -46,7 +50,6 @@ func _ready() -> void:
 	set_process(true)
 	set_process_input(true)
 	_apply_export_safe_layout()
-	battlefield.setup(self)
 	battlefield.character_selected.connect(_select_character)
 	battlefield.enemy_selected.connect(_select_enemy)
 	hand_view.card_clicked.connect(_on_card_clicked)
@@ -55,6 +58,7 @@ func _ready() -> void:
 	hand_view.drag_released.connect(_on_card_drag_released)
 	top_bar.menu_requested.connect(func() -> void: get_tree().change_scene_to_file("res://scenes/MapScene.tscn"))
 	top_bar.shop_requested.connect(_toggle_shop_panel)
+	log_panel.log_opened.connect(func() -> void: tutorial_log_opened.emit())
 	shop_panel.refresh_requested.connect(func() -> void: shop_refresh_requested.emit())
 	shop_panel.buy_requested.connect(_buy_shop_card)
 	shop_panel.visibility_changed.connect(_on_shop_visibility_changed)
@@ -110,12 +114,13 @@ func _process_hidden_code_key(event: InputEventKey) -> void:
 		six_seven_requested.emit()
 
 
-## Refresh.
+## Refreshes the screen with retained units and locks input outside player turns.
 func refresh(new_state: BattleState) -> void:
 	state = new_state
 	if top_bar == null:
 		return
 	_clamp_selection()
+	_update_effective_card_interaction_lock()
 	_select_next_ready_character_if_needed()
 	_refresh_status()
 	_refresh_battlefield()
@@ -137,7 +142,8 @@ func _on_language_changed(_locale: String) -> void:
 
 ## Refresh status.
 func _refresh_status() -> void:
-	top_bar.refresh(state.ap, state.phase, state.turn_count, state.current_wave, state.total_waves)
+	top_bar.refresh(state.ap, state.phase, state.turn_count, state.current_wave, state.total_waves, state.general_cards_enabled)
+	developer_controls.set_general_cards_enabled(state.general_cards_enabled)
 	_refresh_battle_background()
 	_refresh_info_hint()
 	_refresh_shop_panel()
@@ -154,14 +160,13 @@ func _refresh_battlefield() -> void:
 	battlefield.refresh_view(
 		state,
 		selected_character_index,
-		previous_character_index,
-		selection_transition_pending,
+		selection_jump_pending,
 		selected_enemy_index,
 		showing_enemy_info,
 		hovered_player_target_index,
 		hovered_enemy_target_index
 	)
-	selection_transition_pending = false
+	selection_jump_pending = false
 
 
 ## Refresh cards.
@@ -178,7 +183,8 @@ func set_card_interaction_locked(locked: bool) -> void:
 
 ## Update effective card interaction lock.
 func _update_effective_card_interaction_lock() -> void:
-	var should_lock: bool = flow_cards_interaction_locked or (shop_panel != null and shop_panel.visible)
+	var phase_locked: bool = state != null and state.phase != BattleState.Phase.PLAYER_TURN
+	var should_lock: bool = flow_cards_interaction_locked or phase_locked or (shop_panel != null and shop_panel.visible)
 	_set_effective_card_interaction_locked(should_lock)
 
 
@@ -211,7 +217,12 @@ func _cancel_current_card_interaction() -> void:
 ## Refresh logs.
 func _refresh_logs() -> void:
 	if log_panel != null and state != null:
+		log_panel.set_tutorial_mode(state.tutorial != null)
 		log_panel.set_messages(state.battle_log)
+		tutorial_log_hint.text = tr("TUTORIAL_OPEN_LOG_HINT").replace("\\n", "\n")
+		tutorial_log_hint.visible = state.tutorial_log_unread and not log_panel.expanded
+		if state.tutorial_log_unread and log_panel.expanded:
+			tutorial_log_opened.emit()
 
 
 ## On card clicked.
@@ -230,7 +241,7 @@ func _on_card_clicked(card_index: int) -> void:
 		await hand_view.play_general_card_consume_animation(self, card_index)
 		if state == null or state.phase != BattleState.Phase.PLAYER_TURN:
 			return
-	card_use_requested.emit(selected_character_index, card_index, -1, -1, "")
+	card_use_requested.emit(selected_character_index, card_index, -1, -1)
 
 
 ## On card drag started.
@@ -327,7 +338,7 @@ func _release_dragging_card(card_index: int, mouse_global_position: Vector2) -> 
 		_try_use_enemy_target_card(card, card_index, mouse_global_position)
 		return
 	if card.target_type == CardData.TargetType.ALL_ENEMIES or card.is_general():
-		card_use_requested.emit(selected_character_index, card_index, -1, -1, "")
+		card_use_requested.emit(selected_character_index, card_index, -1, -1)
 		return
 	hand_view.restore_hover_after_cancel(mouse_global_position)
 
@@ -342,7 +353,7 @@ func _try_use_ally_target_card(card: CardData, card_index: int, mouse_global_pos
 		await hand_view.play_general_card_consume_animation(self, card_index)
 		if state == null or state.phase != BattleState.Phase.PLAYER_TURN:
 			return
-	card_use_requested.emit(selected_character_index, card_index, -1, ally_index, "")
+	card_use_requested.emit(selected_character_index, card_index, -1, ally_index)
 
 
 ## Try use enemy target card.
@@ -356,7 +367,7 @@ func _try_use_enemy_target_card(card: CardData, card_index: int, mouse_global_po
 		await hand_view.play_general_card_consume_animation(self, card_index)
 		if state == null or state.phase != BattleState.Phase.PLAYER_TURN:
 			return
-	card_use_requested.emit(selected_character_index, card_index, enemy_index, -1, "")
+	card_use_requested.emit(selected_character_index, card_index, enemy_index, -1)
 
 
 ## Enemy index at.
@@ -409,9 +420,7 @@ func _select_character(index: int) -> void:
 		return
 	if not state.player_team[index].is_alive():
 		return
-	if index != selected_character_index:
-		previous_character_index = selected_character_index
-		selection_transition_pending = true
+	selection_jump_pending = true
 	selected_character_index = index
 	showing_enemy_info = false
 	_refresh_status()
@@ -451,6 +460,8 @@ func _refresh_info_hint() -> void:
 func _toggle_shop_panel() -> void:
 	if shop_panel == null:
 		return
+	if state == null or not state.general_cards_enabled or state.phase != BattleState.Phase.PLAYER_TURN:
+		return
 	shop_panel.toggle()
 	if shop_panel.visible:
 		_refresh_shop_panel()
@@ -464,6 +475,9 @@ func _on_shop_visibility_changed() -> void:
 ## Refresh shop panel.
 func _refresh_shop_panel() -> void:
 	if shop_panel == null or state == null:
+		return
+	if not state.general_cards_enabled:
+		shop_panel.hide()
 		return
 	shop_panel.refresh(state.new_toefl, state.shop_offer_cards, state.ap)
 
@@ -521,8 +535,7 @@ func _select_next_ready_character_if_needed() -> void:
 		var character: CharacterData = state.player_team[i]
 		if character.is_alive() and not character.has_acted:
 			if i != selected_character_index:
-				previous_character_index = selected_character_index
-				selection_transition_pending = true
+				selection_jump_pending = true
 			selected_character_index = i
 			return
 
@@ -531,3 +544,20 @@ func _select_next_ready_character_if_needed() -> void:
 func _control_contains_global_point(control: Control, mouse_global_position: Vector2) -> bool:
 	var local_position: Vector2 = control.get_global_transform_with_canvas().affine_inverse() * mouse_global_position
 	return Rect2(Vector2.ZERO, control.size).has_point(local_position)
+
+
+## Plays visual requests from the scene wiring without applying any battle rules.
+func play_presentation(kind: StringName, actor_index: int, targets: Array[int]) -> void:
+	match kind:
+		&"enemy_turn":
+			shop_panel.hide()
+			await turn_banner.play_announcement()
+		&"player_attack":
+			var actors: Array[int] = [actor_index]
+			await battlefield.play_player_action(actors, &"attack")
+		&"player_hurt":
+			await battlefield.play_player_action(targets, &"hurt")
+		&"enemy_attack", &"enemy_action":
+			await battlefield.play_enemy_action(actor_index, kind == &"enemy_attack")
+		&"enemy_skip":
+			await get_tree().create_timer(maxf(0.01, skipped_enemy_delay)).timeout

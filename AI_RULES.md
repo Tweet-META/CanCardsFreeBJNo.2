@@ -40,13 +40,16 @@
 - Enemies: edit `data/enemies.json`; it contains definitions only, never level lineups. All portrait paths must exist, and the complete information-panel text must use one `description` key.
 - Persistent effects: edit `data/effects.json`; every effect needs a stable ID, localization keys, and an icon path under `assets/effects/`.
 - Questions: edit `data/questions.json` and add every generated `Q_<ID>_*` localization key.
+- Learning Goals: edit `data/learning_goals.json`; goals are resolved by character attribute and must not be embedded in character or UI scripts.
 - Map maps: edit `data/maps.json`; every configured `image_path` must point to an imported texture.
-- Map levels: edit `data/levels.json`, then reference their IDs from the owning map. Store positions as normalized `[x, y]` coordinates and target scenes as `res://` paths.
+- Map levels: edit `data/levels.json`, reference their IDs from the owning map, and place matching `LevelNode` instances in `MapScene.tscn`. Level positions belong to those editor-authored nodes; target scenes remain `res://` paths in level data.
 - Put battle backgrounds and all wave lineups in `data/levels.json`. Every `monster` entry is one position containing one or more random candidate enemy IDs.
 - Use unique stable ASCII IDs.
 - Store translatable fields as localization keys.
 - Never add player or enemy fixed base defense unless the game design explicitly reintroduces it.
-- Attribute passives must remain attribute-driven and stack through `BattleState.get_attribute_count()`, not through character-ID checks.
+- Attribute passives no longer exist. Pre-battle Learning Goals are battle-only and limited to one active goal. Level 1 explicitly requires a choice for its tutorial; other levels keep goals optional. The chosen unlocked character supplies its attribute goal even when absent from the party or defeated; goals never stack.
+- Preserve the current Learning Goal values: Pinyin grants team maximum HP and damage-card effects `+20%`, Vocabulary grants `25%` wrong-answer compensation, and Culture grants `+0.25` AP growth.
+- Matching player and enemy attributes must never grant attack or defense modifiers. Attributes remain classification data only unless a named card, effect, ability, or Learning Goal explicitly uses them.
 - Enemy behavior must come from weighted `abilities`, not `prototype`, `attack`, or `ability_power` fields. Attribute variants should not duplicate combat code.
 - Adding a new enemy ability ID requires `BattleManager` dispatch logic and manual battle verification.
 - Adding a new card `effect_id`, target type, enemy prototype, or attribute requires parser, rule, UI-description, localization, and manual verification updates.
@@ -60,8 +63,12 @@
 - Each living player character acts at most once per player turn.
 - General cards belong to the team, are consumable, and use the negative-index encoding documented in `ARCHITECTURE.md`.
 - General-card sale value must come from `CardData.get_sell_price()` (`shop_price * 0.6`, rounded upward to one decimal place); UI code must not duplicate the economy formula.
-- Each enemy must grant exactly one random general card on first death-reward collection; use `rewards_collected` rather than mutating reward values as the duplicate guard.
+- General cards and the shop unlock by the active level's order: `data/levels.json.general_cards_unlock_order` is 5. Orders 1-4 must not grant starting cards, enemy card drops, purchases, or developer/hidden-code cards; do not merely hide the shop button.
+- After general cards unlock, each enemy must grant exactly one random general card on first death-reward collection; use `rewards_collected` rather than mutating reward values as the duplicate guard. Locked levels still award their existing currency rewards.
 - Question/result overlays must lock card interaction.
+- Answer results enter `ANSWER_RESULT`; dismissing the explanation starts `ACTION_RESOLUTION`. Never resolve enemy turns behind a visible answer panel.
+- Battle visuals use request IDs through `presentation_requested` and completion acknowledgements. BattleManager must await visuals without accessing UI nodes; retries and scene exit invalidate stale requests.
+- Enemy turns show the turn banner and resolve living enemies one at a time. Wait for attacked player hurt sequences before advancing or showing defeat; group-hit animations play together.
 - Attack and defense cards must enter `DIFFICULTY_SELECTION` before drawing from the selected global difficulty pool.
 - Skill cards must bypass difficulty selection and draw directly from the global hard pool.
 - Do not filter battle questions by card or character attribute.
@@ -85,8 +92,10 @@
 
 - Players remain on the left; enemies remain on the right.
 - Player selection is performed by clicking standees.
+- Selection plays one gravity-based portrait-layer jump. Keep standee slots and HP bars fixed, return the portrait to its baseline, and do not add a persistent elevation or a foot selection marker.
 - Targeted cards are dragged; the card remains visually represented and an arrow indicates targeting.
 - Valid hovered targets must highlight.
+- Unit selection and card targeting share a portrait-body alpha mask. HP bars, status icons, transparent padding, and attack effects are not hit areas. Target/selection outlines bound only the portrait body and follow its visual movement.
 - Releasing without a required target, or releasing over `CancelDropArea`, cancels cleanly and restores hover animation state.
 - Exclusive and team-general hands remain separate fan layouts.
 - Question and answer-result panels render on `QuestionLayer` at layer `100`.
@@ -94,9 +103,15 @@
 - Opening the shop must lock and cancel all hand interaction; closing it must not clear an active question/result flow lock.
 - Team general cards must render above enemy standees and below the shop.
 - Things users commonly drag or tune in the editor, such as battle standee slots, card hand anchors, panel positions, cancel-drop areas, and overlay layers, should live in `.tscn` scene structure rather than only in script constants.
+- Retain standee nodes across UI refreshes; replace only stale character/enemy identities or defeated enemies. Refreshing HP or hover highlights must not restart character animation.
+- Character battle animations come from `battle_animation_path` in character JSON and editor-owned SpriteFrames resources. Preserve static portraits for non-battle UI and characters without animations.
+- Tutorial definitions and localization keys belong in `data/tutorials.json`. Map guidance advances from real preparation choices; battle guidance belongs in the existing log, with a reminder to open it. Save tutorial completion only after victory and repeat the hints on failed retries.
+- `OpeningSequence.tscn` is the new-save handoff before the map. Its future SpriteFrames path comes from tutorial JSON; an empty path skips straight to the map without displaying fake story content.
 - Independent UI panel scenes must set `layout_mode = 1` and explicit root anchors/offsets in their own `.tscn`. Their host-scene instance must repeat the final layout overrides, and export-sensitive overlays must restore the same anchors/offsets in `_ready()`; never rely on implicit root-layout inheritance.
 
 ## Localization
+
+- Enter levels through the persistent `SceneTransition` overlay. Keep transition layout in its scene and `LoadingScreen.tscn`; iris durations are exported. Loading progress must come from `ResourceLoader.load_threaded_get_status`, never a simulated timer. Include JSON-referenced animations through `LevelResourceManifest`, retain the loaded resources for the battle, and reveal combat only after `BattleScene.loading_ready`.
 
 - Edit `data/localization/translations.csv`, not generated `.translation` files.
 - Register the generated locale-specific `.translation` resources in `project.godot`; keep `translations.csv` as the editable source and do not restore CSV parsing in `LanguageManager`.

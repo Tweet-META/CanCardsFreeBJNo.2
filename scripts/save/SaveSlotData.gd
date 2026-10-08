@@ -2,13 +2,15 @@ extends Resource
 ## Runtime representation of one save slot.
 class_name SaveSlotData
 
-@export var version: int = 1
+@export var version: int = 2
 @export var slot: int = 0
 @export var created_at: String = ""
 @export var updated_at: String = ""
 @export var current_level: String = "level1"
 @export var old_toefl: float = 0.0
 @export var character_levels: Dictionary = {}
+@export var opening_completed: bool = false
+@export var tutorial_completed: bool = false
 
 
 ## Returns true when the slot contains usable saved progress.
@@ -25,7 +27,9 @@ func to_dictionary() -> Dictionary:
 		"updated_at": updated_at,
 		"current_level": current_level,
 		"old_toefl": old_toefl,
-		"characters": character_levels
+		"characters": character_levels,
+		"opening_completed": opening_completed,
+		"tutorial_completed": tutorial_completed
 	}
 
 
@@ -37,6 +41,8 @@ static func from_dictionary(data: Dictionary, fallback_slot: int) -> SaveSlotDat
 	save_data.created_at = str(data.get("created_at", ""))
 	save_data.updated_at = str(data.get("updated_at", ""))
 	save_data.current_level = str(data.get("current_level", "level1"))
+	save_data.opening_completed = bool(data.get("opening_completed", true))
+	save_data.tutorial_completed = bool(data.get("tutorial_completed", save_data.current_level != SaveManager.DEFAULT_LEVEL_ID))
 	save_data.old_toefl = float(data.get("old_toefl", 0.0))
 	var levels_value: Variant = data.get("characters", {})
 	if levels_value is Dictionary:

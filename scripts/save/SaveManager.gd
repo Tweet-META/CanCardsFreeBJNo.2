@@ -4,7 +4,7 @@ extends Node
 signal active_slot_changed(slot_index: int)
 signal slot_list_changed()
 
-const SAVE_VERSION: int = 1
+const SAVE_VERSION: int = 2
 const SLOT_COUNT: int = 3
 const SAVE_DIR: String = "user://saves"
 const DEFAULT_LEVEL_ID: String = "level1"
@@ -150,9 +150,33 @@ func advance_after_level_clear(cleared_level_id: String) -> void:
 	if active_save == null:
 		return
 	var next_level_id: String = LevelDatabase.get_next_level_id(cleared_level_id)
+	var cleared_level: LevelData = LevelDatabase.create_level(cleared_level_id)
+	var changed: bool = false
+	if cleared_level != null and not cleared_level.tutorial_id.is_empty() and not active_save.tutorial_completed:
+		active_save.tutorial_completed = true
+		changed = true
 	if LevelDatabase.get_level_order(next_level_id) > LevelDatabase.get_level_order(active_save.current_level):
 		active_save.current_level = next_level_id
+		changed = true
+	if changed:
 		save_current_slot()
+
+
+## Keeps the opening entry active until its future one-shot sequence has finished.
+func needs_opening_sequence() -> bool:
+	return active_save != null and not active_save.opening_completed
+
+
+## Persists opening completion; an empty configured sequence is treated as skipped.
+func complete_opening_sequence() -> void:
+	if active_save != null and not active_save.opening_completed:
+		active_save.opening_completed = true
+		save_current_slot()
+
+
+## Allows first-level guidance for fresh saves and unfinished tutorials.
+func needs_first_tutorial() -> bool:
+	return active_save == null or not active_save.tutorial_completed
 
 
 ## Returns whether a level is reachable in the active mainline progress.

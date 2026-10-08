@@ -1,0 +1,79 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/LearningGoalButton.gd" id="1"]
+
+[sub_resource type="StyleBoxFlat" id="StyleNormal"]
+bg_color = Color(0.9, 0.82, 0.68, 0.96)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.13, 0.1, 0.08, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleHover"]
+bg_color = Color(0.98, 0.88, 0.62, 0.98)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.13, 0.1, 0.08, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[node name="LearningGoalButton" type="Button"]
+custom_minimum_size = Vector2(270, 150)
+theme_override_styles/normal = SubResource("StyleNormal")
+theme_override_styles/hover = SubResource("StyleHover")
+script = ExtResource("1")
+
+[node name="Content" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = 10.0
+offset_right = -12.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/separation = 10
+
+[node name="Portrait" type="TextureRect" parent="Content"]
+visible = false
+custom_minimum_size = Vector2(76, 92)
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="VBoxContainer" parent="Content"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+theme_override_constants/separation = 3
+
+[node name="CharacterLabel" type="Label" parent="Content/Text"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "LEARNING_GOAL_TITLE"
+
+[node name="AttributeLabel" type="Label" parent="Content/Text"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "LEARNING_GOAL_NONE"
+
+[node name="SummaryLabel" type="Label" parent="Content/Text"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_font_sizes/font_size = 15
+text = "LEARNING_GOAL_OPTIONAL"
+vertical_alignment = 1
+autowrap_mode = 3

@@ -15,12 +15,6 @@ func is_answer_correct(index: int) -> bool:
 	return index == correct_index
 
 
-func get_correct_answer_text() -> String:
-	if correct_index < 0 or correct_index >= options.size():
-		return ""
-	return tr(options[correct_index])
-
-
 func create_shuffled_copy(rng: RandomNumberGenerator) -> QuestionData:
 	var shuffled_question: QuestionData = QuestionData.new()
 	shuffled_question.id = id

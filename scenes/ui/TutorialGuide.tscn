@@ -1,0 +1,73 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/TutorialGuide.gd" id="1"]
+
+[sub_resource type="StyleBoxFlat" id="SpeechStyle"]
+bg_color = Color(0.96, 0.90, 0.76, 0.98)
+content_margin_left = 18.0
+content_margin_right = 18.0
+content_margin_top = 16.0
+content_margin_bottom = 16.0
+border_width_left = 3
+border_width_right = 3
+border_width_top = 3
+border_width_bottom = 3
+border_color = Color(0.24, 0.20, 0.15, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_left = 14
+corner_radius_bottom_right = 14
+
+[node name="TutorialGuide" type="Control"]
+visible = false
+z_index = 400
+layout_mode = 1
+offset_left = 26.0
+offset_top = 105.0
+offset_right = 536.0
+offset_bottom = 305.0
+mouse_filter = 2
+script = ExtResource("1")
+
+[node name="Row" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/separation = 12
+
+[node name="Portrait" type="TextureRect" parent="Row"]
+custom_minimum_size = Vector2(128, 160)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Speech" type="PanelContainer" parent="Row"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+theme_override_styles/panel = SubResource("SpeechStyle")
+
+[node name="Content" type="VBoxContainer" parent="Row/Speech"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 10
+
+[node name="Speaker" type="Label" parent="Row/Speech/Content"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.18, 0.13, 0.09, 1)
+theme_override_font_sizes/font_size = 22
+
+[node name="Message" type="Label" parent="Row/Speech/Content"]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.18, 0.13, 0.09, 1)
+theme_override_font_sizes/font_size = 18
+autowrap_mode = 3

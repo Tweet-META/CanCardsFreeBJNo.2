@@ -12,6 +12,7 @@
       "description": "CHARACTER_BUDDING_DESCRIPTION",
       "max_hp": 110,
       "portrait_path": "res://assets/characters/βudding.png",
+      "battle_animation_path": "res://assets/animation/budding/sprite_frames.tres",
       "cards": [
         "budding_attack",
         "budding_defense",
@@ -25,6 +26,7 @@
       "description": "CHARACTER_RABBIT_DESCRIPTION",
       "max_hp": 95,
       "portrait_path": "res://assets/characters/天才兔.png",
+      "battle_animation_path": "res://assets/animation/rabbit/sprite_frames.tres",
       "cards": [
         "rabbit_attack",
         "rabbit_defense",
@@ -38,6 +40,7 @@
       "description": "CHARACTER_LAWILIM_DESCRIPTION",
       "max_hp": 100,
       "portrait_path": "res://assets/characters/Lawilim.png",
+      "battle_animation_path": "res://assets/animation/lawilim/sprite_frames.tres",
       "cards": [
         "lawilim_attack",
         "lawilim_defense",

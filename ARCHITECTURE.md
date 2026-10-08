@@ -61,19 +61,29 @@ BattleScene (Node2D, BattleScene.gd)
 
 ## Map
 
-`MainMenu` starts `MapScene.tscn`. `MapDatabase` loads ordered map definitions
+New saves enter `OpeningSequence.tscn`, which plays the optional configured SpriteFrames once and then starts `MapScene.tscn`; an empty story path currently skips the opening. Existing saves with `opening_completed` enter the map directly. `MapDatabase` loads ordered map definitions
 from `data/maps.json`; `MapScene` displays the selected map image and keeps an
-extensible `LevelLayer`. Maps reference level IDs; `LevelDatabase` loads
-position, marker, localization keys, unlock state, and target scene from
-`data/levels.json`. `LevelNode.tscn` emits the selected `LevelData`.
+extensible `LevelLayer`. Maps reference level IDs; `LevelDatabase` loads marker,
+localization keys, unlock state, and target scene from `data/levels.json`.
+`MapScene.tscn` contains editor-positioned `LevelNode.tscn` instances whose
+exported `level_id` values bind them to data and emit the selected `LevelData`.
 
 `LevelDatabase` keeps the active level ID across the map-to-battle scene
 change. `MapScene` opens an in-scene preparation panel before entering battle;
-the selected player character IDs are stored through `LevelDatabase` and read
-by `GameDataFactory.create_player_team()`. `BattleManager` loads that level and
-generates each wave through `GameDataFactory.create_level_wave()`. Wave changes
-replace only the enemy team; player HP, AP, cards, currency, and shop state
-persist.
+the selected player character IDs and optional Learning Goal source are stored
+transiently through `LevelDatabase`. `GameDataFactory` resolves the team and
+goal without coupling the preparation UI to battle rules. `BattleManager` loads
+that level and generates each wave through `GameDataFactory.create_level_wave()`.
+Wave changes replace only the enemy team; player HP, AP, cards, currency, shop
+state, and the selected Learning Goal persist.
+
+### First-Level Tutorial and Unlocks
+
+`LevelData` parses `tutorial_id`, `requires_learning_goal`, and a derived `general_cards_enabled` flag. Level 1 references `first_battle` and requires a Learning Goal before its start button or map entry can proceed. Other levels retain optional goals. `general_cards_unlock_order` in level JSON is 5; active levels with lower orders disable the complete general-card/shop pipeline, including initial hands, enemy drops, purchases/sales, developer buttons, and the hidden code.
+
+`TutorialDatabase` creates typed `TutorialData` from `data/tutorials.json`. `MapScene` hosts an editor-owned `TutorialGuide` showing the configured speaker and room/party/goal/entry messages. Preparation changes advance it; the guide hides while the goal drawer is open. Tutorial battle messages are emitted once per step and attempt by `BattleManager` through the existing log, with `BattleState.tutorial_log_unread` driving `TutorialLogHint`. Opening the log clears the reminder, and newly arriving hints are considered read while it stays open. Tutorial mode uses an Inspector-adjustable larger log panel for complete instructions.
+
+Save version 2 stores `opening_completed` and `tutorial_completed`. Old saves skip the new opening; those already past level 1 default to a completed tutorial. First-level victory persists completion along with ordinary level advancement. Loss/retry leaves it unfinished. Opening story art is not implemented: configure `opening_sequence.sprite_frames_path` and its animation name when the real sequence is ready.
 
 Level battle data uses this shape:
 
@@ -165,7 +175,23 @@ It must not manipulate UI nodes. It publishes:
 
 `BattleUI` owns transient battle-screen presentation state: selected indices, target highlights, card interaction locks, and panel refresh coordination. It emits user intentions and must not resolve combat.
 
-`BattlefieldView` is the battle-field node attached inside `BattleUI.tscn`. It creates `CharacterStandee` and `EnemyStandee` instances, performs hit testing, and reads editor-owned slot nodes for player and enemy placement. Dead enemies are omitted when the battlefield is refreshed.
+`BattlefieldView` is the battle-field node attached inside `BattleUI.tscn`. It retains `CharacterStandee` and `EnemyStandee` instances across refreshes, performs hit testing, and reads editor-owned slot nodes for player and enemy placement. It removes defeated enemies and replaces identities on retries or wave changes, without restarting surviving units' animations.
+
+### Battle Presentation
+
+Characters reference editor-owned `SpriteFrames` through `battle_animation_path` in `data/characters.json`. `CharacterMotion.tscn` fits the full transparent canvas into the existing portrait area, loops idle, and plays attack/hurt once. Missing animation resources fall back to static portraits. The three current characters use 256 × 256 sequences at 60 fps.
+
+Selection moves only `CharacterMotion/VisualRoot` along a constant-gravity jump. The standee and HP bar stay at their slot baseline; the portrait lands at its original position. Jump height and gravity are exported Inspector properties. The previous persistent elevation and blue foot marker have been removed.
+
+`PortraitHitButton` caches an alpha mask and tight opaque bounds from each body's texture. Player masks use the idle body texture rather than attack composites; enemies use their static portrait. The child button, selection style, and target outline share these bounds under the moving visual layer. Both native selection and `BattlefieldView` card hit tests use the same mask, excluding HP bars, status UI, transparent margins, and attack effects. Standee roots are passive layout Controls.
+
+Answer submission stores its correctness and compensation result in `BattleState` and enters `ANSWER_RESULT`. Closing the explanation starts `ACTION_RESOLUTION`: damaging cards play the actor's attack sequence, then resolve their existing effects. Completing the party's actions starts `ENEMY_TURN`.
+
+`BattleManager.presentation_requested(request_id, kind, actor_index, targets)` requests visual steps. `BattleScene` routes them to `BattleUI` and acknowledges completion through `complete_presentation(request_id)`. Only the manager advances combat. Retry/scene-exit generation guards prevent old callbacks from advancing a new battle.
+
+The enemy turn starts with `TurnBanner`. Each living enemy selects its weighted ability once, plays an attack or support placeholder, resolves the ability, refreshes HP, and waits for player hurt sequences before the next enemy acts. Group hits animate all affected players together. Stunned enemies skip their entire action. Existing shields, charge progression, target locks, status durations, rewards, and wave rules remain in the rules layer.
+
+Enemy attack placeholders live in `EnemyStandee.tscn`: `AttackAnimation` contains an editor-adjustable lunge; `Content/Portrait/VisualRoot/AttackOrigin/AttackSprite` reserves a position and SpriteFrames slot for future art. Non-attacking abilities use a visual pulse. Turn-banner duration, character speed, and enemy recovery delay are Inspector properties. Card and shop inputs are blocked during action resolution and enemy turns.
 
 `BattleHandView` is the hand node attached to `CardsArea` in `BattleUI.tscn`. It owns the runtime hand UI only: `CardButton` instancing, exclusive/general fan layouts, hover recovery, drag visual state, negative team-card index encoding on the UI side, and the general-card consume particle animation. It does not apply card rules. Its layout tuning values are exported so the Godot editor can adjust them without editing script constants.
 
@@ -235,6 +261,16 @@ JSON uses stable ASCII IDs: `pinyin`, `vocabulary`, `culture`, `none`.
 
 `LearningAttribute.from_id()` converts these to the project's internal Chinese values. Attribute comparisons must use `LearningAttribute` constants or converted runtime values.
 
+Matching player and enemy attributes have no intrinsic combat interaction. Do not add same-attribute attack bonuses or damage reduction to shared damage calculations.
+
+### Learning Goals
+
+Automatic character passives and attribute-count stacking do not exist. Before a battle, `PreparationPanel` selects one unlocked character as the Learning Goal source, required for the level-1 tutorial and optional elsewhere. This selection is independent from the active party and is stored transiently by `LevelDatabase`; it is not save data.
+
+`GameDataFactory.create_active_learning_goal()` resolves the source character's attribute through `LearningGoalDatabase` and `data/learning_goals.json`. `BattleState` owns the resulting single `LearningGoalData` for the full battle, so the bonus remains active regardless of party composition or character deaths. No selection uses neutral multipliers and does not block level entry.
+
+The preparation UI is split into `LearningGoalButton`, `LearningGoalDrawer`, and reusable `LearningGoalEntry` scenes. The drawer must list every character currently unlocked by the active save, not only selected party members or hardcoded character IDs.
+
 ### General-Card UI Indices
 
 Exclusive card indices are non-negative character-card indices. Team general cards are encoded as:
@@ -256,6 +292,15 @@ Q_EXAMPLE_PROMPT
 Q_EXAMPLE_O0 ... Q_EXAMPLE_ON
 Q_EXAMPLE_EXPLANATION
 ```
+
+## Level Loading
+
+`MapScene` confirms preparation, then calls the `SceneTransition` scene autoload (CanvasLayer 200). Its persistent iris closes from the edges to the center, reveals `LoadingScreen` with the conversation-room placeholder, closes again when loading completes, and reveals the initialized battle. UI layout and shader settings live in reusable scenes; closing/reveal durations are exported.
+
+`LevelResourceManifest` gathers the target PackedScene, background, selected characters' SpriteFrames and portraits, card art/effect icons, and every wave's candidate enemy portrait. General-card art is included only when enabled for that level. This covers resources referenced indirectly in JSON that the PackedScene alone cannot preload.
+
+`SceneTransition` submits sequential threaded requests and polls real Godot progress each frame. The overall fraction weights each request by its dependency count plus one. It retrieves only completed resources and keeps strong references through the battle, including future waves. After switching beneath black, it waits for `BattleScene.loading_ready` and layout before revealing combat. Failed requests offer retry or return to the intact map.
+
 
 ## Verification
 

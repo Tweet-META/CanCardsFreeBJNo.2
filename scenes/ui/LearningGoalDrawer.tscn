@@ -1,0 +1,88 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/LearningGoalDrawer.gd" id="1"]
+
+[sub_resource type="StyleBoxEmpty" id="OutsideStyle"]
+
+[sub_resource type="StyleBoxFlat" id="DrawerStyle"]
+bg_color = Color(0.84, 0.75, 0.61, 1)
+border_width_right = 4
+border_width_top = 4
+border_color = Color(0.13, 0.1, 0.08, 1)
+corner_radius_top_right = 16
+shadow_color = Color(0, 0, 0, 0.28)
+shadow_size = 8
+
+[sub_resource type="StyleBoxFlat" id="ClearStyle"]
+bg_color = Color(0.72, 0.62, 0.49, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.13, 0.1, 0.08, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="LearningGoalDrawer" type="Control"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1")
+
+[node name="OutsideClickArea" type="Button" parent="."]
+flat = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/normal = SubResource("OutsideStyle")
+theme_override_styles/hover = SubResource("OutsideStyle")
+theme_override_styles/pressed = SubResource("OutsideStyle")
+
+[node name="DrawerPanel" type="PanelContainer" parent="."]
+custom_minimum_size = Vector2(460, 345)
+layout_mode = 1
+anchors_preset = 12
+anchor_right = 0.0
+anchor_bottom = 1.0
+offset_right = 460.0
+offset_top = -345.0
+grow_horizontal = 1
+grow_vertical = 0
+mouse_filter = 0
+theme_override_styles/panel = SubResource("DrawerStyle")
+
+[node name="Content" type="VBoxContainer" parent="DrawerPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="TitleLabel" type="Label" parent="DrawerPanel/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "LEARNING_GOAL_DRAWER_TITLE"
+horizontal_alignment = 1
+
+[node name="GoalScroll" type="ScrollContainer" parent="DrawerPanel/Content"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="GoalList" type="VBoxContainer" parent="DrawerPanel/Content/GoalScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="ClearButton" type="Button" parent="DrawerPanel/Content"]
+custom_minimum_size = Vector2(1, 42)
+layout_mode = 2
+theme_override_styles/normal = SubResource("ClearStyle")
+text = "LEARNING_GOAL_CLEAR"

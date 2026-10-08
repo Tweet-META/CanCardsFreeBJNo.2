@@ -11,6 +11,7 @@
 [ext_resource type="PackedScene" uid="uid://cgpedcfjh4dk0" path="res://scenes/ui/DeveloperControls.tscn" id="9"]
 [ext_resource type="Script" uid="uid://b26wnu27orw70" path="res://scripts/ui/BattlefieldView.gd" id="10"]
 [ext_resource type="Script" uid="uid://e5wu6cf4bcyf" path="res://scripts/ui/BattleHandView.gd" id="11"]
+[ext_resource type="PackedScene" path="res://scenes/ui/TurnBanner.tscn" id="12"]
 
 [node name="BattleUI" type="Control" unique_id=1235082704]
 layout_mode = 3
@@ -312,9 +313,42 @@ layout_mode = 2
 
 [node name="BattleInfoPanel" parent="." unique_id=721176377 instance=ExtResource("7")]
 
+[node name="TurnBanner" parent="." instance=ExtResource("12")]
+layout_mode = 1
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -200.0
+offset_top = 105.0
+offset_right = 200.0
+offset_bottom = 175.0
+
 [node name="ShopPanel" parent="." unique_id=1946349324 instance=ExtResource("8")]
 
 [node name="DeveloperControls" parent="." unique_id=229202676 instance=ExtResource("9")]
 offset_left = -275.0
 offset_right = -70.0
 offset_bottom = 286.0
+
+[node name="TutorialLogHint" type="Label" parent="."]
+visible = false
+z_index = 1000
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -310.0
+offset_top = -215.0
+offset_right = -26.0
+offset_bottom = -140.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 0.91, 0.56, 1)
+theme_override_colors/font_outline_color = Color(0.12, 0.09, 0.05, 1)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 20
+text = "TUTORIAL_OPEN_LOG_HINT"
+horizontal_alignment = 2
+autowrap_mode = 3

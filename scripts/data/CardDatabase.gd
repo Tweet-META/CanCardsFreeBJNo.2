@@ -5,7 +5,6 @@ class_name CardDatabase
 const DATA_PATH: String = "res://data/cards.json"
 
 static var _loaded: bool = false
-static var _root_data: Dictionary = {}
 static var _definitions: Dictionary = {}
 
 
@@ -24,7 +23,6 @@ static func create_card(card_id: String) -> CardData:
 	card.owner_id = str(raw.get("owner_id", ""))
 	card.card_type = _card_type_from_string(str(raw.get("type", "attack")))
 	card.target_type = _target_type_from_string(str(raw.get("target", "single_enemy")))
-	card.required_attribute = LearningAttribute.from_id(str(raw.get("attribute", "none")))
 	card.requires_question = bool(raw.get("requires_question", true))
 	card.base_damage = int(raw.get("base_damage", 0))
 	card.base_block = float(raw.get("base_block", 0.0))
@@ -42,7 +40,6 @@ static func create_card(card_id: String) -> CardData:
 	card.current_hp_damage_ratio = float(raw.get("current_hp_damage_ratio", 0.0))
 	card.max_hp_heal_ratio = float(raw.get("max_hp_heal_ratio", 0.0))
 	card.direct_hp_loss = int(raw.get("direct_hp_loss", 0))
-	card.available_in_pool = bool(raw.get("available_in_pool", true))
 	card.art_path = str(raw.get("art_path", ""))
 	card.shop_price = float(raw.get("shop_price", 0.0))
 	return card
@@ -73,7 +70,6 @@ static func get_general_pool_ids() -> Array[String]:
 
 static func reload() -> void:
 	_loaded = false
-	_root_data.clear()
 	_definitions.clear()
 	_ensure_loaded()
 
@@ -92,8 +88,8 @@ static func _ensure_loaded() -> void:
 		push_error("CardDatabase: %s must contain a JSON object." % DATA_PATH)
 		return
 
-	_root_data = parsed as Dictionary
-	var cards_value: Variant = _root_data.get("cards")
+	var root_data: Dictionary = parsed as Dictionary
+	var cards_value: Variant = root_data.get("cards")
 	if not cards_value is Array:
 		push_error("CardDatabase: cards must be an array.")
 		return
@@ -111,16 +107,6 @@ static func _ensure_loaded() -> void:
 			push_error("CardDatabase: duplicate card id '%s'." % card_id)
 			continue
 		_definitions[card_id] = raw
-
-
-static func _to_string_array(value: Variant) -> Array[String]:
-	var result: Array[String] = []
-	if not value is Array:
-		return result
-	var values: Array = value as Array
-	for item: Variant in values:
-		result.append(str(item))
-	return result
 
 
 static func _card_type_from_string(value: String) -> CardData.CardType:

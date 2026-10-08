@@ -20,3 +20,19 @@ static func from_id(attribute_id: String) -> String:
 		_:
 			push_error("LearningAttribute: unknown attribute '%s'." % attribute_id)
 			return ""
+
+
+## Converts an internal learning attribute back to its stable data ID.
+static func to_id(attribute: String) -> String:
+	match attribute:
+		PINYIN:
+			return "pinyin"
+		VOCABULARY:
+			return "vocabulary"
+		CULTURE:
+			return "culture"
+		"":
+			return ""
+		_:
+			push_error("LearningAttribute: unknown runtime attribute '%s'." % attribute)
+			return ""

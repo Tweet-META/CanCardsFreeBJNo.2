@@ -32,9 +32,10 @@ func _on_load_save_pressed() -> void:
 	save_slot_panel.open_for_load()
 
 
-## Enters the map after a save slot has been created or loaded.
+## Routes fresh saves through the reserved opening story and existing saves to the map.
 func _enter_game() -> void:
-	get_tree().change_scene_to_file("res://scenes/MapScene.tscn")
+	var scene_path: String = "res://scenes/OpeningSequence.tscn" if SaveManager.needs_opening_sequence() else "res://scenes/MapScene.tscn"
+	get_tree().change_scene_to_file(scene_path)
 
 
 ## Switches the active localization.

@@ -9,6 +9,8 @@ static var _definitions: Dictionary = {}
 static var _level_order: Array[String] = []
 static var _active_level_id: String = "level1"
 static var _active_player_ids: Array[String] = []
+static var _active_learning_goal_character_id: String = ""
+static var _general_cards_unlock_order: int = 5
 
 
 ## Documents this script block.
@@ -23,11 +25,13 @@ static func create_level(level_id: String) -> LevelData:
 	var level: LevelData = LevelData.new()
 	level.id = str(raw.get("id", ""))
 	level.order = int(raw.get("order", 1))
+	level.tutorial_id = str(raw.get("tutorial_id", ""))
+	level.requires_learning_goal = bool(raw.get("requires_learning_goal", false))
+	level.general_cards_enabled = level.order >= _general_cards_unlock_order
 	level.display_name = str(raw.get("display_name", ""))
 	level.description = str(raw.get("description", ""))
 	level.marker_text = str(raw.get("marker_text", ""))
 	level.map_id = str(raw.get("map_id", ""))
-	level.map_position = _parse_position(raw.get("map_position", [0.5, 0.5]))
 	level.scene_path = str(raw.get("scene_path", ""))
 	level.battle_background = str(raw.get("battle_background", ""))
 	level.waves = _parse_waves(raw.get("wave", []), level.id)
@@ -57,6 +61,16 @@ static func set_active_player_ids(character_ids: Array[String]) -> void:
 ## Documents this script block.
 static func get_active_player_ids() -> Array[String]:
 	return _active_player_ids.duplicate()
+
+
+## Stores the unlocked character chosen as the source of this battle's learning goal.
+static func set_active_learning_goal_character_id(character_id: String) -> void:
+	_active_learning_goal_character_id = character_id
+
+
+## Returns the character that supplies the optional learning goal for the next battle.
+static func get_active_learning_goal_character_id() -> String:
+	return _active_learning_goal_character_id
 
 
 ## Documents this script block.
@@ -120,6 +134,7 @@ static func _ensure_loaded() -> void:
 		return
 
 	var root_data: Dictionary = parsed as Dictionary
+	_general_cards_unlock_order = maxi(1, int(root_data.get("general_cards_unlock_order", 5)))
 	var levels_value: Variant = root_data.get("levels", [])
 	if not levels_value is Array:
 		push_error("LevelDatabase: levels must be an array.")
@@ -138,16 +153,6 @@ static func _ensure_loaded() -> void:
 		_definitions[level_id] = raw
 		_level_order.append(level_id)
 	_level_order.sort_custom(func(a: String, b: String) -> bool: return get_level_order(a) < get_level_order(b))
-
-
-## Documents this script block.
-static func _parse_position(value: Variant) -> Vector2:
-	if not value is Array:
-		return Vector2(0.5, 0.5)
-	var values: Array = value as Array
-	if values.size() < 2:
-		return Vector2(0.5, 0.5)
-	return Vector2(clampf(float(values[0]), 0.0, 1.0), clampf(float(values[1]), 0.0, 1.0))
 
 
 ## Documents this script block.

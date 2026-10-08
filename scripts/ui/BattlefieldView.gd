@@ -10,7 +10,6 @@ const ENEMY_STANDEE_SCENE: PackedScene = preload("res://scenes/ui/EnemyStandee.t
 const ENEMY_BASE_Z_INDEX: int = 100
 
 var state: BattleState
-var host: Control
 var player_standees: Dictionary = {}
 var enemy_standees: Dictionary = {}
 
@@ -24,32 +23,22 @@ var enemy_standees: Dictionary = {}
 @onready var enemy_many_slots: Control = $Slots/EnemySlots/EnemyManySlots
 
 
-## Stores the tween host used by selection animations.
-func setup(host_control: Control) -> void:
-	host = host_control
-
-
-## Rebuilds all standees from the current battle state.
+## Refreshes retained units; only replaced teams or defeated enemies remove nodes.
 func refresh_view(
 	new_state: BattleState,
 	selected_character_index: int,
-	previous_character_index: int,
-	selection_transition_pending: bool,
+	selection_jump_pending: bool,
 	selected_enemy_index: int,
 	showing_enemy_info: bool,
 	hovered_player_target_index: int,
 	hovered_enemy_target_index: int
 ) -> void:
 	state = new_state
-	_clear_children(player_layer)
-	_clear_children(enemy_layer)
-	player_standees.clear()
-	enemy_standees.clear()
+	_prune_standees()
 
 	_refresh_players(
 		selected_character_index,
-		previous_character_index,
-		selection_transition_pending,
+		selection_jump_pending,
 		hovered_player_target_index
 	)
 	_refresh_enemies(selected_enemy_index, showing_enemy_info, hovered_enemy_target_index)
@@ -62,7 +51,7 @@ func player_index_at(mouse_global_position: Vector2) -> int:
 	for player_index: Variant in player_standees:
 		var index: int = int(player_index)
 		var standee: CharacterStandee = player_standees[player_index] as CharacterStandee
-		if standee != null and state.player_team[index].is_alive() and _control_contains_global_point(standee, mouse_global_position):
+		if standee != null and state.player_team[index].is_alive() and standee.contains_global_point(mouse_global_position):
 			return index
 	return -1
 
@@ -74,44 +63,33 @@ func enemy_index_at(mouse_global_position: Vector2) -> int:
 	for enemy_index: Variant in enemy_standees:
 		var index: int = int(enemy_index)
 		var standee: EnemyStandee = enemy_standees[enemy_index] as EnemyStandee
-		if standee != null and state.enemy_team[index].is_alive() and _control_contains_global_point(standee, mouse_global_position):
+		if standee != null and state.enemy_team[index].is_alive() and standee.contains_global_point(mouse_global_position):
 			return index
 	return -1
 
 
-## Creates player standees at the editor-owned player slot nodes.
+## Updates retained player standees at the editor-owned slot nodes.
 func _refresh_players(
 	selected_character_index: int,
-	previous_character_index: int,
-	selection_transition_pending: bool,
+	selection_jump_pending: bool,
 	hovered_player_target_index: int
 ) -> void:
 	var player_slots: Array[Control] = _player_slots_for_count(state.player_team.size())
 	for i in state.player_team.size():
 		if i >= player_slots.size():
 			break
-		var standee: CharacterStandee = CHARACTER_STANDEE_SCENE.instantiate() as CharacterStandee
-		player_layer.add_child(standee)
-		standee.standee_selected.connect(func(index: int) -> void: character_selected.emit(index))
+		var standee: CharacterStandee = player_standees.get(i) as CharacterStandee
+		if standee == null:
+			standee = CHARACTER_STANDEE_SCENE.instantiate() as CharacterStandee
+			player_layer.add_child(standee)
+			standee.standee_selected.connect(func(index: int) -> void: character_selected.emit(index))
 		standee.setup(state.player_team[i], i, i == selected_character_index, i == hovered_player_target_index)
 
-		var base_position: Vector2 = player_slots[i].position
-		var target_position: Vector2 = base_position + (Vector2(0, -18) if i == selected_character_index else Vector2.ZERO)
-		var start_position: Vector2 = target_position
-		if selection_transition_pending:
-			if i == selected_character_index:
-				start_position = base_position + Vector2(0, 8)
-			elif i == previous_character_index:
-				start_position = base_position + Vector2(0, -18)
-
-		standee.position = start_position
+		standee.position = player_slots[i].position
 		standee.size = standee.custom_minimum_size
 		player_standees[i] = standee
-		if start_position != target_position and host != null:
-			var standee_tween: Tween = host.create_tween()
-			standee_tween.set_ease(Tween.EASE_OUT)
-			standee_tween.set_trans(Tween.TRANS_CUBIC)
-			standee_tween.tween_property(standee, "position", target_position, 0.18)
+		if selection_jump_pending and i == selected_character_index:
+			standee.play_selection_jump()
 
 
 ## Chooses the visible player slots for the current party size.
@@ -125,7 +103,7 @@ func _player_slots_for_count(count: int) -> Array[Control]:
 			return [player_top_slot, player_middle_slot, player_bottom_slot]
 
 
-## Creates enemy standees at the editor-owned enemy slot nodes.
+## Updates retained enemy standees while preserving stable enemy-team indices.
 func _refresh_enemies(
 	selected_enemy_index: int,
 	showing_enemy_info: bool,
@@ -142,9 +120,11 @@ func _refresh_enemies(
 		if slot >= enemy_slots.size():
 			break
 		var enemy_index: int = alive_enemy_indices[slot]
-		var enemy_standee: EnemyStandee = ENEMY_STANDEE_SCENE.instantiate() as EnemyStandee
-		enemy_layer.add_child(enemy_standee)
-		enemy_standee.standee_selected.connect(func(index: int) -> void: enemy_selected.emit(index))
+		var enemy_standee: EnemyStandee = enemy_standees.get(enemy_index) as EnemyStandee
+		if enemy_standee == null:
+			enemy_standee = ENEMY_STANDEE_SCENE.instantiate() as EnemyStandee
+			enemy_layer.add_child(enemy_standee)
+			enemy_standee.standee_selected.connect(func(index: int) -> void: enemy_selected.emit(index))
 		enemy_standee.setup(
 			state.enemy_team[enemy_index],
 			enemy_index,
@@ -175,16 +155,37 @@ func _enemy_slots_for_count(count: int) -> Array[Control]:
 	return slots
 
 
-## Checks whether a global point is inside a Control's canvas bounds.
-func _control_contains_global_point(control: Control, mouse_global_position: Vector2) -> bool:
-	var local_position: Vector2 = control.get_global_transform_with_canvas().affine_inverse() * mouse_global_position
-	return Rect2(Vector2.ZERO, control.size).has_point(local_position)
+## Removes stale identities on retry/wave changes without restarting surviving units.
+func _prune_standees() -> void:
+	for key: Variant in player_standees.keys():
+		var index: int = int(key)
+		var standee: CharacterStandee = player_standees[key] as CharacterStandee
+		if index >= state.player_team.size() or standee.bound_character != state.player_team[index]:
+			player_layer.remove_child(standee)
+			standee.queue_free()
+			player_standees.erase(key)
+	for key: Variant in enemy_standees.keys():
+		var index: int = int(key)
+		var standee: EnemyStandee = enemy_standees[key] as EnemyStandee
+		if index >= state.enemy_team.size() or standee.bound_enemy != state.enemy_team[index] or not state.enemy_team[index].is_alive():
+			enemy_layer.remove_child(standee)
+			standee.queue_free()
+			enemy_standees.erase(key)
 
 
-## Clears dynamically spawned standees from a layer.
-func _clear_children(node: Node) -> void:
-	if node == null:
-		return
-	for child: Node in node.get_children():
-		node.remove_child(child)
-		child.queue_free()
+## Starts one or more player actions together and waits for the longest sequence.
+func play_player_action(indices: Array[int], animation_name: StringName) -> void:
+	var duration: float = 0.0
+	for index in indices:
+		var standee: CharacterStandee = player_standees.get(index) as CharacterStandee
+		if standee != null:
+			duration = maxf(duration, standee.play_action(animation_name))
+	if duration > 0.0:
+		await get_tree().create_timer(duration).timeout
+
+
+## Plays a reserved enemy attack or support animation on its retained unit.
+func play_enemy_action(index: int, is_attack: bool) -> void:
+	var standee: EnemyStandee = enemy_standees.get(index) as EnemyStandee
+	if standee != null:
+		await standee.play_action(is_attack)

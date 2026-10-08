@@ -11,6 +11,15 @@ static func create_player_team() -> Array[CharacterData]:
 	return CharacterDatabase.create_default_team()
 
 
+## Resolves the optional pre-battle learning goal independently from the active party.
+static func create_active_learning_goal() -> LearningGoalData:
+	var character_id: String = LevelDatabase.get_active_learning_goal_character_id()
+	if character_id.is_empty():
+		return null
+	var character: CharacterData = CharacterDatabase.create_character(character_id)
+	return LearningGoalDatabase.create_goal_for_character(character)
+
+
 ## Documents this script block.
 static func create_level_wave(level: LevelData, wave_index: int, rng: RandomNumberGenerator) -> Array[EnemyData]:
 	var enemies: Array[EnemyData] = []

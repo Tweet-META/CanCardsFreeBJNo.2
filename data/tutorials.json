@@ -1,0 +1,30 @@
+{
+  "opening_sequence": {
+    "sprite_frames_path": "",
+    "animation": "intro"
+  },
+  "tutorials": [
+    {
+      "id": "first_battle",
+      "level_id": "level1",
+      "speaker_id": "budding",
+      "map_steps": {
+        "room": "TUTORIAL_MAP_ROOM",
+        "party": "TUTORIAL_PREP_PARTY",
+        "goal": "TUTORIAL_PREP_GOAL",
+        "enter": "TUTORIAL_PREP_ENTER"
+      },
+      "battle_steps": {
+        "attack": "TUTORIAL_BATTLE_ATTACK",
+        "difficulty": "TUTORIAL_BATTLE_DIFFICULTY",
+        "question": "TUTORIAL_BATTLE_QUESTION",
+        "result": "TUTORIAL_BATTLE_RESULT",
+        "defense": "TUTORIAL_BATTLE_DEFENSE",
+        "enemy_turn": "TUTORIAL_BATTLE_ENEMY_TURN",
+        "next_turn": "TUTORIAL_BATTLE_NEXT_TURN",
+        "skill": "TUTORIAL_BATTLE_SKILL",
+        "victory": "TUTORIAL_BATTLE_VICTORY"
+      }
+    }
+  ]
+}

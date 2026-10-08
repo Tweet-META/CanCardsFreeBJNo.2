@@ -1,0 +1,408 @@
+{
+  "format": "RGBA PNG image sequences",
+  "source_resolution_preserved": false,
+  "source_fps_preserved": true,
+  "resize_filter": "Lanczos",
+  "png_compression": "lossless; optimized maximum compression after resizing",
+  "runtime_animations": [
+    "attack_combined",
+    "character_hurt",
+    "character_idle"
+  ],
+  "unused_layers_retained_in_source_zip": true,
+  "characters": {
+    "budding": [
+      {
+        "animation": "attack_combined",
+        "source": "animations/budding-attack-combined-60fps.webm",
+        "directory": "budding/attack_combined",
+        "pattern": "frame_%04d.png",
+        "first_frame": 0,
+        "width": 256,
+        "height": 256,
+        "fps": 60,
+        "frame_count": 180,
+        "duration_seconds": 3.0,
+        "source_duration_seconds": 3,
+        "loop": false,
+        "layer": "combined",
+        "bytes": 8654974,
+        "alpha_checks": {
+          "0": {
+            "transparent_pixels": 52211,
+            "visible_pixels": 13325,
+            "partial_alpha_pixels": 2036
+          },
+          "45": {
+            "transparent_pixels": 52400,
+            "visible_pixels": 13136,
+            "partial_alpha_pixels": 2215
+          },
+          "90": {
+            "transparent_pixels": 44234,
+            "visible_pixels": 21302,
+            "partial_alpha_pixels": 8490
+          },
+          "135": {
+            "transparent_pixels": 44045,
+            "visible_pixels": 21491,
+            "partial_alpha_pixels": 9022
+          },
+          "179": {
+            "transparent_pixels": 52208,
+            "visible_pixels": 13328,
+            "partial_alpha_pixels": 2041
+          }
+        }
+      },
+      {
+        "animation": "character_hurt",
+        "source": "animations/budding-character-hurt-60fps.webm",
+        "directory": "budding/character_hurt",
+        "pattern": "frame_%04d.png",
+        "first_frame": 0,
+        "width": 256,
+        "height": 256,
+        "fps": 60,
+        "frame_count": 150,
+        "duration_seconds": 2.5,
+        "source_duration_seconds": 2.5,
+        "loop": false,
+        "layer": "character",
+        "bytes": 4600840,
+        "alpha_checks": {
+          "0": {
+            "transparent_pixels": 52211,
+            "visible_pixels": 13325,
+            "partial_alpha_pixels": 2036
+          },
+          "37": {
+            "transparent_pixels": 52216,
+            "visible_pixels": 13320,
+            "partial_alpha_pixels": 2233
+          },
+          "75": {
+            "transparent_pixels": 52192,
+            "visible_pixels": 13344,
+            "partial_alpha_pixels": 2251
+          },
+          "112": {
+            "transparent_pixels": 52211,
+            "visible_pixels": 13325,
+            "partial_alpha_pixels": 2041
+          },
+          "149": {
+            "transparent_pixels": 52212,
+            "visible_pixels": 13324,
+            "partial_alpha_pixels": 2035
+          }
+        }
+      },
+      {
+        "animation": "character_idle",
+        "source": "animations/budding-character-idle-60fps.webm",
+        "directory": "budding/character_idle",
+        "pattern": "frame_%04d.png",
+        "first_frame": 0,
+        "width": 256,
+        "height": 256,
+        "fps": 60,
+        "frame_count": 300,
+        "duration_seconds": 5.0,
+        "source_duration_seconds": 10,
+        "loop": true,
+        "layer": "character",
+        "bytes": 9142747,
+        "alpha_checks": {
+          "0": {
+            "transparent_pixels": 52211,
+            "visible_pixels": 13325,
+            "partial_alpha_pixels": 2036
+          },
+          "75": {
+            "transparent_pixels": 52212,
+            "visible_pixels": 13324,
+            "partial_alpha_pixels": 2035
+          },
+          "150": {
+            "transparent_pixels": 52209,
+            "visible_pixels": 13327,
+            "partial_alpha_pixels": 2044
+          },
+          "225": {
+            "transparent_pixels": 52200,
+            "visible_pixels": 13336,
+            "partial_alpha_pixels": 2047
+          },
+          "299": {
+            "transparent_pixels": 52214,
+            "visible_pixels": 13322,
+            "partial_alpha_pixels": 2222
+          }
+        }
+      }
+    ],
+    "rabbit": [
+      {
+        "animation": "attack_combined",
+        "source": "animations/rabbit-attack-combined-60fps.webm",
+        "directory": "rabbit/attack_combined",
+        "pattern": "frame_%04d.png",
+        "first_frame": 0,
+        "width": 256,
+        "height": 256,
+        "fps": 60,
+        "frame_count": 180,
+        "duration_seconds": 3.0,
+        "source_duration_seconds": 3,
+        "loop": false,
+        "layer": "combined",
+        "bytes": 7446711,
+        "alpha_checks": {
+          "0": {
+            "transparent_pixels": 47194,
+            "visible_pixels": 18342,
+            "partial_alpha_pixels": 2293
+          },
+          "45": {
+            "transparent_pixels": 46731,
+            "visible_pixels": 18805,
+            "partial_alpha_pixels": 2859
+          },
+          "90": {
+            "transparent_pixels": 44999,
+            "visible_pixels": 20537,
+            "partial_alpha_pixels": 4551
+          },
+          "135": {
+            "transparent_pixels": 46873,
+            "visible_pixels": 18663,
+            "partial_alpha_pixels": 2609
+          },
+          "179": {
+            "transparent_pixels": 47189,
+            "visible_pixels": 18347,
+            "partial_alpha_pixels": 2293
+          }
+        }
+      },
+      {
+        "animation": "character_hurt",
+        "source": "animations/rabbit-character-hurt-60fps.webm",
+        "directory": "rabbit/character_hurt",
+        "pattern": "frame_%04d.png",
+        "first_frame": 0,
+        "width": 256,
+        "height": 256,
+        "fps": 60,
+        "frame_count": 150,
+        "duration_seconds": 2.5,
+        "source_duration_seconds": 2.5,
+        "loop": false,
+        "layer": "character",
+        "bytes": 5647435,
+        "alpha_checks": {
+          "0": {
+            "transparent_pixels": 47194,
+            "visible_pixels": 18342,
+            "partial_alpha_pixels": 2293
+          },
+          "37": {
+            "transparent_pixels": 47485,
+            "visible_pixels": 18051,
+            "partial_alpha_pixels": 2250
+          },
+          "75": {
+            "transparent_pixels": 47430,
+            "visible_pixels": 18106,
+            "partial_alpha_pixels": 2252
+          },
+          "112": {
+            "transparent_pixels": 47189,
+            "visible_pixels": 18347,
+            "partial_alpha_pixels": 2299
+          },
+          "149": {
+            "transparent_pixels": 47194,
+            "visible_pixels": 18342,
+            "partial_alpha_pixels": 2291
+          }
+        }
+      },
+      {
+        "animation": "character_idle",
+        "source": "animations/rabbit-character-idle-60fps.webm",
+        "directory": "rabbit/character_idle",
+        "pattern": "frame_%04d.png",
+        "first_frame": 0,
+        "width": 256,
+        "height": 256,
+        "fps": 60,
+        "frame_count": 150,
+        "duration_seconds": 2.5,
+        "source_duration_seconds": 10,
+        "loop": true,
+        "layer": "character",
+        "bytes": 5742164,
+        "alpha_checks": {
+          "0": {
+            "transparent_pixels": 47194,
+            "visible_pixels": 18342,
+            "partial_alpha_pixels": 2293
+          },
+          "37": {
+            "transparent_pixels": 47216,
+            "visible_pixels": 18320,
+            "partial_alpha_pixels": 2293
+          },
+          "75": {
+            "transparent_pixels": 47237,
+            "visible_pixels": 18299,
+            "partial_alpha_pixels": 2277
+          },
+          "112": {
+            "transparent_pixels": 47205,
+            "visible_pixels": 18331,
+            "partial_alpha_pixels": 2307
+          },
+          "149": {
+            "transparent_pixels": 47186,
+            "visible_pixels": 18350,
+            "partial_alpha_pixels": 2307
+          }
+        }
+      }
+    ],
+    "lawilim": [
+      {
+        "animation": "attack_combined",
+        "source": "animations/lawilim-attack-combined-60fps.webm",
+        "directory": "lawilim/attack_combined",
+        "pattern": "frame_%04d.png",
+        "first_frame": 0,
+        "width": 256,
+        "height": 256,
+        "fps": 60,
+        "frame_count": 180,
+        "duration_seconds": 3.0,
+        "source_duration_seconds": 3,
+        "loop": false,
+        "layer": "combined",
+        "bytes": 6959855,
+        "alpha_checks": {
+          "0": {
+            "transparent_pixels": 49818,
+            "visible_pixels": 15718,
+            "partial_alpha_pixels": 1887
+          },
+          "45": {
+            "transparent_pixels": 48125,
+            "visible_pixels": 17411,
+            "partial_alpha_pixels": 3197
+          },
+          "90": {
+            "transparent_pixels": 46580,
+            "visible_pixels": 18956,
+            "partial_alpha_pixels": 5103
+          },
+          "135": {
+            "transparent_pixels": 47235,
+            "visible_pixels": 18301,
+            "partial_alpha_pixels": 4083
+          },
+          "179": {
+            "transparent_pixels": 49808,
+            "visible_pixels": 15728,
+            "partial_alpha_pixels": 1904
+          }
+        }
+      },
+      {
+        "animation": "character_hurt",
+        "source": "animations/lawilim-character-hurt-60fps.webm",
+        "directory": "lawilim/character_hurt",
+        "pattern": "frame_%04d.png",
+        "first_frame": 0,
+        "width": 256,
+        "height": 256,
+        "fps": 60,
+        "frame_count": 150,
+        "duration_seconds": 2.5,
+        "source_duration_seconds": 2.5,
+        "loop": false,
+        "layer": "character",
+        "bytes": 4545730,
+        "alpha_checks": {
+          "0": {
+            "transparent_pixels": 49818,
+            "visible_pixels": 15718,
+            "partial_alpha_pixels": 1887
+          },
+          "37": {
+            "transparent_pixels": 49813,
+            "visible_pixels": 15723,
+            "partial_alpha_pixels": 1888
+          },
+          "75": {
+            "transparent_pixels": 49815,
+            "visible_pixels": 15721,
+            "partial_alpha_pixels": 1877
+          },
+          "112": {
+            "transparent_pixels": 49820,
+            "visible_pixels": 15716,
+            "partial_alpha_pixels": 1887
+          },
+          "149": {
+            "transparent_pixels": 49818,
+            "visible_pixels": 15718,
+            "partial_alpha_pixels": 1887
+          }
+        }
+      },
+      {
+        "animation": "character_idle",
+        "source": "animations/lawilim-character-idle-60fps.webm",
+        "directory": "lawilim/character_idle",
+        "pattern": "frame_%04d.png",
+        "first_frame": 0,
+        "width": 256,
+        "height": 256,
+        "fps": 60,
+        "frame_count": 150,
+        "duration_seconds": 2.5,
+        "source_duration_seconds": 2.5,
+        "loop": true,
+        "layer": "character",
+        "bytes": 4562803,
+        "alpha_checks": {
+          "0": {
+            "transparent_pixels": 49818,
+            "visible_pixels": 15718,
+            "partial_alpha_pixels": 1887
+          },
+          "37": {
+            "transparent_pixels": 49793,
+            "visible_pixels": 15743,
+            "partial_alpha_pixels": 1907
+          },
+          "75": {
+            "transparent_pixels": 49818,
+            "visible_pixels": 15718,
+            "partial_alpha_pixels": 1886
+          },
+          "112": {
+            "transparent_pixels": 49810,
+            "visible_pixels": 15726,
+            "partial_alpha_pixels": 1893
+          },
+          "149": {
+            "transparent_pixels": 49806,
+            "visible_pixels": 15730,
+            "partial_alpha_pixels": 1906
+          }
+        }
+      }
+    ]
+  }
+}

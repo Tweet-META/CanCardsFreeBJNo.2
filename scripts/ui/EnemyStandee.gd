@@ -1,4 +1,4 @@
-extends Button
+extends Control
 ## Defines the EnemyStandee script.
 class_name EnemyStandee
 
@@ -10,26 +10,37 @@ const STATUS_EFFECT_ICON_SCENE: PackedScene = preload("res://scenes/ui/StatusEff
 
 @onready var hp_bar: ProgressBar = $Content/HpWrap/HpBar
 @onready var hp_label: Label = $Content/HpWrap/HpLabel
-@onready var portrait: TextureRect = $Content/Portrait
+@onready var portrait: TextureRect = $Content/Portrait/VisualRoot/StaticPortrait
 @onready var shield_visual: ShieldVisual = $ShieldVisual
 @onready var effect_container: HBoxContainer = $EffectContainer
-@onready var target_highlight: Panel = $TargetHighlight
+@onready var hit_button: PortraitHitButton = $Content/Portrait/VisualRoot/HitButton
+@onready var target_highlight: Panel = $Content/Portrait/VisualRoot/HitButton/TargetHighlight
+@onready var visual_root: Control = $Content/Portrait/VisualRoot
+@onready var attack_sprite: AnimatedSprite2D = $Content/Portrait/VisualRoot/AttackOrigin/AttackSprite
+@onready var attack_animation: AnimationPlayer = $AttackAnimation
+
+@export_range(0.0, 2.0, 0.05) var action_recovery_seconds: float = 0.15
 
 var enemy_index: int = -1
+var bound_enemy: EnemyData
 
 
+## Connects the body-only button and keeps health/status UI outside the interaction area.
 func _ready() -> void:
-	pressed.connect(_on_pressed)
-	add_theme_stylebox_override("hover", _style(Color(1.0, 0.82, 0.74, 0.22), 8, 2))
-	add_theme_stylebox_override("pressed", _style(Color(1.0, 0.82, 0.74, 0.35), 8, 2))
+	hit_button.pressed.connect(_on_pressed)
+	hit_button.add_theme_stylebox_override("hover", _style(Color(1.0, 0.82, 0.74, 0.22), 8, 2))
+	hit_button.add_theme_stylebox_override("pressed", _style(Color(1.0, 0.82, 0.74, 0.35), 8, 2))
+	portrait.resized.connect(_fit_hit_button)
 	hp_bar.add_theme_stylebox_override("background", _style(Color(0.40, 0.34, 0.27), 12, 2))
 	hp_bar.add_theme_stylebox_override("fill", _style(HP_RED, 12, 1))
 	_apply_target_highlight_style()
 
 
+## Updates the retained enemy without interrupting its presentation.
 func setup(enemy: EnemyData, index: int, selected: bool, target_highlighted: bool) -> void:
+	bound_enemy = enemy
 	enemy_index = index
-	disabled = not enemy.is_alive()
+	hit_button.disabled = not enemy.is_alive()
 	modulate = Color(1, 1, 1, 1.0 if enemy.is_alive() else 0.30)
 
 	var normal_color: Color = Color(0, 0, 0, 0)
@@ -40,15 +51,60 @@ func setup(enemy: EnemyData, index: int, selected: bool, target_highlighted: boo
 	elif selected:
 		normal_color = Color(1.0, 0.82, 0.74, 0.23)
 		normal_border = 2
-	add_theme_stylebox_override("normal", _style(normal_color, 8, normal_border))
+	hit_button.add_theme_stylebox_override("normal", _style(normal_color, 8, normal_border))
 
 	hp_bar.max_value = enemy.max_hp
 	hp_bar.value = enemy.current_hp
 	hp_label.text = "%d / %d" % [enemy.current_hp, enemy.max_hp]
 	portrait.texture = load(enemy.portrait_path) as Texture2D
+	_fit_hit_button()
 	shield_visual.setup(enemy.current_shield, enemy.damage_reduction)
 	_refresh_effects(enemy)
 	target_highlight.visible = target_highlighted
+
+
+## Fits native clicks and target outlines to the texture's drawn, aspect-correct body.
+func _fit_hit_button() -> void:
+	var texture: Texture2D = portrait.texture
+	if texture == null:
+		hit_button.setup_texture(null, Rect2())
+		return
+	var texture_size: Vector2 = texture.get_size()
+	var fit_scale: float = minf(portrait.size.x / maxf(1.0, texture_size.x), portrait.size.y / maxf(1.0, texture_size.y))
+	var draw_size: Vector2 = texture_size * fit_scale
+	hit_button.setup_texture(texture, Rect2(portrait.position + (portrait.size - draw_size) * 0.5, draw_size))
+
+
+## Rejects HP bars, status icons, and transparent padding when a card is targeted.
+func contains_global_point(mouse_global_position: Vector2) -> bool:
+	return hit_button.contains_global_point(mouse_global_position)
+
+
+## Uses the reserved attack sprite when supplied, otherwise plays the editor-authored lunge.
+func play_action(is_attack: bool) -> void:
+	var frames: SpriteFrames = attack_sprite.sprite_frames
+	if is_attack and frames != null and frames.has_animation(&"attack"):
+		portrait.hide()
+		attack_sprite.show()
+		attack_sprite.stop()
+		attack_sprite.play(&"attack")
+		if frames.get_animation_loop(&"attack"):
+			await attack_sprite.animation_looped
+		else:
+			await attack_sprite.animation_finished
+		attack_sprite.stop()
+		attack_sprite.hide()
+		portrait.show()
+	elif is_attack:
+		attack_animation.play(&"attack")
+		await attack_animation.animation_finished
+	else:
+		var pulse: Tween = create_tween()
+		pulse.tween_property(visual_root, "modulate", Color(1.15, 1.08, 0.75), 0.18)
+		pulse.tween_property(visual_root, "modulate", Color.WHITE, 0.18)
+		await pulse.finished
+	if action_recovery_seconds > 0.0:
+		await get_tree().create_timer(action_recovery_seconds).timeout
 
 
 func _refresh_effects(enemy: EnemyData) -> void:

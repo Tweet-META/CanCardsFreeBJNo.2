@@ -8,6 +8,7 @@ class_name CharacterData
 @export var description: String = ""
 @export var max_hp: int = 100
 @export var portrait_path: String = ""
+@export var battle_animation_path: String = ""
 @export var cards: Array[CardData] = []
 
 var base_max_hp: int = 0
@@ -41,7 +42,7 @@ func heal(amount: int) -> int:
 	return current_hp - hp_before
 
 
-func take_damage(raw_damage: int, incoming_attribute: String = "") -> int:
+func take_damage(raw_damage: int) -> int:
 	last_damage_was_immune = false
 	if raw_damage > 0 and consume_status_effect("damage_immunity"):
 		last_damage_was_immune = true
@@ -49,8 +50,6 @@ func take_damage(raw_damage: int, incoming_attribute: String = "") -> int:
 
 	var amplified_damage: int = roundi(float(raw_damage) * get_incoming_damage_multiplier())
 	var reduction: float = turn_damage_reduction
-	if incoming_attribute == attribute:
-		reduction += 0.20
 
 	var reduced_damage: int = maxi(1, roundi(float(amplified_damage) * (1.0 - clampf(reduction, 0.0, 0.85))))
 	var absorbed_damage: int = mini(current_shield, reduced_damage)

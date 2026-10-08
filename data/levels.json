@@ -1,13 +1,15 @@
 {
+  "general_cards_unlock_order": 5,
   "levels": [
     {
       "id": "level1",
       "order": 1,
+      "tutorial_id": "first_battle",
+      "requires_learning_goal": true,
       "display_name": "LEVEL_1_NAME",
       "description": "LEVEL_1_DESCRIPTION",
       "marker_text": "1",
       "map_id": "map1",
-      "map_position": [0.44, 0.69],
       "scene_path": "res://scenes/BattleScene.tscn",
       "battle_background": "res://assets/ui/conversation_room.png",
       "wave": [
@@ -26,7 +28,6 @@
       "description": "LEVEL_2_DESCRIPTION",
       "marker_text": "2",
       "map_id": "map1",
-      "map_position": [0.35, 0.69],
       "scene_path": "res://scenes/BattleScene.tscn",
       "battle_background": "res://assets/ui/conversation_room.png",
       "wave": [
@@ -45,7 +46,6 @@
       "description": "LEVEL_3_DESCRIPTION",
       "marker_text": "3",
       "map_id": "map1",
-      "map_position": [0.24, 0.69],
       "scene_path": "res://scenes/BattleScene.tscn",
       "battle_background": "res://assets/ui/conversation_room.png",
       "wave": [
@@ -65,7 +65,6 @@
       "description": "LEVEL_4_DESCRIPTION",
       "marker_text": "4",
       "map_id": "map1",
-      "map_position": [0.14, 0.69],
       "scene_path": "res://scenes/BattleScene.tscn",
       "battle_background": "res://assets/ui/conversation_room.png",
       "wave": [

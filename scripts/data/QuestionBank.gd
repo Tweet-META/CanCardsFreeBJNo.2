@@ -44,23 +44,6 @@ func load_from_json(path: String) -> bool:
 	return true
 
 
-func get_random_question(category: String, difficulty: String, rng: RandomNumberGenerator) -> QuestionData:
-	var candidates: Array[QuestionData] = []
-	for question: QuestionData in questions:
-		if question.category == category and question.difficulty == difficulty:
-			candidates.append(question)
-
-	if candidates.is_empty():
-		for question: QuestionData in questions:
-			if question.category == category:
-				candidates.append(question)
-
-	if candidates.is_empty():
-		return questions[0].create_shuffled_copy(rng)
-
-	return candidates[rng.randi_range(0, candidates.size() - 1)].create_shuffled_copy(rng)
-
-
 func get_random_question_by_difficulty(difficulty: String, rng: RandomNumberGenerator) -> QuestionData:
 	var candidates: Array[QuestionData] = get_questions_for_difficulty(difficulty)
 	if candidates.is_empty():

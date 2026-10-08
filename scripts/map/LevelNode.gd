@@ -7,6 +7,7 @@ signal level_selected(level: LevelData)
 @onready var level_button: Button = $LevelButton
 @onready var level_label: Label = $LevelLabel
 
+@export var level_id: String = ""
 var level_data: LevelData
 
 
@@ -15,9 +16,10 @@ func _ready() -> void:
 	level_button.pressed.connect(_on_pressed)
 
 
-## Setup.
+## Binds the level definition to this editor-authored map node.
 func setup(level: LevelData) -> void:
 	level_data = level
+	level_id = level.id
 	level_button.disabled = not level.unlocked
 	level_button.text = level.marker_text
 	level_label.text = tr(level.display_name)

@@ -1,4 +1,4 @@
-extends Button
+extends Control
 ## Defines the CharacterStandee script.
 class_name CharacterStandee
 
@@ -10,27 +10,31 @@ const STATUS_EFFECT_ICON_SCENE: PackedScene = preload("res://scenes/ui/StatusEff
 
 @onready var hp_bar: ProgressBar = $Content/HpWrap/HpBar
 @onready var hp_label: Label = $Content/HpWrap/HpLabel
-@onready var portrait: TextureRect = $Content/Portrait
-@onready var selected_icon: Label = $Content/SelectedIcon
+@onready var portrait: CharacterMotion = $Content/Portrait
 @onready var shield_visual: ShieldVisual = $ShieldVisual
 @onready var effect_container: HBoxContainer = $EffectContainer
-@onready var target_highlight: Panel = $TargetHighlight
+@onready var hit_button: PortraitHitButton = $Content/Portrait/VisualRoot/HitButton
+@onready var target_highlight: Panel = $Content/Portrait/VisualRoot/HitButton/TargetHighlight
 
 var character_index: int = -1
+var bound_character: CharacterData
 
 
+## Makes only the body's child button clickable; health and status displays remain passive.
 func _ready() -> void:
-	pressed.connect(_on_pressed)
-	add_theme_stylebox_override("hover", _style(Color(0.72, 0.86, 1.0, 0.22), 8, 2))
-	add_theme_stylebox_override("pressed", _style(Color(0.72, 0.86, 1.0, 0.35), 8, 2))
+	hit_button.pressed.connect(_on_pressed)
+	hit_button.add_theme_stylebox_override("hover", _style(Color(0.72, 0.86, 1.0, 0.22), 8, 2))
+	hit_button.add_theme_stylebox_override("pressed", _style(Color(0.72, 0.86, 1.0, 0.35), 8, 2))
 	hp_bar.add_theme_stylebox_override("background", _style(Color(0.40, 0.34, 0.27), 12, 2))
 	hp_bar.add_theme_stylebox_override("fill", _style(HP_GREEN, 12, 1))
 	_apply_target_highlight_style()
 
 
+## Refreshes values without replacing the character's active animation.
 func setup(character: CharacterData, index: int, selected: bool, target_highlighted: bool) -> void:
+	bound_character = character
 	character_index = index
-	disabled = not character.is_alive()
+	hit_button.disabled = not character.is_alive()
 
 	var character_alpha: float = 1.0
 	if not character.is_alive():
@@ -47,16 +51,30 @@ func setup(character: CharacterData, index: int, selected: bool, target_highligh
 	elif selected:
 		normal_color = Color(0.72, 0.86, 1.0, 0.23)
 		normal_border = 2
-	add_theme_stylebox_override("normal", _style(normal_color, 8, normal_border))
+	hit_button.add_theme_stylebox_override("normal", _style(normal_color, 8, normal_border))
 
 	hp_bar.max_value = character.max_hp
 	hp_bar.value = character.current_hp
 	hp_label.text = "%d / %d" % [character.current_hp, character.max_hp]
-	portrait.texture = load(character.portrait_path) as Texture2D
+	portrait.setup(character.battle_animation_path, character.portrait_path, character.is_alive())
 	shield_visual.setup(character.current_shield, character.turn_damage_reduction)
 	_refresh_effects(character.active_effects)
-	selected_icon.visible = selected
 	target_highlight.visible = target_highlighted
+
+
+## Starts an attack or hurt sequence and reports its playback duration.
+func play_action(animation_name: StringName) -> float:
+	return portrait.play_action(animation_name)
+
+
+## Gives selection feedback without moving the HP bar or standee slot.
+func play_selection_jump() -> void:
+	portrait.play_selection_jump()
+
+
+## Shares the body alpha mask with card targeting instead of the full standee rectangle.
+func contains_global_point(mouse_global_position: Vector2) -> bool:
+	return hit_button.contains_global_point(mouse_global_position)
 
 
 func _refresh_effects(effects: Array[StatusEffectData]) -> void:

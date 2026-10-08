@@ -7,11 +7,17 @@ signal difficulty_requested()
 signal question_requested(question: QuestionData)
 signal result_requested(title: String, message: String, battle_over: bool, victory: bool)
 signal log_added(message: String)
+signal presentation_requested(request_id: int, kind: StringName, actor_index: int, targets: Array[int])
+signal presentation_finished(request_id: int)
 
 var state: BattleState = BattleState.new()
 var question_bank: QuestionBank = QuestionBank.new()
 var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var active_level: LevelData
+var _battle_generation: int = 0
+var _next_presentation_id: int = 0
+var _waiting_presentation_id: int = -1
+var _hit_player_indices: Array[int] = []
 
 const TEAM_GENERAL_CARD_INDEX_OFFSET: int = 1000
 
@@ -29,22 +35,30 @@ func start_new_battle() -> void:
 
 ## Start battle with level.
 func _start_battle_with_level(level: LevelData) -> void:
+	_cancel_presentation()
 	active_level = level
 	if active_level == null or active_level.waves.is_empty():
 		push_error("BattleManager: active level has no waves.")
 		return
 	var first_wave: Array[EnemyData] = GameDataFactory.create_level_wave(active_level, 0, rng)
-	state.setup(GameDataFactory.create_player_team(), first_wave, active_level, rng)
+	state.setup(
+		GameDataFactory.create_player_team(),
+		first_wave,
+		active_level,
+		GameDataFactory.create_active_learning_goal(),
+		rng
+	)
 	_roll_shop_offers()
 	state.push_log(tr("LOG_BATTLE_START"))
 	_emit_log(tr("LOG_WAVE_START") % [state.current_wave, state.total_waves])
 	state.start_player_turn()
 	_emit_log(tr("LOG_PLAYER_TURN_START") % state.turn_count)
+	_emit_tutorial_tip("attack")
 	state_changed.emit(state)
 
 
 ## Request use card.
-func request_use_card(character_index: int, card_index: int, enemy_index: int, ally_index: int, _difficulty: String = "") -> void:
+func request_use_card(character_index: int, card_index: int, enemy_index: int, ally_index: int) -> void:
 	if state.phase != BattleState.Phase.PLAYER_TURN:
 		_emit_log(tr("LOG_CANNOT_USE_CARD"))
 		return
@@ -60,6 +74,8 @@ func request_use_card(character_index: int, card_index: int, enemy_index: int, a
 		return
 	var card: CardData = _get_card_for_request(character, card_index)
 	if card == null:
+		return
+	if card.is_general() and not state.general_cards_enabled:
 		return
 
 	if not card.can_use(state.ap):
@@ -81,8 +97,7 @@ func request_use_card(character_index: int, card_index: int, enemy_index: int, a
 	state.pending_card = card
 
 	if not card.requires_question:
-		_apply_card_effect(false, true)
-		_finish_player_action()
+		_resolve_player_action(false, true)
 		return
 
 	if card.is_skill():
@@ -90,6 +105,7 @@ func request_use_card(character_index: int, card_index: int, enemy_index: int, a
 		return
 	if card.card_type == CardData.CardType.ATTACK or card.card_type == CardData.CardType.DEFENSE:
 		state.phase = BattleState.Phase.DIFFICULTY_SELECTION
+		_emit_tutorial_tip("defense" if card.card_type == CardData.CardType.DEFENSE else "difficulty")
 		difficulty_requested.emit()
 		state_changed.emit(state)
 		return
@@ -115,6 +131,7 @@ func _begin_question(difficulty: String) -> void:
 	state.pending_difficulty = card.get_question_difficulty(difficulty)
 	state.phase = BattleState.Phase.QUESTION
 	state.pending_question = question_bank.get_random_question_by_difficulty(state.pending_difficulty, rng)
+	_emit_tutorial_tip("question")
 	_emit_log(tr("LOG_CARD_QUESTION") % [tr(character.display_name), tr(card.display_name), _difficulty_label(state.pending_difficulty)])
 	question_requested.emit(state.pending_question)
 	state_changed.emit(state)
@@ -133,12 +150,74 @@ func submit_answer(answer_index: int) -> void:
 
 	var answer_text: String = tr("RESULT_CORRECT") if correct else tr("RESULT_WRONG")
 	if bonus_triggered and not correct:
-		answer_text += tr("RESULT_VOCABULARY_TRIGGER")
+		answer_text += tr("RESULT_VOCABULARY_GOAL_TRIGGER")
 
-	_apply_card_effect(correct, bonus_triggered)
+	state.pending_answer_correct = correct
+	state.pending_answer_bonus_triggered = bonus_triggered
+	state.phase = BattleState.Phase.ANSWER_RESULT
+	_emit_tutorial_tip("result")
 	_emit_log(answer_text + ("。" if TranslationServer.get_locale() == "zh_CN" else "."))
 	result_requested.emit(answer_text, tr(state.pending_question.explanation), false, false)
-	_finish_player_action()
+	state_changed.emit(state)
+
+
+## Resolves the retained answer only after its explanation panel has been dismissed.
+func continue_after_answer() -> void:
+	if state.phase != BattleState.Phase.ANSWER_RESULT:
+		return
+	_resolve_player_action(state.pending_answer_correct, state.pending_answer_bonus_triggered)
+
+
+## Locks the turn, plays damaging-card animations, and then applies the existing rules.
+func _resolve_player_action(correct: bool, bonus_triggered: bool) -> void:
+	var character: CharacterData = state.selected_character
+	var card: CardData = state.pending_card
+	if character == null or card == null:
+		return
+	state.phase = BattleState.Phase.ACTION_RESOLUTION
+	state_changed.emit(state)
+	if card.base_damage > 0 or card.effect_id == "damage_current_hp_percent":
+		var actor_index: int = state.player_team.find(character)
+		if not await _present(&"player_attack", actor_index):
+			return
+	_apply_card_effect(correct, bonus_triggered)
+	await _finish_player_action()
+
+
+## Releases only the current visual request; stale callbacks cannot advance a later battle.
+func complete_presentation(request_id: int) -> void:
+	if request_id != _waiting_presentation_id:
+		return
+	_waiting_presentation_id = -1
+	presentation_finished.emit(request_id)
+
+
+## Requests a visual through signals and waits without referencing UI nodes.
+func _present(kind: StringName, actor_index: int = -1, targets: Array[int] = []) -> bool:
+	var generation: int = _battle_generation
+	if not presentation_requested.has_connections():
+		return true
+	_next_presentation_id += 1
+	var request_id: int = _next_presentation_id
+	_waiting_presentation_id = request_id
+	presentation_requested.emit(request_id, kind, actor_index, targets)
+	while _waiting_presentation_id == request_id and generation == _battle_generation:
+		await presentation_finished
+	return generation == _battle_generation and is_inside_tree()
+
+
+## Invalidates pending asynchronous work before retry or scene removal.
+func _cancel_presentation() -> void:
+	_battle_generation += 1
+	var cancelled_id: int = _waiting_presentation_id
+	_waiting_presentation_id = -1
+	if cancelled_id >= 0:
+		presentation_finished.emit(cancelled_id)
+
+
+## Prevents unfinished visuals from resuming a removed battle.
+func _exit_tree() -> void:
+	_cancel_presentation()
 
 
 ## Retry battle.
@@ -148,6 +227,8 @@ func retry_battle() -> void:
 
 ## Request refresh shop.
 func request_refresh_shop() -> void:
+	if not state.general_cards_enabled or state.phase != BattleState.Phase.PLAYER_TURN:
+		return
 	if not state.spend_new_toefl(0.5):
 		_emit_log(tr("LOG_REFRESH_NO_FUNDS"))
 		state_changed.emit(state)
@@ -159,6 +240,8 @@ func request_refresh_shop() -> void:
 
 ## Request buy shop card.
 func request_buy_shop_card(offer_index: int, character_index: int) -> void:
+	if not state.general_cards_enabled or state.phase != BattleState.Phase.PLAYER_TURN:
+		return
 	if offer_index < 0 or offer_index >= state.shop_offer_cards.size():
 		return
 	if character_index < 0 or character_index >= state.player_team.size():
@@ -185,7 +268,7 @@ func request_buy_shop_card(offer_index: int, character_index: int) -> void:
 
 ## Request sell general card.
 func request_sell_general_card(card_index: int) -> void:
-	if state.phase != BattleState.Phase.PLAYER_TURN:
+	if not state.general_cards_enabled or state.phase != BattleState.Phase.PLAYER_TURN:
 		return
 	if not _is_team_general_card_index(card_index):
 		return
@@ -203,7 +286,7 @@ func request_sell_general_card(card_index: int) -> void:
 
 ## Developer add culture mask.
 func developer_add_culture_mask() -> void:
-	if not SettingsManager.developer_mode:
+	if not SettingsManager.developer_mode or state.phase != BattleState.Phase.PLAYER_TURN:
 		return
 	if state.get_alive_enemies().size() >= 8:
 		_emit_log(tr("DEV_LOG_ENEMY_LIMIT"))
@@ -219,7 +302,7 @@ func developer_add_culture_mask() -> void:
 
 ## Developer add general card.
 func developer_add_general_card() -> void:
-	if not SettingsManager.developer_mode:
+	if not state.general_cards_enabled or not SettingsManager.developer_mode or state.phase != BattleState.Phase.PLAYER_TURN:
 		return
 	var card: CardData = GameDataFactory.create_potion_of_confucius()
 	card.id = "%s_dev_%d" % [card.id, Time.get_ticks_msec()]
@@ -231,6 +314,8 @@ func developer_add_general_card() -> void:
 
 ## Grant six seven.
 func grant_six_seven() -> void:
+	if not state.general_cards_enabled:
+		return
 	var card: CardData = GameDataFactory.create_six_seven()
 	if card == null:
 		return
@@ -243,7 +328,7 @@ func grant_six_seven() -> void:
 
 ## Developer clear enemies.
 func developer_clear_enemies() -> void:
-	if not SettingsManager.developer_mode:
+	if not SettingsManager.developer_mode or state.phase != BattleState.Phase.PLAYER_TURN:
 		return
 	for enemy: EnemyData in state.enemy_team:
 		if enemy.is_alive():
@@ -256,7 +341,7 @@ func developer_clear_enemies() -> void:
 
 ## Developer defeat players.
 func developer_defeat_players() -> void:
-	if not SettingsManager.developer_mode:
+	if not SettingsManager.developer_mode or state.phase != BattleState.Phase.PLAYER_TURN:
 		return
 	for character: CharacterData in state.player_team:
 		if character.is_alive():
@@ -335,7 +420,7 @@ func _apply_attack_card(character: CharacterData, card: CardData, bonus_triggere
 	var enemy: EnemyData = state.selected_enemy
 	if enemy == null:
 		return
-	var damage: int = _calculate_damage(character, enemy, card.base_damage, card.get_damage_bonus_for_difficulty(state.pending_difficulty) if bonus_triggered else 0.0)
+	var damage: int = _calculate_damage(character, card.base_damage, card.get_damage_bonus_for_difficulty(state.pending_difficulty) if bonus_triggered else 0.0)
 	var dealt: int = enemy.take_damage(damage)
 	_emit_log(tr("LOG_ATTACK_DAMAGE") % [tr(character.display_name), tr(enemy.display_name), dealt])
 	_collect_reward_if_dead(enemy)
@@ -374,7 +459,7 @@ func _apply_primary_splash_attack(character: CharacterData, card: CardData, bonu
 		if not enemy.is_alive():
 			continue
 		var base_damage: int = card.base_damage if enemy == primary_target else roundi(float(card.base_damage) * 0.5)
-		var damage: int = _calculate_damage(character, enemy, base_damage, card_bonus)
+		var damage: int = _calculate_damage(character, base_damage, card_bonus)
 		var dealt: int = enemy.take_damage(damage)
 		_emit_log(tr("LOG_ATTACK_DAMAGE") % [tr(character.display_name), tr(enemy.display_name), dealt])
 		_collect_reward_if_dead(enemy)
@@ -387,7 +472,7 @@ func _apply_current_hp_percent_damage(character: CharacterData, card: CardData) 
 		return
 	var target_hp_before: int = enemy.current_hp
 	var dynamic_base_damage: int = maxi(1, roundi(float(target_hp_before) * card.current_hp_damage_ratio))
-	var damage: int = _calculate_damage(character, enemy, dynamic_base_damage, 0.0)
+	var damage: int = _calculate_damage(character, dynamic_base_damage, 0.0)
 	var dealt: int = enemy.take_damage(damage)
 	_emit_log(tr("LOG_CURRENT_HP_DAMAGE") % [
 		tr(card.display_name),
@@ -509,24 +594,22 @@ func _apply_skill_card(character: CharacterData, card: CardData, bonus_triggered
 	if card.target_type == CardData.TargetType.ALL_ENEMIES:
 		for enemy: EnemyData in state.enemy_team:
 			if enemy.is_alive():
-				var damage: int = _calculate_damage(character, enemy, card.base_damage, extra_bonus)
+				var damage: int = _calculate_damage(character, card.base_damage, extra_bonus)
 				var dealt: int = enemy.take_damage(damage)
 				_emit_log(tr("LOG_SKILL_HIT_ALL") % [tr(character.display_name), tr(enemy.display_name), dealt])
 				_collect_reward_if_dead(enemy)
 	else:
 		var enemy: EnemyData = state.selected_enemy
 		if enemy != null:
-			var damage: int = _calculate_damage(character, enemy, card.base_damage, extra_bonus)
+			var damage: int = _calculate_damage(character, card.base_damage, extra_bonus)
 			var dealt: int = enemy.take_damage(damage)
 			_emit_log(tr("LOG_SKILL_HIT_ONE") % [tr(character.display_name), tr(enemy.display_name), dealt])
 			_collect_reward_if_dead(enemy)
 
 
 ## Calculate damage.
-func _calculate_damage(character: CharacterData, enemy: EnemyData, base_damage: int, card_bonus: float) -> int:
+func _calculate_damage(character: CharacterData, base_damage: int, card_bonus: float) -> int:
 	var multiplier: float = state.get_team_stat_multiplier()
-	if character.attribute == enemy.attribute:
-		multiplier += 0.20
 	multiplier += card_bonus
 	return maxi(1, roundi(float(base_damage) * multiplier * character.get_outgoing_damage_multiplier()))
 
@@ -548,46 +631,73 @@ func _finish_player_action() -> void:
 			if used_card_index != -1:
 				state.team_general_cards.remove_at(used_card_index)
 	state.clear_pending_action()
+	if state.ap >= 5.0:
+		_emit_tutorial_tip("skill")
 
 	if _check_battle_end():
 		state_changed.emit(state)
 		return
 
 	if state.did_all_living_players_act():
-		_run_enemy_turn()
+		await _run_enemy_turn()
 	else:
 		state.phase = BattleState.Phase.PLAYER_TURN
 		state_changed.emit(state)
 
 
-## Run enemy turn.
+## Announces the enemy turn and resolves enemies sequentially, waiting for each visual.
 func _run_enemy_turn() -> void:
 	state.phase = BattleState.Phase.ENEMY_TURN
 	state_changed.emit(state)
 	_emit_log(tr("LOG_ENEMY_TURN_START"))
+	_emit_tutorial_tip("enemy_turn")
+	if not await _present(&"enemy_turn"):
+		return
 
 	for enemy: EnemyData in state.enemy_team:
 		if not enemy.is_alive():
 			continue
-		_run_enemy_action(enemy)
+		var enemy_index: int = state.enemy_team.find(enemy)
+		if enemy.consume_all_status_effects("stun") > 0:
+			_emit_log(tr("LOG_ENEMY_STUNNED") % tr(enemy.display_name))
+			state_changed.emit(state)
+			if not await _present(&"enemy_skip", enemy_index):
+				return
+			continue
+		var ability: EnemyAbilityData = null
+		var is_attack: bool = false
+		if enemy.is_charging():
+			var target_index: int = enemy.charge_target_index
+			is_attack = enemy.charge_remaining_turns <= 1 and target_index >= 0 and target_index < state.player_team.size() and state.player_team[target_index].is_alive()
+		else:
+			ability = enemy.choose_ability(rng)
+			if ability == null:
+				continue
+			is_attack = ability.id in ["bun_group_attack", "single_attack", "nian_weakening_strike"]
+		var kind: StringName = &"enemy_attack" if is_attack else &"enemy_action"
+		if not await _present(kind, enemy_index):
+			return
+		_hit_player_indices.clear()
+		_run_enemy_action(enemy, ability)
+		state_changed.emit(state)
+		if not _hit_player_indices.is_empty():
+			if not await _present(&"player_hurt", -1, _hit_player_indices.duplicate()):
+				return
 		if _check_battle_end():
 			state_changed.emit(state)
 			return
 
 	state.start_player_turn()
 	_emit_log(tr("LOG_NEXT_PLAYER_TURN") % state.turn_count)
+	_emit_tutorial_tip("next_turn")
 	state_changed.emit(state)
 
 
-## Run enemy action.
-func _run_enemy_action(enemy: EnemyData) -> void:
-	if enemy.consume_all_status_effects("stun") > 0:
-		_emit_log(tr("LOG_ENEMY_STUNNED") % tr(enemy.display_name))
-		return
+## Resolves the ability already selected for this enemy's visible action.
+func _run_enemy_action(enemy: EnemyData, ability: EnemyAbilityData) -> void:
 	if enemy.is_charging():
 		_run_nian_charge_progress(enemy)
 		return
-	var ability: EnemyAbilityData = enemy.choose_ability(rng)
 	if ability == null:
 		return
 	match ability.id:
@@ -617,7 +727,8 @@ func _run_slime_support(enemy: EnemyData, power: int) -> void:
 ## Run bun group attack.
 func _run_bun_group_attack(enemy: EnemyData, power: int) -> void:
 	for target: CharacterData in state.get_alive_players():
-		var dealt: int = target.take_damage(maxi(0, power), enemy.attribute)
+		var dealt: int = target.take_damage(maxi(0, power))
+		_record_player_hit(target)
 		if target.last_damage_was_immune:
 			_emit_log(tr("LOG_DAMAGE_IMMUNED") % [tr(target.display_name), tr(enemy.display_name)])
 		else:
@@ -629,7 +740,8 @@ func _run_single_attack(enemy: EnemyData, power: int) -> void:
 	var target: CharacterData = _get_random_alive_player()
 	if target == null:
 		return
-	var dealt: int = target.take_damage(maxi(0, power), enemy.attribute)
+	var dealt: int = target.take_damage(maxi(0, power))
+	_record_player_hit(target)
 	if target.last_damage_was_immune:
 		_emit_log(tr("LOG_DAMAGE_IMMUNED") % [tr(target.display_name), tr(enemy.display_name)])
 	else:
@@ -649,7 +761,8 @@ func _run_nian_weakening_strike(enemy: EnemyData, power: int) -> void:
 		"ENEMY_ABILITY_NIAN_WEAKENING_STRIKE"
 	)
 	target.apply_status_effect(effect)
-	var dealt: int = target.take_damage(maxi(0, power), enemy.attribute)
+	var dealt: int = target.take_damage(maxi(0, power))
+	_record_player_hit(target)
 	if target.last_damage_was_immune:
 		_emit_log(tr("LOG_DAMAGE_IMMUNED") % [tr(target.display_name), tr(enemy.display_name)])
 	else:
@@ -681,12 +794,20 @@ func _run_nian_charge_progress(enemy: EnemyData) -> void:
 	if remaining_turns > 0:
 		_emit_log(tr("LOG_NIAN_CHARGING") % [tr(enemy.display_name), tr(target.display_name), remaining_turns])
 		return
-	var dealt: int = target.take_damage(enemy.charge_power, enemy.attribute)
+	var dealt: int = target.take_damage(enemy.charge_power)
+	_record_player_hit(target)
 	enemy.clear_charge()
 	if target.last_damage_was_immune:
 		_emit_log(tr("LOG_DAMAGE_IMMUNED") % [tr(target.display_name), tr(enemy.display_name)])
 	else:
 		_emit_log(tr("LOG_NIAN_CHARGE_RELEASE") % [tr(enemy.display_name), tr(target.display_name), dealt])
+
+
+## Records attacked players, including shielded and lethal hits, for one-shot hurt playback.
+func _record_player_hit(target: CharacterData) -> void:
+	var index: int = state.player_team.find(target)
+	if index >= 0 and not _hit_player_indices.has(index):
+		_hit_player_indices.append(index)
 
 
 ## Check battle end.
@@ -696,6 +817,7 @@ func _check_battle_end() -> bool:
 			_start_next_wave()
 			return true
 		state.phase = BattleState.Phase.VICTORY
+		_emit_tutorial_tip("victory")
 		SaveManager.advance_after_level_clear(active_level.id)
 		result_requested.emit(tr("RESULT_VICTORY_TITLE"), tr("RESULT_VICTORY_MESSAGE") % state.new_toefl, true, true)
 		return true
@@ -726,6 +848,8 @@ func _collect_reward_if_dead(enemy: EnemyData) -> void:
 		state.add_new_toefl(enemy.toefl_reward)
 		_emit_log(tr("LOG_ENEMY_REWARD") % [tr(enemy.display_name), enemy.toefl_reward])
 
+	if not state.general_cards_enabled:
+		return
 	var dropped_card: CardData = GameDataFactory.create_enemy_drop_general_card(rng)
 	if dropped_card != null:
 		dropped_card.owner_id = "team"
@@ -787,7 +911,33 @@ func _emit_log(message: String) -> void:
 
 ## Roll shop offers.
 func _roll_shop_offers() -> void:
+	if not state.general_cards_enabled:
+		state.shop_offer_cards.clear()
+		return
 	state.shop_offer_cards = GameDataFactory.create_shop_general_offers(rng, 4)
+
+
+## Writes each configured lesson once per attempt and notifies the existing log UI.
+func _emit_tutorial_tip(step: String) -> void:
+	if state.tutorial == null or state.tutorial_steps_seen.has(step):
+		return
+	var key: String = state.tutorial.get_battle_message(step)
+	if key.is_empty():
+		return
+	var speaker: CharacterData = CharacterDatabase.create_character(state.tutorial.speaker_id)
+	if speaker == null:
+		return
+	state.tutorial_steps_seen[step] = true
+	state.tutorial_log_unread = true
+	_emit_log(tr("TUTORIAL_SPEAKER_FORMAT") % [tr(speaker.display_name), tr(key)])
+
+
+## Clears the log reminder without rebuilding cards or changing combat state.
+func notify_tutorial_log_opened() -> void:
+	if not state.tutorial_log_unread:
+		return
+	state.tutorial_log_unread = false
+	log_added.emit("")
 
 
 ## Get card for request.

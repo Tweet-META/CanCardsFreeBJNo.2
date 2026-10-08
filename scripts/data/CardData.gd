@@ -23,7 +23,6 @@ enum TargetType {
 @export var owner_id: String = ""
 @export var card_type: CardType = CardType.ATTACK
 @export var target_type: TargetType = TargetType.SINGLE_ENEMY
-@export var required_attribute: String = ""
 @export var requires_question: bool = true
 @export var base_damage: int = 0
 @export var base_block: float = 0.0
@@ -41,7 +40,6 @@ enum TargetType {
 @export var current_hp_damage_ratio: float = 0.0
 @export var max_hp_heal_ratio: float = 0.0
 @export var direct_hp_loss: int = 0
-@export var available_in_pool: bool = true
 @export var art_path: String = ""
 @export var shop_price: float = 0.0
 
