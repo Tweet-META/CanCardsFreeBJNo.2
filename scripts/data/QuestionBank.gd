@@ -44,6 +44,7 @@ func load_from_json(path: String) -> bool:
 	return true
 
 
+## Draws from the shared difficulty pool without any character or topic restriction.
 func get_random_question_by_difficulty(difficulty: String, rng: RandomNumberGenerator) -> QuestionData:
 	var candidates: Array[QuestionData] = get_questions_for_difficulty(difficulty)
 	if candidates.is_empty():
@@ -51,6 +52,7 @@ func get_random_question_by_difficulty(difficulty: String, rng: RandomNumberGene
 	return candidates[rng.randi_range(0, candidates.size() - 1)].create_shuffled_copy(rng)
 
 
+## Collects all questions with the requested difficulty regardless of their IDs.
 func get_questions_for_difficulty(difficulty: String) -> Array[QuestionData]:
 	var candidates: Array[QuestionData] = []
 	for question: QuestionData in questions:
@@ -59,37 +61,38 @@ func get_questions_for_difficulty(difficulty: String) -> Array[QuestionData]:
 	return candidates
 
 
+## Restores the default shared pool when the configured JSON cannot be loaded.
 func _setup_default_questions() -> void:
 	questions = [
-		_make_question("py_easy_1", "拼音", "easy", "“你好”的拼音是哪一个？", ["ni hao", "wo ai", "xie xie", "zai jian"], 0, "你好 = ni hao。"),
-		_make_question("py_easy_2", "拼音", "easy", "“谢谢”的拼音是哪一个？", ["qing wen", "xie xie", "lao shi", "peng you"], 1, "谢谢 = xie xie。"),
-		_make_question("py_medium_1", "拼音", "medium", "“老师”的正确拼音是？", ["lao shi", "luo si", "la shi", "liang shi"], 0, "老师 = lao shi。"),
-		_make_question("py_medium_2", "拼音", "medium", "“中国”的正确拼音是？", ["zhong guo", "zhong gua", "zong guo", "cheng guo"], 0, "中国 = zhong guo。"),
-		_make_question("py_hard_1", "拼音", "hard", "“北京二中”的拼音更接近哪一个？", ["bei jing er zhong", "bai jing yi zhong", "bei jin er zong", "bei qing er zhong"], 0, "北京二中 = bei jing er zhong。"),
-		_make_question("py_hard_2", "拼音", "hard", "“中文社”的拼音是？", ["zhong wen she", "zhong wen se", "zong wen she", "cheng wen she"], 0, "中文社 = zhong wen she。"),
+		_make_question("py_easy_1", "easy", "“你好”的拼音是哪一个？", ["ni hao", "wo ai", "xie xie", "zai jian"], 0, "你好 = ni hao。"),
+		_make_question("py_easy_2", "easy", "“谢谢”的拼音是哪一个？", ["qing wen", "xie xie", "lao shi", "peng you"], 1, "谢谢 = xie xie。"),
+		_make_question("py_medium_1", "medium", "“老师”的正确拼音是？", ["lao shi", "luo si", "la shi", "liang shi"], 0, "老师 = lao shi。"),
+		_make_question("py_medium_2", "medium", "“中国”的正确拼音是？", ["zhong guo", "zhong gua", "zong guo", "cheng guo"], 0, "中国 = zhong guo。"),
+		_make_question("py_hard_1", "hard", "“北京二中”的拼音更接近哪一个？", ["bei jing er zhong", "bai jing yi zhong", "bei jin er zong", "bei qing er zhong"], 0, "北京二中 = bei jing er zhong。"),
+		_make_question("py_hard_2", "hard", "“中文社”的拼音是？", ["zhong wen she", "zhong wen se", "zong wen she", "cheng wen she"], 0, "中文社 = zhong wen she。"),
 
-		_make_question("voc_easy_1", "词汇", "easy", "“水”是什么意思？", ["water", "fire", "school", "card"], 0, "水 = water。"),
-		_make_question("voc_easy_2", "词汇", "easy", "“朋友”是什么意思？", ["teacher", "friend", "monster", "answer"], 1, "朋友 = friend。"),
-		_make_question("voc_medium_1", "词汇", "medium", "“教室”是什么意思？", ["classroom", "library", "office", "gym"], 0, "教室 = classroom。"),
-		_make_question("voc_medium_2", "词汇", "medium", "“迟到”是什么意思？", ["to arrive late", "to study", "to win", "to ask"], 0, "迟到 = to arrive late。"),
-		_make_question("voc_hard_1", "词汇", "hard", "“吉祥物”是什么意思？", ["mascot", "homework", "culture", "question"], 0, "吉祥物 = mascot。"),
-		_make_question("voc_hard_2", "词汇", "hard", "“减伤”在游戏里更接近？", ["damage reduction", "extra gold", "new level", "random card"], 0, "减伤 = damage reduction。"),
+		_make_question("voc_easy_1", "easy", "“水”是什么意思？", ["water", "fire", "school", "card"], 0, "水 = water。"),
+		_make_question("voc_easy_2", "easy", "“朋友”是什么意思？", ["teacher", "friend", "monster", "answer"], 1, "朋友 = friend。"),
+		_make_question("voc_medium_1", "medium", "“教室”是什么意思？", ["classroom", "library", "office", "gym"], 0, "教室 = classroom。"),
+		_make_question("voc_medium_2", "medium", "“迟到”是什么意思？", ["to arrive late", "to study", "to win", "to ask"], 0, "迟到 = to arrive late。"),
+		_make_question("voc_hard_1", "hard", "“吉祥物”是什么意思？", ["mascot", "homework", "culture", "question"], 0, "吉祥物 = mascot。"),
+		_make_question("voc_hard_2", "hard", "“减伤”在游戏里更接近？", ["damage reduction", "extra gold", "new level", "random card"], 0, "减伤 = damage reduction。"),
 
-		_make_question("cul_easy_1", "文化", "easy", "春节通常和哪种颜色关系最密切？", ["红色", "蓝色", "黑色", "紫色"], 0, "春节常用红色表达喜庆。"),
-		_make_question("cul_easy_2", "文化", "easy", "中秋节常吃什么？", ["月饼", "饺子", "粽子", "面条"], 0, "中秋节常吃月饼。"),
-		_make_question("cul_medium_1", "文化", "medium", "清明节常见活动是？", ["扫墓", "贴春联", "吃月饼", "赛龙舟"], 0, "清明节常见活动包括扫墓。"),
-		_make_question("cul_medium_2", "文化", "medium", "端午节常见食物是？", ["粽子", "月饼", "汤圆", "蛋糕"], 0, "端午节常吃粽子。"),
-		_make_question("cul_hard_1", "文化", "hard", "“中文社”最可能推广的是？", ["中文学习和中国文化", "化学实验", "足球训练", "机器人维修"], 0, "中文社围绕中文学习和文化交流。"),
-		_make_question("cul_hard_2", "文化", "hard", "春节贴春联通常表达什么？", ["祝福和新年愿望", "考试答案", "地图路线", "购物清单"], 0, "春联常表达祝福与新年愿望。")
+		_make_question("cul_easy_1", "easy", "春节通常和哪种颜色关系最密切？", ["红色", "蓝色", "黑色", "紫色"], 0, "春节常用红色表达喜庆。"),
+		_make_question("cul_easy_2", "easy", "中秋节常吃什么？", ["月饼", "饺子", "粽子", "面条"], 0, "中秋节常吃月饼。"),
+		_make_question("cul_medium_1", "medium", "清明节常见活动是？", ["扫墓", "贴春联", "吃月饼", "赛龙舟"], 0, "清明节常见活动包括扫墓。"),
+		_make_question("cul_medium_2", "medium", "端午节常见食物是？", ["粽子", "月饼", "汤圆", "蛋糕"], 0, "端午节常吃粽子。"),
+		_make_question("cul_hard_1", "hard", "“中文社”最可能推广的是？", ["中文学习和中国文化", "化学实验", "足球训练", "机器人维修"], 0, "中文社围绕中文学习和文化交流。"),
+		_make_question("cul_hard_2", "hard", "春节贴春联通常表达什么？", ["祝福和新年愿望", "考试答案", "地图路线", "购物清单"], 0, "春联常表达祝福与新年愿望。")
 	]
 	for question: QuestionData in questions:
 		_assign_translation_keys(question)
 
 
+## Reads a question without requiring obsolete category metadata.
 func _question_from_dictionary(data: Dictionary) -> QuestionData:
-	var question := QuestionData.new()
+	var question: QuestionData = QuestionData.new()
 	question.id = str(data.get("id", ""))
-	question.category = str(data.get("category", ""))
 	question.difficulty = str(data.get("difficulty", "easy"))
 	question.prompt = str(data.get("prompt", ""))
 	question.explanation = str(data.get("explanation", ""))
@@ -105,7 +108,7 @@ func _question_from_dictionary(data: Dictionary) -> QuestionData:
 		typed_options.append(str(option))
 	question.options = typed_options
 
-	if question.id == "" or question.category == "" or question.prompt == "" or question.options.size() < 2:
+	if question.id == "" or question.prompt == "" or question.options.size() < 2:
 		return null
 	if question.correct_index < 0 or question.correct_index >= question.options.size():
 		return null
@@ -122,10 +125,10 @@ func _assign_translation_keys(question: QuestionData) -> void:
 		question.options[option_index] = "%s_O%d" % [translation_prefix, option_index]
 
 
-func _make_question(id: String, category: String, difficulty: String, prompt: String, options: Array, correct_index: int, explanation: String) -> QuestionData:
-	var question := QuestionData.new()
+## Creates fallback content using the same difficulty-only data contract.
+func _make_question(id: String, difficulty: String, prompt: String, options: Array, correct_index: int, explanation: String) -> QuestionData:
+	var question: QuestionData = QuestionData.new()
 	question.id = id
-	question.category = category
 	question.difficulty = difficulty
 	question.prompt = prompt
 	var typed_options: Array[String] = []

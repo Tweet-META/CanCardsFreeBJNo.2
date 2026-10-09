@@ -1,0 +1,99 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/StoryPanel.gd" id="1"]
+
+[sub_resource type="StyleBoxFlat" id="DialogueStyle"]
+bg_color = Color(0.94, 0.87, 0.73, 1)
+content_margin_left = 24.0
+content_margin_right = 24.0
+content_margin_top = 18.0
+content_margin_bottom = 18.0
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_left = 16
+corner_radius_bottom_right = 16
+
+[node name="StoryPanel" type="Control"]
+visible = false
+z_index = 900
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+script = ExtResource("1")
+
+[node name="Shade" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+color = Color(0, 0, 0, 0.86)
+
+[node name="StorySprite" type="AnimatedSprite2D" parent="."]
+visible = false
+position = Vector2(640, 360)
+
+[node name="LoadingLabel" type="Label" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "LOADING_STATUS"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Dialogue" type="PanelContainer" parent="."]
+layout_mode = 1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 80.0
+offset_top = -250.0
+offset_right = -80.0
+offset_bottom = -42.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/panel = SubResource("DialogueStyle")
+
+[node name="Content" type="HBoxContainer" parent="Dialogue"]
+layout_mode = 2
+theme_override_constants/separation = 22
+
+[node name="Portrait" type="TextureRect" parent="Dialogue/Content"]
+custom_minimum_size = Vector2(168, 168)
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="VBoxContainer" parent="Dialogue/Content"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 12
+
+[node name="Speaker" type="Label" parent="Dialogue/Content/Text"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.15, 0.11, 0.08, 1)
+theme_override_font_sizes/font_size = 26
+
+[node name="Message" type="Label" parent="Dialogue/Content/Text"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.15, 0.11, 0.08, 1)
+theme_override_font_sizes/font_size = 22
+autowrap_mode = 3
+
+[node name="Next" type="Button" parent="Dialogue/Content/Text"]
+custom_minimum_size = Vector2(120, 42)
+layout_mode = 2
+size_flags_horizontal = 8
+text = "STORY_CONTINUE"

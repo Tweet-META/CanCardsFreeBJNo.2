@@ -1,0 +1,31 @@
+{
+  "events": [
+    {
+      "id": "rabbit_join",
+      "level_id": "level3",
+      "sprite_frames_path": "",
+      "animation": "story",
+      "speaker_name": "CHARACTER_BUDDING",
+      "portrait_path": "res://assets/characters/βudding.png",
+      "dialogue": [
+        "STORY_RABBIT_JOIN"
+      ],
+      "unlock_characters": [
+        "tiancaitu"
+      ]
+    },
+    {
+      "id": "david_stall",
+      "level_id": "level5",
+      "sprite_frames_path": "",
+      "animation": "story",
+      "speaker_name": "NPC_DAVID",
+      "portrait_path": "res://assets/animation/david/character_idle/frame_0000.png",
+      "dialogue": [
+        "STORY_DAVID_STALL",
+        "STORY_DAVID_CARD_UNLOCKS"
+      ],
+      "unlock_general_cards": true
+    }
+  ]
+}

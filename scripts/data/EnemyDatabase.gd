@@ -8,6 +8,7 @@ static var _loaded: bool = false
 static var _definitions: Dictionary = {}
 
 
+## Creates enemy behavior, independent animation layers, and shared visual transforms.
 static func create_enemy(enemy_id: String) -> EnemyData:
 	_ensure_loaded()
 	var raw_value: Variant = _definitions.get(enemy_id)
@@ -26,9 +27,14 @@ static func create_enemy(enemy_id: String) -> EnemyData:
 	enemy.abilities = _parse_abilities(raw.get("abilities", []), enemy.id)
 	enemy.toefl_reward = float(raw.get("toefl_reward", 0.0))
 	enemy.portrait_path = str(raw.get("portrait_path", ""))
+	enemy.battle_animation_path = str(raw.get("battle_animation_path", ""))
+	enemy.magic_animation_path = str(raw.get("magic_animation_path", ""))
+	enemy.battle_visual_scale = maxf(0.1, float(raw.get("battle_visual_scale", 1.0)))
+	enemy.battle_flip_h = bool(raw.get("battle_flip_h", false))
 	return enemy
 
 
+## Reads weighted abilities including explicit enemy-only card draw pools.
 static func _parse_abilities(value: Variant, enemy_id: String) -> Array[EnemyAbilityData]:
 	var abilities: Array[EnemyAbilityData] = []
 	if not value is Array:
@@ -42,6 +48,8 @@ static func _parse_abilities(value: Variant, enemy_id: String) -> Array[EnemyAbi
 		ability.id = str(raw.get("id", ""))
 		ability.power = int(raw.get("power", 0))
 		ability.weight = float(raw.get("weight", 1.0))
+		for card_id: Variant in raw.get("card_ids", []) as Array:
+			ability.card_ids.append(str(card_id))
 		if ability.id.is_empty():
 			push_error("EnemyDatabase: enemy '%s' has an ability without an id." % enemy_id)
 			continue

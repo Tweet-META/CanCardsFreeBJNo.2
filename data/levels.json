@@ -83,6 +83,26 @@
         }
       ],
       "unlocked": true
+    },
+    {
+      "id": "level5",
+      "order": 5,
+      "display_name": "LEVEL_5_NAME",
+      "description": "LEVEL_5_DESCRIPTION",
+      "marker_text": "5",
+      "map_id": "map1",
+      "scene_path": "res://scenes/BattleScene.tscn",
+      "battle_background": "res://assets/ui/conversation_room.png",
+      "wave": [
+        {
+          "monster": [
+            [
+              "david"
+            ]
+          ]
+        }
+      ],
+      "unlocked": true
     }
   ]
 }

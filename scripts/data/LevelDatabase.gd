@@ -13,7 +13,7 @@ static var _active_learning_goal_character_id: String = ""
 static var _general_cards_unlock_order: int = 5
 
 
-## Documents this script block.
+## Creates a level with card features gated by both order and saved progression.
 static func create_level(level_id: String) -> LevelData:
 	_ensure_loaded()
 	var raw_value: Variant = _definitions.get(level_id)
@@ -27,7 +27,7 @@ static func create_level(level_id: String) -> LevelData:
 	level.order = int(raw.get("order", 1))
 	level.tutorial_id = str(raw.get("tutorial_id", ""))
 	level.requires_learning_goal = bool(raw.get("requires_learning_goal", false))
-	level.general_cards_enabled = level.order >= _general_cards_unlock_order
+	level.general_cards_enabled = level.order >= _general_cards_unlock_order and SaveManager.are_general_cards_unlocked()
 	level.display_name = str(raw.get("display_name", ""))
 	level.description = str(raw.get("description", ""))
 	level.marker_text = str(raw.get("marker_text", ""))
@@ -37,6 +37,12 @@ static func create_level(level_id: String) -> LevelData:
 	level.waves = _parse_waves(raw.get("wave", []), level.id)
 	level.unlocked = bool(raw.get("unlocked", false))
 	return level
+
+
+## Returns ordered level IDs for conservative migration of older saves.
+static func get_mainline_ids() -> Array[String]:
+	_ensure_loaded()
+	return _level_order.duplicate()
 
 
 ## Documents this script block.

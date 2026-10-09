@@ -1,0 +1,2083 @@
+﻿English Copy Catalogue
+
+408 entries. Keep the bracketed IDs and formatting placeholders when editing.
+Line breaks are expanded for editing.
+
+========================================
+
+[MENU_SUBTITLE]
+Can Cards Free BJNo.2? - Beta
+
+----------------------------------------
+
+[MENU_START]
+Start Game
+
+----------------------------------------
+
+[MENU_QUIT]
+Quit
+
+----------------------------------------
+
+[MENU_SETTINGS]
+Settings
+
+----------------------------------------
+
+[MENU_LANGUAGE]
+Language
+
+----------------------------------------
+
+[MENU_LOAD_SAVE]
+Load Save
+
+----------------------------------------
+
+[SAVE_START_TITLE]
+Choose Your File
+
+----------------------------------------
+
+[SAVE_START_SUBTITLE]
+Choose an empty slot to start a new game
+
+----------------------------------------
+
+[SAVE_LOAD_TITLE]
+Load Save
+
+----------------------------------------
+
+[SAVE_LOAD_SUBTITLE]
+Choose an existing save to enter the game, or delete a save you no longer need
+
+----------------------------------------
+
+[SAVE_EMPTY_SLOT]
+File %d: Empty
+
+----------------------------------------
+
+[SAVE_SLOT_SUMMARY]
+File %d: Current %s | Characters %d | %s
+
+----------------------------------------
+
+[SAVE_NEW]
+New
+
+----------------------------------------
+
+[SAVE_LOAD]
+Load
+
+----------------------------------------
+
+[SAVE_DELETE]
+Delete
+
+----------------------------------------
+
+[SAVE_USED]
+Used
+
+----------------------------------------
+
+[SAVE_DELETE_TITLE]
+Delete Save File
+
+----------------------------------------
+
+[SAVE_DELETE_CONFIRM]
+Delete save file %d?
+
+----------------------------------------
+
+[LANGUAGE_ZH_CN]
+Chinese
+
+----------------------------------------
+
+[LANGUAGE_EN]
+English
+
+----------------------------------------
+
+[SETTINGS_TITLE]
+Settings
+
+----------------------------------------
+
+[MAP_BACK]
+Back
+
+----------------------------------------
+
+[MAP_1_NAME]
+First Floor
+
+----------------------------------------
+
+[MAP_NO_MAPS]
+No maps are available
+
+----------------------------------------
+
+[LEVEL_1_NAME]
+F1 - Conversation Room
+
+----------------------------------------
+
+[LEVEL_1_DESCRIPTION]
+The beginning of our journey
+
+----------------------------------------
+
+[LEVEL_2_NAME]
+F1 - S3C1
+
+----------------------------------------
+
+[LEVEL_2_DESCRIPTION]
+Is that...a bun?
+
+----------------------------------------
+
+[LEVEL_3_NAME]
+F1 - S3C2
+
+----------------------------------------
+
+[LEVEL_3_DESCRIPTION]
+S3C2——Does the 2 mean 2 monsters?
+
+----------------------------------------
+
+[LEVEL_4_NAME]
+F1 - S3C3
+
+----------------------------------------
+
+[LEVEL_4_DESCRIPTION]
+That one is HUGE...At least we have Dr. Rabbert now
+
+----------------------------------------
+
+[PREP_LEVEL_FORMAT]
+Level %s
+
+----------------------------------------
+
+[PREP_WAVE_COUNT]
+Waves: %d
+
+----------------------------------------
+
+[PREP_EMPTY_SLOT]
+Choose Character
+
+----------------------------------------
+
+[PREP_START_LEVEL]
+Start Level
+
+----------------------------------------
+
+[LEARNING_GOAL_TITLE]
+Learning Goal
+
+----------------------------------------
+
+[LEARNING_GOAL_NONE]
+None Selected
+
+----------------------------------------
+
+[LEARNING_GOAL_OPTIONAL]
+Optional; not required to start
+
+----------------------------------------
+
+[LEARNING_GOAL_DRAWER_TITLE]
+Choose Learning Goal
+
+----------------------------------------
+
+[LEARNING_GOAL_CLEAR]
+Use No Learning Goal
+
+----------------------------------------
+
+[LEARNING_GOAL_PINYIN]
+Pinyin Goal
+
+----------------------------------------
+
+[LEARNING_GOAL_PINYIN_DESCRIPTION]
+Increase the team's maximum HP and attack power by 20%
+
+----------------------------------------
+
+[LEARNING_GOAL_PINYIN_SUMMARY]
+HP and damage +20%
+
+----------------------------------------
+
+[LEARNING_GOAL_VOCABULARY]
+Vocabulary Goal
+
+----------------------------------------
+
+[LEARNING_GOAL_VOCABULARY_DESCRIPTION]
+25% chance to gain difficulty AP even after a wrong answer
+
+----------------------------------------
+
+[LEARNING_GOAL_VOCABULARY_SUMMARY]
+Wrong-answer compensation +25%
+
+----------------------------------------
+
+[LEARNING_GOAL_CULTURE]
+Culture Goal
+
+----------------------------------------
+
+[LEARNING_GOAL_CULTURE_DESCRIPTION]
+Every AP gain receives an additional +0.25
+
+----------------------------------------
+
+[LEARNING_GOAL_CULTURE_SUMMARY]
+AP gain +0.25
+
+----------------------------------------
+
+[DEV_TITLE]
+Developer Tools
+
+----------------------------------------
+
+[DEV_ADD_CULTURE_MASK]
+Add Culture Mask
+
+----------------------------------------
+
+[DEV_ADD_GENERAL_CARD]
+Add Potion of Confucius
+
+----------------------------------------
+
+[DEV_ADD_SIX_SEVEN]
+Add Six Seven
+
+----------------------------------------
+
+[DEV_CLEAR_ENEMIES]
+Clear Enemies
+
+----------------------------------------
+
+[DEV_DEFEAT_PLAYERS]
+Defeat Team
+
+----------------------------------------
+
+[DEV_SKIP_TURN]
+Skip Turn
+
+----------------------------------------
+
+[DEV_LOG_ADDED_MASK]
+Developer: added a Culture Mask.
+
+----------------------------------------
+
+[DEV_LOG_ADDED_CARD]
+Developer: added a Potion of Confucius card.
+
+----------------------------------------
+
+[DEV_LOG_ADDED_SIX_SEVEN]
+Secret: received a Six Seven card.
+
+----------------------------------------
+
+[DEV_LOG_ENEMY_LIMIT]
+Developer: no more than 8 living enemies are allowed.
+
+----------------------------------------
+
+[DEV_LOG_CLEARED_ENEMIES]
+Developer: cleared current enemies.
+
+----------------------------------------
+
+[DEV_LOG_DEFEATED_PLAYERS]
+Developer: defeated the team.
+
+----------------------------------------
+
+[DEV_LOG_SKIPPED_TURN]
+Developer: skipped the current player turn.
+
+----------------------------------------
+
+[UI_SHOP]
+Shop
+
+----------------------------------------
+
+[UI_LOG]
+Log
+
+----------------------------------------
+
+[UI_SHOP_LOCKED]
+Shop (Locked)
+
+----------------------------------------
+
+[GENERAL_CARDS_LOCKED_HINT]
+Clear level 5 to unlock general cards and the shop.
+
+----------------------------------------
+
+[PREP_TUTORIAL_GOAL_REQUIRED]
+Choose a Learning Goal before entering the tutorial level.
+
+----------------------------------------
+
+[TUTORIAL_SPEAKER_FORMAT]
+%s: %s
+
+----------------------------------------
+
+[TUTORIAL_OPEN_LOG_HINT]
+βudding has something to tell you.
+Click the log in the bottom right!
+
+----------------------------------------
+
+[TUTORIAL_MAP_ROOM]
+Hi there! I'm βudding. Let's head into the Conversation Room first!
+
+----------------------------------------
+
+[TUTORIAL_PREP_PARTY]
+Click my character button to add me to the party. Then let's choose a Learning Goal!
+
+----------------------------------------
+
+[TUTORIAL_PREP_GOAL]
+Click Learning Goal on the right side of the preparation screen, then choose me!
+
+----------------------------------------
+
+[TUTORIAL_PREP_ENTER]
+We're ready! Click Enter Level to get started!
+
+----------------------------------------
+
+[TUTORIAL_BATTLE_ATTACK]
+Let's try an attack! Drag my Culture Card onto the enemy's body to attack!
+
+----------------------------------------
+
+[TUTORIAL_BATTLE_DIFFICULTY]
+When I use the card on the left, I need you to answer a question. That's how we gain AP—Accumulated Power!
+
+----------------------------------------
+
+[TUTORIAL_BATTLE_QUESTION]
+Choose an answer! If you get it right, we'll earn extra AP. Don't worry, though—we still get some if you get it wrong!
+
+----------------------------------------
+
+[TUTORIAL_BATTLE_RESULT]
+Now let's resolve the card's effect!
+
+----------------------------------------
+
+[TUTORIAL_BATTLE_DEFENSE]
+The middle card is a defense card. We can use it on ourselves!
+
+----------------------------------------
+
+[TUTORIAL_BATTLE_ENEMY_TURN]
+We've taken our actions. Now it's the enemies' turn!
+
+----------------------------------------
+
+[TUTORIAL_BATTLE_NEXT_TURN]
+A new turn has started, so I can act again! Let's keep attacking!
+
+----------------------------------------
+
+[TUTORIAL_BATTLE_SKILL]
+We've reached 5 AP, so we can use a skill card now! Skills are powerful—make them count!
+
+----------------------------------------
+
+[TUTORIAL_BATTLE_VICTORY]
+We did it! We won!
+
+----------------------------------------
+
+[UI_CANCEL]
+Cancel
+
+----------------------------------------
+
+[UI_CONTINUE]
+Continue
+
+----------------------------------------
+
+[UI_RETRY]
+Retry
+
+----------------------------------------
+
+[UI_MAIN_MENU]
+Main Menu
+
+----------------------------------------
+
+[UI_CLOSE]
+Close
+
+----------------------------------------
+
+[UI_BUY]
+Buy
+
+----------------------------------------
+
+[UI_SELL]
+Sell
+
+----------------------------------------
+
+[UI_REFRESH]
+Refresh -0.5
+
+----------------------------------------
+
+[UI_SHOP_HINT]
+Purchased cards are added to the team's shared cards.
+
+----------------------------------------
+
+[UI_PRICE_FORMAT]
+%.1f TOEFL
+
+----------------------------------------
+
+[UI_BALANCE_FORMAT]
+TOEFL %s
+
+----------------------------------------
+
+[LOG_CARD_SOLD]
+Sold %s for %.2f New TOEFL.
+
+----------------------------------------
+
+[LOG_REFRESH_NO_FUNDS]
+Not enough New TOEFL to refresh the shop.
+
+----------------------------------------
+
+[LOG_SHOP_REFRESHED]
+Spent 0.5 New TOEFL to refresh the shop.
+
+----------------------------------------
+
+[LOG_BUY_INVALID_CHARACTER]
+Cards cannot be purchased for a character who cannot act.
+
+----------------------------------------
+
+[LOG_BUY_NO_FUNDS]
+Not enough New TOEFL to purchase %s.
+
+----------------------------------------
+
+[LOG_CARD_PURCHASED]
+Purchased %s for %.1f New TOEFL.
+
+----------------------------------------
+
+[LOG_TEAM_GAIN_AP]
+Gained %.2f AP.
+
+----------------------------------------
+
+[LOG_DEFENSE_GRANTED]
+%s takes %.0f%% less damage this turn.
+
+----------------------------------------
+
+[LOG_AP_CLEARED]
+Team AP was reset.
+
+----------------------------------------
+
+[LOG_ATTACK_DAMAGE]
+%s attacked %s for %d damage.
+
+----------------------------------------
+
+[LOG_MAX_HP_HEAL]
+%s recovered %d HP.
+
+----------------------------------------
+
+[LOG_ENEMY_STUNNED]
+%s is stunned and skips this action.
+
+----------------------------------------
+
+[LOG_DAMAGE_IMMUNED]
+%s's damage immunity completely blocked %s's attack.
+
+----------------------------------------
+
+[LOG_DIRECT_HP_LOSS]
+%s lost %d HP.
+
+----------------------------------------
+
+[LOG_ENEMY_TURN_START]
+Enemy turn started.
+
+----------------------------------------
+
+[UI_ENEMY_TURN_START]
+Enemy turn begins
+
+----------------------------------------
+
+[PHASE_ANSWER_RESULT]
+Answer result
+
+----------------------------------------
+
+[PHASE_ACTION_RESOLUTION]
+Resolving action
+
+----------------------------------------
+
+[LOG_ENEMY_ATTACK]
+%s attacked %s for %d damage.
+
+----------------------------------------
+
+[LOG_ENEMY_GROUP_ATTACK]
+%s attacked %s for %d damage.
+
+----------------------------------------
+
+[LOG_ENEMY_SHIELD_ALL]
+All living enemies gained %d shield.
+
+----------------------------------------
+
+[LOG_NEXT_PLAYER_TURN]
+Player turn %d.
+
+----------------------------------------
+
+[LOG_NIAN_CHARGE_START]
+%s began charging against %s.
+
+----------------------------------------
+
+[LOG_NIAN_CHARGING]
+%s is charging: %d turns left.
+
+----------------------------------------
+
+[LOG_NIAN_CHARGE_RELEASE]
+%s attacked %s for %d damage.
+
+----------------------------------------
+
+[LOG_NIAN_CHARGE_TARGET_LOST]
+%s's charge was canceled.
+
+----------------------------------------
+
+[LOG_BATTLE_START]
+Battle started
+
+----------------------------------------
+
+[LOG_WAVE_START]
+Wave %d/%d started.
+
+----------------------------------------
+
+[LOG_PLAYER_TURN_START]
+Player turn %d.
+
+----------------------------------------
+
+[LOG_CANNOT_USE_CARD]
+Cards cannot be used right now.
+
+----------------------------------------
+
+[LOG_CHARACTER_UNAVAILABLE]
+%s can no longer act.
+
+----------------------------------------
+
+[LOG_CHARACTER_ACTED]
+%s has already acted this turn.
+
+----------------------------------------
+
+[LOG_CARD_AP_REQUIRED]
+Not enough AP; %.1f AP required.
+
+----------------------------------------
+
+[LOG_NO_ENEMY_TARGET]
+There are no enemies to attack.
+
+----------------------------------------
+
+[LOG_SELECT_ALLY_TARGET]
+Choose an allied character as the defense target.
+
+----------------------------------------
+
+[LOG_ENEMY_REWARD]
+Defeated %s and gained %.1f New TOEFL.
+
+----------------------------------------
+
+[LOG_ENEMY_CARD_DROP]
+Defeated %s and received a random general card: %s.
+
+----------------------------------------
+
+[PHASE_READY]
+Ready
+
+----------------------------------------
+
+[PHASE_PLAYER]
+Player Turn
+
+----------------------------------------
+
+[PHASE_DIFFICULTY]
+Choose Difficulty
+
+----------------------------------------
+
+[PHASE_QUESTION]
+Answering
+
+----------------------------------------
+
+[PHASE_ENEMY]
+Enemy Turn
+
+----------------------------------------
+
+[PHASE_VICTORY]
+Victory
+
+----------------------------------------
+
+[PHASE_DEFEAT]
+Defeat
+
+----------------------------------------
+
+[ROUND_FORMAT]
+Round %d
+
+----------------------------------------
+
+[WAVE_FORMAT]
+Wave %d/%d
+
+----------------------------------------
+
+[DIFFICULTY_EASY]
+Easy
+
+----------------------------------------
+
+[DIFFICULTY_MEDIUM]
+Medium
+
+----------------------------------------
+
+[DIFFICULTY_HARD]
+Hard
+
+----------------------------------------
+
+[QUESTION_SELECT_DIFFICULTY]
+Choose Question Difficulty
+
+----------------------------------------
+
+[ATTRIBUTE_PINYIN]
+Pinyin
+
+----------------------------------------
+
+[ATTRIBUTE_VOCABULARY]
+Vocabulary
+
+----------------------------------------
+
+[ATTRIBUTE_CULTURE]
+Culture
+
+----------------------------------------
+
+[QUESTION_HEADER_FORMAT]
+[%s]
+%s
+
+----------------------------------------
+
+[COMMON_CANCEL]
+Cancel
+
+----------------------------------------
+
+[CARD_SKILL_COST]
+%.0f AP
+
+----------------------------------------
+
+[CARD_SKILL_BASE_EFFECT]
+Damage independent of answers
+
+----------------------------------------
+
+[CARD_GENERAL_TEAM_GAIN]
+Team
+
+----------------------------------------
+
+[CARD_AP_FORMAT]
++%.1f AP
+
+----------------------------------------
+
+[CARD_ATTACK_DAMAGE]
+%d damage
+
+----------------------------------------
+
+[CARD_ANSWER_ENHANCE]
+Answer for AP
+
+----------------------------------------
+
+[CARD_DEFENSE_REDUCTION]
+%.0f%% guard
+
+----------------------------------------
+
+[CHARACTER_BUDDING]
+βudding
+
+----------------------------------------
+
+[CHARACTER_RABBIT]
+Rabbert Einstein
+
+----------------------------------------
+
+[CHARACTER_LAWILIM]
+Lawilim
+
+----------------------------------------
+
+[CHARACTER_BUDDING_DESCRIPTION]
+βudding
+[Culture Card] Deal 30 damage to the selected enemy.
+[Club Guard] Reduce the selected ally's damage taken by 60% for 2 turns.
+[Qingming Breeze] Deal 3 × 50 damage to the selected enemy.
+
+----------------------------------------
+
+[CHARACTER_RABBIT_DESCRIPTION]
+Rabbert Einstein
+[Pinyin Combo] Deal 15 damage to the selected enemy, then pass the same damage to three other enemies. Above 2.5 AP, damage rises to 20 and the chain can bounce in place, but damage decreases with each jump.
+[Tone Counter] The selected ally returns 100% of damage taken and gains an extra 0.5 AP each time they are hurt. Lasts 1 turn.
+[Four-Tone Burst] Unleash an enhanced chain attack starting on the selected enemy. Damage rises to 25, the chain can bounce in place, and damage does not decrease between jumps. Apply random effects.
+
+----------------------------------------
+
+[CHARACTER_LAWILIM_DESCRIPTION]
+Lawilim
+Type: Vocabulary
+
+----------------------------------------
+
+[ENEMY_PINYIN_BUN]
+Pinyin Bun
+
+----------------------------------------
+
+[ENEMY_VOCAB_BUN]
+Vocabulary Bun
+
+----------------------------------------
+
+[ENEMY_CULTURE_BUN]
+Culture Bun
+
+----------------------------------------
+
+[ENEMY_PINYIN_SLIME]
+Pinyin Slime
+
+----------------------------------------
+
+[ENEMY_VOCAB_SLIME]
+Vocabulary Slime
+
+----------------------------------------
+
+[ENEMY_CULTURE_SLIME]
+Culture Slime
+
+----------------------------------------
+
+[ENEMY_PINYIN_MASK]
+Pinyin Mask
+
+----------------------------------------
+
+[ENEMY_VOCAB_MASK]
+Vocabulary Mask
+
+----------------------------------------
+
+[ENEMY_CULTURE_MASK]
+Culture Mask
+
+----------------------------------------
+
+[ENEMY_NIAN_BEAST]
+Nian Beast
+
+----------------------------------------
+
+[ENEMY_PINYIN_BUN_DESCRIPTION]
+HP: 80
+Deal 14 damage to the entire player team.
+
+----------------------------------------
+
+[ENEMY_VOCAB_BUN_DESCRIPTION]
+HP: 80
+Deal 14 damage to the entire player team.
+
+----------------------------------------
+
+[ENEMY_CULTURE_BUN_DESCRIPTION]
+HP: 80
+Deal 14 damage to the entire player team.
+
+----------------------------------------
+
+[ENEMY_PINYIN_SLIME_DESCRIPTION]
+HP: 100
+① Grant all monsters 10 shield.
+② Deal 15 damage to one random player character.
+
+----------------------------------------
+
+[ENEMY_VOCAB_SLIME_DESCRIPTION]
+HP: 100
+① Grant all monsters 10 shield.
+② Deal 15 damage to one random player character.
+
+----------------------------------------
+
+[ENEMY_CULTURE_SLIME_DESCRIPTION]
+HP: 100
+① Grant all monsters 10 shield.
+② Deal 15 damage to one random player character.
+
+----------------------------------------
+
+[ENEMY_PINYIN_MASK_DESCRIPTION]
+HP: 60
+Deal 25 damage to one random player character.
+
+----------------------------------------
+
+[ENEMY_VOCAB_MASK_DESCRIPTION]
+HP: 60
+Deal 25 damage to one random player character.
+
+----------------------------------------
+
+[ENEMY_CULTURE_MASK_DESCRIPTION]
+HP: 60
+Deal 25 damage to one random player character.
+
+----------------------------------------
+
+[ENEMY_NIAN_BEAST_DESCRIPTION]
+Nian Beast
+HP: 300
+① Deal 30 base damage to one random player character and reduce their damage dealt by 30% for 2 turns.
+② Lock onto one random player character, charge for 2 turns, then deal 100 damage.
+
+----------------------------------------
+
+[ENEMY_ABILITY_NIAN_WEAKENING_STRIKE]
+Nian Roar
+
+----------------------------------------
+
+[ENEMY_ABILITY_NIAN_CHARGE_ATTACK]
+Nian's Charge
+
+----------------------------------------
+
+[CARD_BUDDING_ATTACK]
+Culture Card
+
+----------------------------------------
+
+[CARD_BUDDING_ATTACK_DESC]
+Deal 30 damage
+
+----------------------------------------
+
+[CARD_BUDDING_DEFENSE]
+Club Guard
+
+----------------------------------------
+
+[CARD_BUDDING_DEFENSE_DESC]
+Grant 60% damage reduction for 2 turns
+
+----------------------------------------
+
+[CARD_BUDDING_SKILL]
+Qingming Breeze
+
+----------------------------------------
+
+[CARD_BUDDING_SKILL_DESC]
+Deal 3 × 50 damage
+
+----------------------------------------
+
+[CARD_RABBIT_ATTACK]
+Pinyin Combo
+
+----------------------------------------
+
+[CARD_RABBIT_ATTACK_DESC]
+Perform a chain attack based on AP
+
+----------------------------------------
+
+[CARD_RABBIT_DEFENSE]
+Tone Counter
+
+----------------------------------------
+
+[CARD_RABBIT_DEFENSE_DESC]
+Retaliate for 1 turn; gain an extra 0.5 AP when hurt
+
+----------------------------------------
+
+[CARD_RABBIT_SKILL]
+Four-Tone Burst
+
+----------------------------------------
+
+[CARD_RABBIT_SKILL_DESC]
+Perform an enhanced chain attack, applying a random effect with each hit
+
+----------------------------------------
+
+[CARD_LAWILIM_ATTACK]
+Vocab Impact
+
+----------------------------------------
+
+[CARD_LAWILIM_ATTACK_DESC]
+Deal 43 base damage to the selected target.
+
+----------------------------------------
+
+[CARD_LAWILIM_DEFENSE]
+Chengyu Barrier
+
+----------------------------------------
+
+[CARD_LAWILIM_DEFENSE_DESC]
+Apply 35% damage reduction to the selected target.
+
+----------------------------------------
+
+[CARD_LAWILIM_SKILL]
+Word-Sea Echo
+
+----------------------------------------
+
+[CARD_LAWILIM_SKILL_DESC]
+Deal 42 base damage to all monsters.
+
+----------------------------------------
+
+[CARD_POTION_OF_CONFUCIUS]
+Potion of Confucius
+
+----------------------------------------
+
+[CARD_POTION_OF_CONFUCIUS_DESC]
+Immediately gain 2.5 AP
+
+----------------------------------------
+
+[CARD_DAGGER_OF_JINGKE]
+Dagger of Jing Ke
+
+----------------------------------------
+
+[CARD_DAGGER_OF_JINGKE_DESC]
+Deal damage equal to 30% of the target's current HP
+
+----------------------------------------
+
+[CARD_CURRENT_HP_DAMAGE]
+%d%% current HP
+as base damage
+
+----------------------------------------
+
+[CARD_IMPENETRABLE_SHIELD]
+Impenetrable Shield
+
+----------------------------------------
+
+[CARD_IMPENETRABLE_SHIELD_DESC]
+Completely negate one instance of damage
+
+----------------------------------------
+
+[CARD_MENGHAN_TOXIN]
+Menghan Toxin
+
+----------------------------------------
+
+[CARD_MENGHAN_TOXIN_DESC]
+Stun an enemy for 1 turn
+
+----------------------------------------
+
+[CARD_ELIXIR_OF_HUATUO]
+Elixir of Hua Tuo
+
+----------------------------------------
+
+[CARD_ELIXIR_OF_HUATUO_DESC]
+Restore 40% of maximum HP
+
+----------------------------------------
+
+[CARD_GALL_OF_GOUJIAN]
+Gall of Goujian
+
+----------------------------------------
+
+[CARD_GALL_OF_GOUJIAN_DESC]
+Deal 50% less damage this turn, then 30% more damage for 2 turns
+
+----------------------------------------
+
+[CARD_INSIGHT_OF_PAODING]
+Insight of Paoding
+
+----------------------------------------
+
+[CARD_INSIGHT_OF_PAODING_DESC]
+An enemy takes 30% more damage for 2 turns
+
+----------------------------------------
+
+[CARD_SMASHED_CAULDRON]
+Smashed Cauldron
+
+----------------------------------------
+
+[CARD_SMASHED_CAULDRON_DESC]
+The selected character takes double damage but deals 30% more damage for 2 turns
+
+----------------------------------------
+
+[CARD_SIX_SEVEN]
+Six Seven
+
+----------------------------------------
+
+[CARD_SIX_SEVEN_DESC]
+676767676767
+
+----------------------------------------
+
+[EFFECT_DAMAGE_IMMUNITY]
+Damage Immunity
+
+----------------------------------------
+
+[EFFECT_DAMAGE_IMMUNITY_DESC]
+Negate one instance of damage; consumed when triggered
+
+----------------------------------------
+
+[EFFECT_STUN]
+Stun
+
+----------------------------------------
+
+[EFFECT_STUN_DESC]
+Temporarily unable to act
+
+----------------------------------------
+
+[EFFECT_WEAKNESS]
+Weakness
+
+----------------------------------------
+
+[EFFECT_WEAKNESS_DESC]
+Deal %d%% less damage
+
+----------------------------------------
+
+[EFFECT_STRENGTH]
+Strength
+
+----------------------------------------
+
+[EFFECT_STRENGTH_DESC]
+Deal %d%% more damage
+
+----------------------------------------
+
+[EFFECT_TARGET_LOCK]
+Target Lock
+
+----------------------------------------
+
+[EFFECT_TARGET_LOCK_VALUE]
+Aim
+
+----------------------------------------
+
+[EFFECT_TARGET_LOCK_DESC]
+Aiming at %s
+
+----------------------------------------
+
+[EFFECT_VULNERABLE]
+Vulnerable
+
+----------------------------------------
+
+[EFFECT_VULNERABLE_DESC]
+Take %d%% more damage
+
+----------------------------------------
+
+[EFFECT_SOURCE_UNKNOWN]
+Unknown
+
+----------------------------------------
+
+[EFFECT_TOOLTIP_FORMAT]
+%s: %s
+
+----------------------------------------
+
+[RESULT_CORRECT]
+Correct
+
+----------------------------------------
+
+[RESULT_WRONG]
+Incorrect
+
+----------------------------------------
+
+[RESULT_VOCABULARY_GOAL_TRIGGER]
+, compensated difficulty AP gained
+
+----------------------------------------
+
+[RESULT_VICTORY_TITLE]
+Victory
+
+----------------------------------------
+
+[RESULT_VICTORY_MESSAGE]
+A glorious victory! +%d Old TOEFL!
+
+----------------------------------------
+
+[RESULT_DEFEAT_TITLE]
+Defeat
+
+----------------------------------------
+
+[RESULT_DEFEAT_MESSAGE]
+Oh no! Shall we try again?
+
+----------------------------------------
+
+[Q_PY_EASY_1_PROMPT]
+Which pinyin matches “你好”?
+
+----------------------------------------
+
+[Q_PY_EASY_1_O0]
+ni hao
+
+----------------------------------------
+
+[Q_PY_EASY_1_O1]
+wo ai
+
+----------------------------------------
+
+[Q_PY_EASY_1_O2]
+xie xie
+
+----------------------------------------
+
+[Q_PY_EASY_1_O3]
+zai jian
+
+----------------------------------------
+
+[Q_PY_EASY_1_EXPLANATION]
+你好 = ni hao.
+
+----------------------------------------
+
+[Q_PY_EASY_2_PROMPT]
+Which pinyin matches “谢谢”?
+
+----------------------------------------
+
+[Q_PY_EASY_2_O0]
+qing wen
+
+----------------------------------------
+
+[Q_PY_EASY_2_O1]
+xie xie
+
+----------------------------------------
+
+[Q_PY_EASY_2_O2]
+lao shi
+
+----------------------------------------
+
+[Q_PY_EASY_2_O3]
+peng you
+
+----------------------------------------
+
+[Q_PY_EASY_2_EXPLANATION]
+谢谢 = xie xie.
+
+----------------------------------------
+
+[Q_PY_MEDIUM_1_PROMPT]
+What is the correct pinyin for “老师”?
+
+----------------------------------------
+
+[Q_PY_MEDIUM_1_O0]
+lao shi
+
+----------------------------------------
+
+[Q_PY_MEDIUM_1_O1]
+luo si
+
+----------------------------------------
+
+[Q_PY_MEDIUM_1_O2]
+la shi
+
+----------------------------------------
+
+[Q_PY_MEDIUM_1_O3]
+liang shi
+
+----------------------------------------
+
+[Q_PY_MEDIUM_1_EXPLANATION]
+老师 = lao shi.
+
+----------------------------------------
+
+[Q_PY_MEDIUM_2_PROMPT]
+What is the correct pinyin for “中国”?
+
+----------------------------------------
+
+[Q_PY_MEDIUM_2_O0]
+zhong guo
+
+----------------------------------------
+
+[Q_PY_MEDIUM_2_O1]
+zhong gua
+
+----------------------------------------
+
+[Q_PY_MEDIUM_2_O2]
+zong guo
+
+----------------------------------------
+
+[Q_PY_MEDIUM_2_O3]
+cheng guo
+
+----------------------------------------
+
+[Q_PY_MEDIUM_2_EXPLANATION]
+中国 = zhong guo.
+
+----------------------------------------
+
+[Q_PY_HARD_1_PROMPT]
+Which pinyin is closest to “北京二中”?
+
+----------------------------------------
+
+[Q_PY_HARD_1_O0]
+bei jing er zhong
+
+----------------------------------------
+
+[Q_PY_HARD_1_O1]
+bai jing yi zhong
+
+----------------------------------------
+
+[Q_PY_HARD_1_O2]
+bei jin er zong
+
+----------------------------------------
+
+[Q_PY_HARD_1_O3]
+bei qing er zhong
+
+----------------------------------------
+
+[Q_PY_HARD_1_EXPLANATION]
+北京二中 = bei jing er zhong.
+
+----------------------------------------
+
+[Q_PY_HARD_2_PROMPT]
+What is the pinyin for “中文社”?
+
+----------------------------------------
+
+[Q_PY_HARD_2_O0]
+zhong wen she
+
+----------------------------------------
+
+[Q_PY_HARD_2_O1]
+zhong wen se
+
+----------------------------------------
+
+[Q_PY_HARD_2_O2]
+zong wen she
+
+----------------------------------------
+
+[Q_PY_HARD_2_O3]
+cheng wen she
+
+----------------------------------------
+
+[Q_PY_HARD_2_EXPLANATION]
+中文社 = zhong wen she.
+
+----------------------------------------
+
+[Q_VOC_EASY_1_PROMPT]
+What does “水” mean?
+
+----------------------------------------
+
+[Q_VOC_EASY_1_O0]
+water
+
+----------------------------------------
+
+[Q_VOC_EASY_1_O1]
+fire
+
+----------------------------------------
+
+[Q_VOC_EASY_1_O2]
+school
+
+----------------------------------------
+
+[Q_VOC_EASY_1_O3]
+card
+
+----------------------------------------
+
+[Q_VOC_EASY_1_EXPLANATION]
+水 = water.
+
+----------------------------------------
+
+[Q_VOC_EASY_2_PROMPT]
+What does “朋友” mean?
+
+----------------------------------------
+
+[Q_VOC_EASY_2_O0]
+teacher
+
+----------------------------------------
+
+[Q_VOC_EASY_2_O1]
+friend
+
+----------------------------------------
+
+[Q_VOC_EASY_2_O2]
+monster
+
+----------------------------------------
+
+[Q_VOC_EASY_2_O3]
+answer
+
+----------------------------------------
+
+[Q_VOC_EASY_2_EXPLANATION]
+朋友 = friend.
+
+----------------------------------------
+
+[Q_VOC_MEDIUM_1_PROMPT]
+What does “教室” mean?
+
+----------------------------------------
+
+[Q_VOC_MEDIUM_1_O0]
+classroom
+
+----------------------------------------
+
+[Q_VOC_MEDIUM_1_O1]
+library
+
+----------------------------------------
+
+[Q_VOC_MEDIUM_1_O2]
+office
+
+----------------------------------------
+
+[Q_VOC_MEDIUM_1_O3]
+gym
+
+----------------------------------------
+
+[Q_VOC_MEDIUM_1_EXPLANATION]
+教室 = classroom.
+
+----------------------------------------
+
+[Q_VOC_MEDIUM_2_PROMPT]
+What does “迟到” mean?
+
+----------------------------------------
+
+[Q_VOC_MEDIUM_2_O0]
+to arrive late
+
+----------------------------------------
+
+[Q_VOC_MEDIUM_2_O1]
+to study
+
+----------------------------------------
+
+[Q_VOC_MEDIUM_2_O2]
+to win
+
+----------------------------------------
+
+[Q_VOC_MEDIUM_2_O3]
+to ask
+
+----------------------------------------
+
+[Q_VOC_MEDIUM_2_EXPLANATION]
+迟到 = to arrive late.
+
+----------------------------------------
+
+[Q_VOC_HARD_1_PROMPT]
+What does “吉祥物” mean?
+
+----------------------------------------
+
+[Q_VOC_HARD_1_O0]
+mascot
+
+----------------------------------------
+
+[Q_VOC_HARD_1_O1]
+homework
+
+----------------------------------------
+
+[Q_VOC_HARD_1_O2]
+culture
+
+----------------------------------------
+
+[Q_VOC_HARD_1_O3]
+question
+
+----------------------------------------
+
+[Q_VOC_HARD_1_EXPLANATION]
+吉祥物 = mascot.
+
+----------------------------------------
+
+[Q_VOC_HARD_2_PROMPT]
+What does “减伤” mean in a game?
+
+----------------------------------------
+
+[Q_VOC_HARD_2_O0]
+damage reduction
+
+----------------------------------------
+
+[Q_VOC_HARD_2_O1]
+extra gold
+
+----------------------------------------
+
+[Q_VOC_HARD_2_O2]
+new level
+
+----------------------------------------
+
+[Q_VOC_HARD_2_O3]
+random card
+
+----------------------------------------
+
+[Q_VOC_HARD_2_EXPLANATION]
+减伤 = damage reduction.
+
+----------------------------------------
+
+[Q_CUL_EASY_1_PROMPT]
+Which color is most closely associated with the Spring Festival?
+
+----------------------------------------
+
+[Q_CUL_EASY_1_O0]
+Red
+
+----------------------------------------
+
+[Q_CUL_EASY_1_O1]
+Blue
+
+----------------------------------------
+
+[Q_CUL_EASY_1_O2]
+Black
+
+----------------------------------------
+
+[Q_CUL_EASY_1_O3]
+Purple
+
+----------------------------------------
+
+[Q_CUL_EASY_1_EXPLANATION]
+Red commonly represents celebration during the Spring Festival.
+
+----------------------------------------
+
+[Q_CUL_EASY_2_PROMPT]
+What food is commonly eaten during the Mid-Autumn Festival?
+
+----------------------------------------
+
+[Q_CUL_EASY_2_O0]
+Mooncakes
+
+----------------------------------------
+
+[Q_CUL_EASY_2_O1]
+Dumplings
+
+----------------------------------------
+
+[Q_CUL_EASY_2_O2]
+Zongzi
+
+----------------------------------------
+
+[Q_CUL_EASY_2_O3]
+Noodles
+
+----------------------------------------
+
+[Q_CUL_EASY_2_EXPLANATION]
+Mooncakes are commonly eaten during the Mid-Autumn Festival.
+
+----------------------------------------
+
+[Q_CUL_MEDIUM_1_PROMPT]
+Which activity is common during the Qingming Festival?
+
+----------------------------------------
+
+[Q_CUL_MEDIUM_1_O0]
+Tomb sweeping
+
+----------------------------------------
+
+[Q_CUL_MEDIUM_1_O1]
+Putting up spring couplets
+
+----------------------------------------
+
+[Q_CUL_MEDIUM_1_O2]
+Eating mooncakes
+
+----------------------------------------
+
+[Q_CUL_MEDIUM_1_O3]
+Dragon boat racing
+
+----------------------------------------
+
+[Q_CUL_MEDIUM_1_EXPLANATION]
+Tomb sweeping is a common Qingming Festival activity.
+
+----------------------------------------
+
+[Q_CUL_MEDIUM_2_PROMPT]
+Which food is common during the Dragon Boat Festival?
+
+----------------------------------------
+
+[Q_CUL_MEDIUM_2_O0]
+Zongzi
+
+----------------------------------------
+
+[Q_CUL_MEDIUM_2_O1]
+Mooncakes
+
+----------------------------------------
+
+[Q_CUL_MEDIUM_2_O2]
+Tangyuan
+
+----------------------------------------
+
+[Q_CUL_MEDIUM_2_O3]
+Cake
+
+----------------------------------------
+
+[Q_CUL_MEDIUM_2_EXPLANATION]
+Zongzi is commonly eaten during the Dragon Boat Festival.
+
+----------------------------------------
+
+[Q_CUL_HARD_1_PROMPT]
+What would a Chinese club most likely promote?
+
+----------------------------------------
+
+[Q_CUL_HARD_1_O0]
+Chinese learning and Chinese culture
+
+----------------------------------------
+
+[Q_CUL_HARD_1_O1]
+Chemistry experiments
+
+----------------------------------------
+
+[Q_CUL_HARD_1_O2]
+Football training
+
+----------------------------------------
+
+[Q_CUL_HARD_1_O3]
+Robot maintenance
+
+----------------------------------------
+
+[Q_CUL_HARD_1_EXPLANATION]
+A Chinese club focuses on Chinese learning and cultural exchange.
+
+----------------------------------------
+
+[Q_CUL_HARD_2_PROMPT]
+What do Spring Festival couplets usually express?
+
+----------------------------------------
+
+[Q_CUL_HARD_2_O0]
+Blessings and New Year wishes
+
+----------------------------------------
+
+[Q_CUL_HARD_2_O1]
+Exam answers
+
+----------------------------------------
+
+[Q_CUL_HARD_2_O2]
+Map routes
+
+----------------------------------------
+
+[Q_CUL_HARD_2_O3]
+Shopping lists
+
+----------------------------------------
+
+[Q_CUL_HARD_2_EXPLANATION]
+Spring couplets commonly express blessings and New Year wishes.
+
+----------------------------------------
+
+[LOADING_STATUS]
+Loading…
+
+----------------------------------------
+
+[LOADING_COMPLETE]
+Loading complete
+
+----------------------------------------
+
+[LOADING_FAILED]
+Loading failed. Retry or return to the map
+
+----------------------------------------
+
+[LOADING_PERCENT_FORMAT]
+%d%%
+
+----------------------------------------
+
+[LOADING_RETRY]
+Retry
+
+----------------------------------------
+
+[LOADING_BACK]
+Return to map
+
+----------------------------------------
+
+[LOG_STATUS_UNCHANGED]
+%s's status did not change
+
+----------------------------------------
+
+[LOG_ATTACK_REDUCED]
+%s's attack decreased by %.0f%% for %d turns
+
+----------------------------------------
+
+[LOG_ATTACK_INCREASED]
+%s's attack increased by %.0f%% for %d turns
+
+----------------------------------------
+
+[LOG_INCOMING_DAMAGE_INCREASED]
+%s takes %.0f%% more damage for %d turns
+
+----------------------------------------
+
+[LOG_IMMUNITY_GAINED]
+%s gained %d damage immunity charges
+
+----------------------------------------
+
+[LOG_STUN_APPLIED]
+%s is stunned for %d turns
+
+----------------------------------------
+
+[LOG_STATUS_APPLIED]
+%s gained %s for %d turns
+
+----------------------------------------
+
+[LOG_STATUS_PERCENT]
+%s gained %s %.0f%% for %d turns
+
+----------------------------------------
+
+[LOG_STATUS_DELAYED]
+After %d turns: %s
+
+----------------------------------------
+
+[LEVEL_5_NAME]
+F1 - Locker
+
+----------------------------------------
+
+[LEVEL_5_DESCRIPTION]
+We've finally met a teacher, but something seems a little...
+
+----------------------------------------
+
+[ENEMY_DAVID]
+Anomaly·David
+
+----------------------------------------
+
+[ENEMY_DAVID_DESCRIPTION]
+Anomaly·David
+HP: 240
+① Copy and use an attack or defense card from a living player character.
+② Use a random general card.
+
+----------------------------------------
+
+[STORY_CONTINUE]
+Continue
+
+----------------------------------------
+
+[STORY_RABBIT_JOIN]
+Rabbert Einstein has joined us! She can fight alongside us for the rest of our journey!
+
+----------------------------------------
+
+[STORY_DAVID_STALL]
+Ahem... Thank you! Here are some cards I've collected. They're yours!
+I'll set up a stall here. Come back for new cards!
+
+----------------------------------------
+
+[STORY_DAVID_CARD_UNLOCKS]
+General cards and the battle shop are unlocked! Spend Old TOEFL at my stall to unlock cards
+
+----------------------------------------
+
+[VENDOR_DAVID_TITLE]
+David's Little Stall
+
+----------------------------------------
+
+[VENDOR_OLD_BALANCE]
+Old TOEFL: %.1f
+
+----------------------------------------
+
+[VENDOR_UNLOCK_DESCRIPTION]
+Use Old TOEFL to permanently unlock general cards
+Unlocked cards can appear in starting battle hands, enemy drops, and the battle shop
+
+----------------------------------------
+
+[VENDOR_UNLOCK_PRICE]
+Unlock: %.1f Old TOEFL
+
+----------------------------------------
+
+[VENDOR_ALREADY_UNLOCKED]
+Unlocked
+
+----------------------------------------
+
+[VENDOR_UNLOCK_CARD]
+Unlock
+
+----------------------------------------
+
+[VENDOR_CARD_UNLOCKED]
+Unlocked %s.
+
+----------------------------------------
+
+[VENDOR_CHALLENGE]
+Play a card battle with David
+
+----------------------------------------
+
+[VENDOR_CLOSE]
+Return to Map
+
+----------------------------------------
+
+[UI_RETURN_MAP]
+Return to Map
+
+----------------------------------------
+
+[CARD_BUDDING_DEFENSE_SUMMARY]
+60% damage reduction, 2 turns
+
+----------------------------------------
+
+[CARD_BUDDING_SKILL_SUMMARY]
+Cost: 5 AP
+One enemy: 3 x 50
+
+----------------------------------------
+
+[CARD_RABBIT_ATTACK_SUMMARY]
+AP<2.5: up to 4 x 15
+AP≥2.5: 4 chained hits
+20 > 14 > 9 > 6
+
+----------------------------------------
+
+[CARD_RABBIT_DEFENSE_SUMMARY]
+One ally: retaliate
+On HP loss: +0.5 AP
+Lasts 1 turn
+
+----------------------------------------
+
+[CARD_RABBIT_SKILL_SUMMARY]
+Cost: 5 AP
+4 chained hits x 25
+Random debuff per hit
+
+----------------------------------------
+
+[EFFECT_DAMAGE_REDUCTION]
+Damage Reduction
+
+----------------------------------------
+
+[EFFECT_DAMAGE_REDUCTION_DESC]
+Take %d%% less damage
+
+----------------------------------------
+
+[EFFECT_COUNTERATTACK]
+Retaliation
+
+----------------------------------------
+
+[EFFECT_COUNTERATTACK_DESC]
+Return %d%% of damage taken
+
+----------------------------------------
+
+[EFFECT_HURT_AP]
+Live and Learn
+
+----------------------------------------
+
+[EFFECT_HURT_AP_DESC]
+Gain an extra %.1f AP each time you are hurt
+
+----------------------------------------
+
+[EFFECT_ATTACK_AP]
+AP Mark
+
+----------------------------------------
+
+[EFFECT_ATTACK_AP_DESC]
+Each attack against this unit grants us an extra %.1f AP
+
+----------------------------------------
+
+[LOG_REFLECT_DAMAGE]
+%s counters %s for %d damage
+
+----------------------------------------
+
+[LOG_DAMAGE_REDUCTION_DURATION]
+%s takes %.0f%% less damage for %d turns
+
+----------------------------------------
+
+[LOG_COUNTERATTACK_GRANTED]
+%s gained %.0f%% retaliation for %d turns
+
+----------------------------------------
+
+[LOG_HURT_AP_GRANTED]
+%s gains an extra %.1f AP when hurt for %d turns
+
+----------------------------------------
+
+[LOG_ATTACK_AP_MARKED]
+Attacking %s grants us an extra %.1f AP per hit for %d turns
+
+----------------------------------------
+
+[NPC_DAVID]
+David
+
+----------------------------------------
+
+[LOG_CURRENCY_CONVERTED]
+%.1f New TOEFL converted into %d Old TOEFL
+
+----------------------------------------
+
+[LOG_UNIT_SHIELD_GAIN]
+%s gained %d shield
+
+----------------------------------------
+
+[LOG_PLAYER_STUNNED]
+%s is stunned
+
+----------------------------------------
+
+[LOG_UNIT_GAIN_AP]
+%s gained %.1f AP
+
+----------------------------------------

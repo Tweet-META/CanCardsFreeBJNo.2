@@ -51,12 +51,11 @@ func show_difficulty_selection() -> void:
 	show()
 
 
-## Show question.
+## Displays only difficulty and question text from the shared question pool.
 func show_question(question: QuestionData) -> void:
 	_set_difficulty_controls_visible(false)
 	_set_question_controls_visible(true)
 	prompt_label.text = tr("QUESTION_HEADER_FORMAT").replace("\\n", "\n") % [
-		_category_label(question.category),
 		_difficulty_label(question.difficulty),
 		tr(question.prompt)
 	]
@@ -93,19 +92,6 @@ func _set_question_controls_visible(should_show: bool) -> void:
 	prompt_label.visible = should_show
 	for button: Button in option_buttons:
 		button.visible = should_show
-
-
-## Category label.
-func _category_label(category: String) -> String:
-	match category:
-		"拼音":
-			return tr("ATTRIBUTE_PINYIN")
-		"词汇":
-			return tr("ATTRIBUTE_VOCABULARY")
-		"文化":
-			return tr("ATTRIBUTE_CULTURE")
-		_:
-			return category
 
 
 ## Difficulty label.

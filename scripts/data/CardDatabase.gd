@@ -8,6 +8,7 @@ static var _loaded: bool = false
 static var _definitions: Dictionary = {}
 
 
+## Creates card runtime data including its separate permanent unlock price.
 static func create_card(card_id: String) -> CardData:
 	_ensure_loaded()
 	var raw_value: Variant = _definitions.get(card_id)
@@ -42,6 +43,20 @@ static func create_card(card_id: String) -> CardData:
 	card.direct_hp_loss = int(raw.get("direct_hp_loss", 0))
 	card.art_path = str(raw.get("art_path", ""))
 	card.shop_price = float(raw.get("shop_price", 0.0))
+	card.unlock_price = maxf(0.0, float(raw.get("unlock_price", card.shop_price)))
+	card.summary = str(raw.get("summary", ""))
+	card.hit_count = maxi(1, int(raw.get("hit_count", 1)))
+	card.ap_switch_threshold = float(raw.get("ap_switch_threshold", 2.5))
+	card.extra_target_count = maxi(0, int(raw.get("extra_target_count", 0)))
+	for value: Variant in raw.get("chain_damage_sequence", []) as Array:
+		card.chain_damage_sequence.append(maxi(0, int(value)))
+	for value: Variant in raw.get("random_hit_effects", []) as Array:
+		var item: Dictionary = value as Dictionary
+		var option: CardStatusOption = CardStatusOption.new()
+		option.effect_id = str(item.get("effect_id", ""))
+		option.value = float(item.get("value", 0.0))
+		option.duration = maxi(1, int(item.get("duration", 1)))
+		card.random_hit_effects.append(option)
 	return card
 
 
@@ -54,6 +69,7 @@ static func create_cards(card_ids: Array[String]) -> Array[CardData]:
 	return cards
 
 
+## Restricts every normal random draw to permanently unlocked general cards.
 static func get_general_pool_ids() -> Array[String]:
 	_ensure_loaded()
 	var general_ids: Array[String] = []
@@ -63,9 +79,31 @@ static func get_general_pool_ids() -> Array[String]:
 		if not raw_value is Dictionary:
 			continue
 		var raw: Dictionary = raw_value as Dictionary
-		if str(raw.get("type", "")) == "general" and bool(raw.get("available_in_pool", true)):
+		if str(raw.get("type", "")) == "general" and bool(raw.get("available_in_pool", true)) and SaveManager.is_general_card_unlocked(card_id):
 			general_ids.append(card_id)
 	return general_ids
+
+
+## Lists normal general cards for the permanent unlock stall, including locked additions.
+static func create_vendor_cards() -> Array[CardData]:
+	_ensure_loaded()
+	var cards: Array[CardData] = []
+	for key: Variant in _definitions:
+		var raw: Dictionary = _definitions[key] as Dictionary
+		if str(raw.get("type", "")) == "general" and bool(raw.get("available_in_pool", true)):
+			cards.append(create_card(str(key)))
+	return cards
+
+
+## Supplies the explicit starter unlock list without recursively querying the save.
+static func get_initial_general_card_ids() -> Array[String]:
+	_ensure_loaded()
+	var ids: Array[String] = []
+	for key: Variant in _definitions:
+		var raw: Dictionary = _definitions[key] as Dictionary
+		if str(raw.get("type", "")) == "general" and bool(raw.get("available_in_pool", true)) and bool(raw.get("initially_unlocked", false)):
+			ids.append(str(key))
+	return ids
 
 
 static func reload() -> void:

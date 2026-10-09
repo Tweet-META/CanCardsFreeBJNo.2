@@ -46,3 +46,7 @@ budding 原先的 10 秒待机包含两个相同的 5 秒动作周期，rabbit �
 战斗中待机循环播放；关闭答题结果后，伤害牌先播放一次攻击再结算。敌方回合显示提示，然后逐个行动；被攻击的我方角色播放一次受击动画，结束后再处理下一名敌人。群体攻击的受击动画同步播放，致命一击播放完后才显示失败结算。
 
 可调项：`CharacterMotion` 的 `playback_speed`、`selection_jump_height`、`selection_jump_gravity`，`TurnBanner` 的 `display_seconds`，`EnemyStandee` 的 `action_recovery_seconds`。选中时仅贴图层原地跳一次，血条与站位固定，落地后回到原位；没有脚下选择标记。敌人攻击占位动画位于 `EnemyStandee.tscn > AttackAnimation`，预留动画精灵位于 `Content/Portrait/VisualRoot/AttackOrigin/AttackSprite`。
+
+## David
+
+`david/sprite_frames.tres` contains body idle/hurt/attack (150 frames each, 2.5 seconds). `david/magic_frames.tres` contains the independent 30-second ambient loop (1800 frames) and 2.5-second attack burst (150 frames). All sequences preserve 256x256 RGBA and 60 fps. The clean idle frame is reused for post-clear dialogue and the stall. Full package metadata is in `david/frames_manifest.json`; the source ZIP is retained.

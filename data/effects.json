@@ -48,6 +48,38 @@
       "value_format": "text",
       "show_duration": true,
       "advances_with_turn": false
+    },
+    {
+      "id": "damage_reduction",
+      "display_name": "EFFECT_DAMAGE_REDUCTION",
+      "description": "EFFECT_DAMAGE_REDUCTION_DESC",
+      "icon_path": "res://assets/effects/shield_icon.png",
+      "value_format": "percent",
+      "show_duration": true
+    },
+    {
+      "id": "counterattack",
+      "display_name": "EFFECT_COUNTERATTACK",
+      "description": "EFFECT_COUNTERATTACK_DESC",
+      "icon_path": "res://assets/effects/shield_icon.png",
+      "value_format": "percent",
+      "show_duration": true
+    },
+    {
+      "id": "hurt_ap",
+      "display_name": "EFFECT_HURT_AP",
+      "description": "EFFECT_HURT_AP_DESC",
+      "icon_path": "res://assets/effects/strength.png",
+      "value_format": "decimal",
+      "show_duration": true
+    },
+    {
+      "id": "attack_ap",
+      "display_name": "EFFECT_ATTACK_AP",
+      "description": "EFFECT_ATTACK_AP_DESC",
+      "icon_path": "res://assets/effects/target.png",
+      "value_format": "decimal",
+      "show_duration": true
     }
   ]
 }

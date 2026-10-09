@@ -57,7 +57,7 @@ func setup(character: CharacterData, index: int, selected: bool, target_highligh
 	hp_bar.value = character.current_hp
 	hp_label.text = "%d / %d" % [character.current_hp, character.max_hp]
 	portrait.setup(character.battle_animation_path, character.portrait_path, character.is_alive())
-	shield_visual.setup(character.current_shield, character.turn_damage_reduction)
+	shield_visual.setup(character.current_shield, character.get_damage_reduction())
 	_refresh_effects(character.active_effects)
 	target_highlight.visible = target_highlighted
 

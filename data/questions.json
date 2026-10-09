@@ -1,7 +1,6 @@
 [
   {
     "id": "py_easy_1",
-    "category": "拼音",
     "difficulty": "easy",
     "prompt": "“你好”的拼音是哪一个？",
     "options": ["ni hao", "wo ai", "xie xie", "zai jian"],
@@ -10,7 +9,6 @@
   },
   {
     "id": "py_easy_2",
-    "category": "拼音",
     "difficulty": "easy",
     "prompt": "“谢谢”的拼音是哪一个？",
     "options": ["qing wen", "xie xie", "lao shi", "peng you"],
@@ -19,7 +17,6 @@
   },
   {
     "id": "py_medium_1",
-    "category": "拼音",
     "difficulty": "medium",
     "prompt": "“老师”的正确拼音是？",
     "options": ["lao shi", "luo si", "la shi", "liang shi"],
@@ -28,7 +25,6 @@
   },
   {
     "id": "py_medium_2",
-    "category": "拼音",
     "difficulty": "medium",
     "prompt": "“中国”的正确拼音是？",
     "options": ["zhong guo", "zhong gua", "zong guo", "cheng guo"],
@@ -37,7 +33,6 @@
   },
   {
     "id": "py_hard_1",
-    "category": "拼音",
     "difficulty": "hard",
     "prompt": "“北京二中”的拼音更接近哪一个？",
     "options": ["bei jing er zhong", "bai jing yi zhong", "bei jin er zong", "bei qing er zhong"],
@@ -46,7 +41,6 @@
   },
   {
     "id": "py_hard_2",
-    "category": "拼音",
     "difficulty": "hard",
     "prompt": "“中文社”的拼音是？",
     "options": ["zhong wen she", "zhong wen se", "zong wen she", "cheng wen she"],
@@ -55,7 +49,6 @@
   },
   {
     "id": "voc_easy_1",
-    "category": "词汇",
     "difficulty": "easy",
     "prompt": "“水”是什么意思？",
     "options": ["water", "fire", "school", "card"],
@@ -64,7 +57,6 @@
   },
   {
     "id": "voc_easy_2",
-    "category": "词汇",
     "difficulty": "easy",
     "prompt": "“朋友”是什么意思？",
     "options": ["teacher", "friend", "monster", "answer"],
@@ -73,7 +65,6 @@
   },
   {
     "id": "voc_medium_1",
-    "category": "词汇",
     "difficulty": "medium",
     "prompt": "“教室”是什么意思？",
     "options": ["classroom", "library", "office", "gym"],
@@ -82,7 +73,6 @@
   },
   {
     "id": "voc_medium_2",
-    "category": "词汇",
     "difficulty": "medium",
     "prompt": "“迟到”是什么意思？",
     "options": ["to arrive late", "to study", "to win", "to ask"],
@@ -91,7 +81,6 @@
   },
   {
     "id": "voc_hard_1",
-    "category": "词汇",
     "difficulty": "hard",
     "prompt": "“吉祥物”是什么意思？",
     "options": ["mascot", "homework", "culture", "question"],
@@ -100,7 +89,6 @@
   },
   {
     "id": "voc_hard_2",
-    "category": "词汇",
     "difficulty": "hard",
     "prompt": "“减伤”在游戏里更接近？",
     "options": ["damage reduction", "extra gold", "new level", "random card"],
@@ -109,7 +97,6 @@
   },
   {
     "id": "cul_easy_1",
-    "category": "文化",
     "difficulty": "easy",
     "prompt": "春节通常和哪种颜色关系最密切？",
     "options": ["红色", "蓝色", "黑色", "紫色"],
@@ -118,7 +105,6 @@
   },
   {
     "id": "cul_easy_2",
-    "category": "文化",
     "difficulty": "easy",
     "prompt": "中秋节常吃什么？",
     "options": ["月饼", "饺子", "粽子", "面条"],
@@ -127,7 +113,6 @@
   },
   {
     "id": "cul_medium_1",
-    "category": "文化",
     "difficulty": "medium",
     "prompt": "清明节常见活动是？",
     "options": ["扫墓", "贴春联", "吃月饼", "赛龙舟"],
@@ -136,7 +121,6 @@
   },
   {
     "id": "cul_medium_2",
-    "category": "文化",
     "difficulty": "medium",
     "prompt": "端午节常见食物是？",
     "options": ["粽子", "月饼", "汤圆", "蛋糕"],
@@ -145,7 +129,6 @@
   },
   {
     "id": "cul_hard_1",
-    "category": "文化",
     "difficulty": "hard",
     "prompt": "“中文社”最可能推广的是？",
     "options": ["中文学习和中国文化", "化学实验", "足球训练", "机器人维修"],
@@ -154,7 +137,6 @@
   },
   {
     "id": "cul_hard_2",
-    "category": "文化",
     "difficulty": "hard",
     "prompt": "春节贴春联通常表达什么？",
     "options": ["祝福和新年愿望", "考试答案", "地图路线", "购物清单"],

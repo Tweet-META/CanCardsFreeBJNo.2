@@ -39,7 +39,9 @@
 - Characters: edit `data/characters.json`; card references must resolve through `CardDatabase`, and the complete information-panel text must use one `description` key.
 - Enemies: edit `data/enemies.json`; it contains definitions only, never level lineups. All portrait paths must exist, and the complete information-panel text must use one `description` key.
 - Persistent effects: edit `data/effects.json`; every effect needs a stable ID, localization keys, and an icon path under `assets/effects/`.
-- Questions: edit `data/questions.json` and add every generated `Q_<ID>_*` localization key.
+- Level-clear stories: edit `data/story_events.json`; optional SpriteFrames slots precede localized dialogue. Level 3 unlocks Tiancaitu and level 5 unlocks general-card features. Store clears and acknowledged events in the save.
+- General-card ownership: explicit `initially_unlocked: true` identifies starter cards. New general cards default locked; David's map stall permanently unlocks them using saved Old TOEFL and `unlock_price` (fallback: shop price). Every normal general-card pool must filter saved ownership, while `available_in_pool: false` still excludes hidden cards.
+- Questions: edit `data/questions.json` and add every generated `Q_<ID>_*` localization key. Questions have no category/attribute field; preserve stable IDs and pool only by difficulty.
 - Learning Goals: edit `data/learning_goals.json`; goals are resolved by character attribute and must not be embedded in character or UI scripts.
 - Map maps: edit `data/maps.json`; every configured `image_path` must point to an imported texture.
 - Map levels: edit `data/levels.json`, reference their IDs from the owning map, and place matching `LevelNode` instances in `MapScene.tscn`. Level positions belong to those editor-authored nodes; target scenes remain `res://` paths in level data.
@@ -58,12 +60,16 @@
 ## Battle Invariants
 
 - `BattleState` is the authoritative mutable state.
-- Team AP is capped at `5`; skills force hard questions and clear AP.
+- Battle logs describe action outcomes only: attacker/target and actual damage, HP/AP/shield changes, and status values/durations. Do not narrate card use, question selection, answer correctness, calculation steps, or status sources. Preserve configured tutorial guidance and concise flow/error feedback.
+- Team AP is capped at `5`; skills force hard questions and clear AP before their hits, retaining AP gained during hits and from their answer. Answers modify AP only: no attack, skill, or defense magnitude bonuses. Correct simple/medium/hard answers grant 0.2/0.3/0.5 AP above card base AP; vocabulary compensation can also grant that difficulty AP.
+- AP-pattern attacks sample AP before action gains. Tiancaitu uses the chain branch at exactly 2.5 AP. Low-AP targets are distinct; chain targets may repeat and must remain alive. Resolve each damage packet and subsequent random status in order.
+- Retaliation copies actual HP loss after incoming reduction, shields, and immunity, then applies the attacker's defenses without player damage bonuses. Only actual HP loss grants hurt AP. Lethal hits can retaliate; a killed attacker stops remaining group hits. Reflections must not recursively trigger attack marks.
+- Enemy weakness must modify all damage abilities, including charge delivery. Multi-turn defense is an active status and must be shown by ShieldVisual; do not reset it as ordinary turn defense.
 - Exclusive attack/defense cards grant base AP on every answer; difficulty AP is added only for a correct answer or vocabulary-compensation trigger.
 - Each living player character acts at most once per player turn.
 - General cards belong to the team, are consumable, and use the negative-index encoding documented in `ARCHITECTURE.md`.
 - General-card sale value must come from `CardData.get_sell_price()` (`shop_price * 0.6`, rounded upward to one decimal place); UI code must not duplicate the economy formula.
-- General cards and the shop unlock by the active level's order: `data/levels.json.general_cards_unlock_order` is 5. Orders 1-4 must not grant starting cards, enemy card drops, purchases, or developer/hidden-code cards; do not merely hide the shop button.
+- General cards and the battle shop require both completion of the unlocking story level (level 5) and active level order >= `data/levels.json.general_cards_unlock_order` (5). Orders 1-4 and the first David fight must not grant starting cards, enemy drops, purchases, or developer/hidden-code cards; do not merely hide the button.
 - After general cards unlock, each enemy must grant exactly one random general card on first death-reward collection; use `rewards_collected` rather than mutating reward values as the duplicate guard. Locked levels still award their existing currency rewards.
 - Question/result overlays must lock card interaction.
 - Answer results enter `ANSWER_RESULT`; dismissing the explanation starts `ACTION_RESOLUTION`. Never resolve enemy turns behind a visible answer panel.
@@ -84,7 +90,10 @@
 - Victory is allowed only after the final configured wave is cleared.
 - No more than eight living enemies may be displayed or added by developer tools.
 - Both sides support fixed shields and percentage reduction. Resolve percentage reduction first, then fixed shield, then HP.
-- Fixed shields persist until consumed; their shared `ShieldVisual` must disappear when the value reaches zero and no percentage shield remains.
+- Fixed shields persist until consumed; slime support sets max(existing, offered) rather than stacking. Shared ShieldVisual must disappear when the value reaches zero and no percentage shield remains.
+- New TOEFL is capped at 120. Victory converts the remaining balance once into floor(New TOEFL * 5) Old TOEFL and persists it; defeat does not convert.
+- Anomaly David has equally weighted copy_player_card and use_general_card abilities. The latter uses explicit ability.card_ids independently of player ownership. Mirror hostile targets and self-support correctly; copied counters must not recurse.
+- Enemy-phase statuses protect their first upcoming player-turn tick. Allied stuns consume one action; an entirely stunned team must automatically advance without recursive turn resolution.
 - Persistent effects use `effect_id + source_id` as the stack key: the same source refreshes, while different sources may coexist. Vulnerable effects from different sources stack multiplicatively.
 - Status durations advance at the start of player turns. An effect applied for two turns affects the application turn and the following player turn.
 

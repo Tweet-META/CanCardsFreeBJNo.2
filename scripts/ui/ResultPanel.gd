@@ -32,13 +32,17 @@ func _apply_export_safe_layout() -> void:
 	offset_bottom = 130.0
 
 
-## Show result.
-func show_result(title: String, message: String, battle_over: bool, _victory: bool) -> void:
+## Offers a clear continue handoff when victory has unlocked a pending story.
+func show_result(title: String, message: String, battle_over: bool, victory: bool) -> void:
 	title_label.text = title
 	message_label.text = message
 	retry_button.visible = battle_over
 	menu_button.visible = battle_over
 	close_button.visible = not battle_over
+	if battle_over and victory and SaveManager.get_pending_story() != null:
+		menu_button.text = tr("STORY_CONTINUE")
+	else:
+		menu_button.text = tr("UI_RETURN_MAP")
 	show()
 
 

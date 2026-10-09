@@ -39,6 +39,8 @@ Do not treat the narrative and planned systems in `README.md` as implemented unl
 
 Question and result overlays lock card interaction. Wrong answers have no direct penalty.
 
+Battle logs now summarize action results only: attacks and damage, restored/lost HP, shield/AP changes, and status percentages/durations. Card names, question/answer narration, formulas, and status sources are omitted from combat-result messages. Tutorial hints and concise round/error feedback remain in the existing log.
+
 Unit clicks and card targeting use only the portrait body's alpha mask. HP bars, status icons, transparent margins, and attack effects are excluded. The target outline encloses the body and follows portrait movement; unit roots are passive layout containers.
 
 The three mascots use 256 × 256, 60 fps SpriteFrames for idle, attack, and hurt. Idle loops preserve one complete cycle (budding: 5 seconds; rabbit/Lawilim: 2.5 seconds). Attack lasts 3 seconds and hurt lasts 2.5 seconds. Static portraits remain in preparation and Learning Goal UI. Enemy art currently uses an editor-authored attack lunge and a reserved attack-sprite origin; support and charge actions use a pulse instead. Defeat is shown after the lethal hit's hurt animation finishes. Card/shop/developer battle actions are locked during asynchronous resolution.
@@ -50,11 +52,11 @@ The three mascots use 256 × 256, 60 fps SpriteFrames for idle, attack, and hurt
 - AP belongs to the team, not individual characters.
 - AP starts at `0` and is capped at `5`.
 - Skill cards require their configured `skill_ap_cost`, currently `5`.
-- Skills always request a hard question and clear all AP after use.
+- Skills always request a hard question and clear AP before their hits; hits and correct-answer difficulty AP can then restore AP.
 - Exclusive attack and defense cards always grant their configured base AP, currently `0.5`, even after a wrong answer.
-- Correct answers add `0.5` / `0.7` / `1.0` AP for easy / medium / hard. Vocabulary compensation also triggers this difficulty bonus.
+- Correct answers add `0.2` / `0.3` / `0.5` AP for easy / medium / hard, including hard-question skills. Vocabulary compensation also triggers this difficulty AP bonus.
 - General cards do not ask questions and are removed from the team hand after use.
-- General cards and the shop unlock from level order 5. The first four levels have no starting general cards or enemy card drops, and do not allow shopping or developer/hidden-code card grants.
+- General cards and the battle shop unlock after clearing David in level 5, and are enabled only in levels of order 5 or above. The first four levels have no starting general cards or enemy card drops, and do not allow shopping or developer/hidden-code card grants.
 - After unlocking, the starting general hand contains three cards randomly drawn with replacement.
 - After unlocking, defeating each enemy grants one random general card drawn with replacement from the same complete general-card pool.
 - The general-card pool includes `potion_of_confucius`, `dagger_of_jingke`, `impenetrable_shield`, `menghan_toxin`, and `elixir_of_huatuo`.
@@ -67,12 +69,12 @@ The three mascots use 256 × 256, 60 fps SpriteFrames for idle, attack, and hurt
 ### Questions
 
 - Source: `data/questions.json`.
-- Categories match the three learning attributes.
+- Questions have no attribute/category field or topic label in the question panel.
 - Difficulties: `easy`, `medium`, `hard`.
 - Attack and defense cards open a difficulty choice before drawing a question.
 - Skills skip the choice and immediately draw from the `hard` pool.
-- Battle questions are selected by difficulty across all three categories; card and character attributes do not constrain the category.
-- If no exact category/difficulty question exists, `QuestionBank` falls back to the same category, then the first loaded question.
+- Battle questions are selected from one shared pool by difficulty; character, card, and Learning Goal attributes do not filter the pool. ID prefixes are stable identifiers only.
+- If a difficulty pool is empty, `QuestionBank` falls back to the first loaded question.
 - Question text stored in JSON is converted to stable localization keys at runtime.
 - Every drawn question is copied and its options are shuffled; the source question and correct-answer mapping remain unchanged.
 
@@ -82,17 +84,17 @@ The three mascots use 256 × 256, 60 fps SpriteFrames for idle, attack, and hurt
 - Player attack damage originates only from card `base_damage`.
 - Player damage multiplier includes:
   - The Pinyin Learning Goal multiplier when selected.
-  - The card's correct-answer difficulty bonus, when triggered.
+  - Active weakness/strength statuses. Question difficulty and correctness never modify card damage or defense.
 - Incoming enemy damage is reduced by:
   - Temporary percentage reduction granted by defense cards.
 - Matching player and enemy attributes do not modify outgoing or incoming damage.
 - Both sides support fixed-value shields and percentage damage reduction.
 - Percentage reduction resolves first; fixed shields absorb the remaining damage before HP.
-- Fixed shields stack, persist until consumed, and lose their visual effect immediately at zero.
+- Fixed shields persist until consumed and disappear visually at zero. Slime support uses the larger shield value instead of stacking.
 - The current playable content grants player percentage shields and enemy fixed shields; the inverse data paths already exist for future cards and skills.
 - Persistent status effects are defined in `data/effects.json` and stored as runtime `StatusEffectData` instances.
-- βudding's attack applies `20%` Vulnerable before damage, so the triggering hit is amplified. It lasts for the application turn and the following player turn.
-- Genius Rabbit's attack deals `26` base damage to the selected enemy and `13` base damage to every other living enemy.
+- βudding's attack deals 30 base damage to one enemy, without applying Vulnerable. Her persistent defense lasts two turns.
+- Tiancaitu uses distinct 15-damage targets below 2.5 AP and a repeatable 20/14/9/6 chain at or above 2.5 AP.
 - Reapplying a status from the same actor and card/skill refreshes its duration and keeps the stronger value. The same status from different actor/source pairs is stored separately; Vulnerable from different sources stacks multiplicatively. UI source text displays the card or skill name, not the actor name.
 
 ### Learning Goals
@@ -100,7 +102,7 @@ The three mascots use 256 × 256, 60 fps SpriteFrames for idle, attack, and hurt
 The player may choose one optional Learning Goal before entering a battle. Every unlocked character can supply the goal associated with their attribute, even when that character is not in the active party. A goal remains active for the entire battle and is unaffected by character deaths. Goals never stack and are not persistent save data.
 
 - Pinyin: team maximum HP and damage-card effects `+20%`.
-- Vocabulary: wrong answers have a `25%` chance to trigger the card bonus anyway.
+- Vocabulary: wrong answers have a `25%` chance to grant the difficulty AP bonus anyway.
 - Culture: every AP gain receives `+0.25`.
 
 Entering a level requires at least one selected party member. Level 1 also requires a Learning Goal; all other levels allow it to remain unselected.
@@ -110,7 +112,7 @@ Entering a level requires at least one selected party member. Level 1 also requi
 Nine enemy definitions exist as every combination of three attributes and three prototypes:
 
 - `bun`: attacks every living player character.
-- `slime`: has no attack; grants `ability_power` shield to every living enemy.
+- `slime`: uses weighted 10-point maximum-value team shields or 15-damage single attacks.
 - `mask`: attacks one random living player character.
 
 `prototype` identifies the enemy family, while combat behavior comes from its
@@ -120,8 +122,8 @@ an enemy with multiple entries randomly selects one each turn.
 ### Shop and Currency
 
 - Defeated enemies award `New TOEFL`.
-- Battle currency is capped at `6`.
-- From level 5, the shop displays four random general cards drawn with replacement from all `type = general` definitions. In earlier levels the button is locked and shop operations are blocked in the rules layer.
+- Battle currency is capped at `120`. On victory, remaining New TOEFL converts once to integer Old TOEFL at 1:5 (fractional results are truncated). Defeat does not settle currency.
+- After the level-5 clear, the battle shop displays four random general cards drawn with replacement from unlocked normal general-card definitions in eligible levels. In earlier levels the button is locked and shop operations are blocked in the rules layer.
 - Refresh costs `0.5`.
 - Purchased cards are added to the shared team general hand.
 - During the player turn, a general card can be dragged onto the top-right shop button and sold for `shop_price * 0.6`, rounded upward to one decimal place; selling does not consume a character action.
@@ -151,3 +153,19 @@ are registered in `project.godot` for runtime and exported builds.
 The lower-left battle information panel is data-driven. Every player and enemy
 entry provides one complete localized `description`; its lines and wording are
 not assembled by UI code.
+
+## Current Locker Content
+
+Level 5 Locker is in the map's upper-left room and contains one David (240 HP, two equally weighted card-copy/draw actions, 6 New TOEFL reward). His 256x256 60fps body and purple magic remain separate. The battle background currently uses the conversation-room placeholder.
+
+David's battle portrait is enlarged to 150% and horizontally mirrored toward the player team. Enemy JSON controls `battle_visual_scale` and `battle_flip_h`; body animations, magic, and the body-only alpha mask share the visual transform.
+
+Level 3 permanently unlocks Tiancaitu and queues a future SpriteFrames story slot; while empty, Budding immediately announces the recruitment on returning to the map. Level 5 queues clean David dialogue and unlocks general cards, the battle shop, and the map stall. Clicking cleared Locker opens the stall; its replay button opens party preparation.
+
+David's stall uses Old TOEFL for permanent card unlocks. Existing normal general cards start unlocked. Future additions default locked and do not enter starting hands, enemy drops, or battle-shop draws until unlocked. Data may set a separate unlock_price; otherwise shop_price is used. Winning battles now grant integer Old TOEFL by converting the remaining New TOEFL at 1:5.
+
+Budding now has 200 HP, a 30-base-damage single attack, 60% defense for two turns, and a single-target three-hit skill with 50 base damage per hit. Tiancaitu has 120 HP. Below 2.5 AP before the action, her attack hits the selected enemy and up to three distinct other enemies for 15 base damage each; at 2.5 or above it chains 20/14/9/6 damage across living enemies, with repeat targets allowed. Her defense grants one ally one turn of 100% retaliation and +0.5 AP per actual HP-loss hit, without reduction. Her skill clears AP first and performs four 25-base-damage chain hits, each adding one random one-turn stun, 30% weakness, 30% vulnerable, or +0.5 AP-on-attack mark. Existing learning-goal modifiers remain active. Answers affect AP only, including skill answers.
+
+## Current Monster Values
+
+All three attribute variants share family values: bun 80 HP and 14 team attack (reward 1); slime 100 HP, shield 10 at weight 1 or single attack 15 at weight 2 (reward 1); mask 60 HP and single attack 25 (reward 1.5). Nian has 300 HP, single attack 30 plus 30% weakness for two upcoming player turns at weight 1, or charge 100 after two further actions at weight 2 (reward 3). Anomaly David has 240 HP and reward 6. He equally chooses copying a living player's attack/defense card or drawing from seven configured general cards. Copies use player AP for Tiancaitu's mode, attack living player targets, and defend/heal himself. Enemy-specific card draws ignore player unlock gates. Clean post-clear dialogue still uses the name David.

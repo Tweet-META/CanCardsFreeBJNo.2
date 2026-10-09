@@ -283,6 +283,10 @@ Both `BattleUI` and `BattleManager` depend on `TEAM_GENERAL_CARD_INDEX_OFFSET = 
 
 ### Localization
 
+BattleManager formats concise outcome logs with localization keys. Damage lines name the attacker and target; healing, direct HP loss, defense, and status lines describe the affected unit only. `_emit_status_effect_result` includes configured percentages, charges, durations, and delayed timing without sources. Answer feedback remains in the result panel; the log has no card/question/answer narration or damage calculations. AP logs report actual capped gains. Tutorial messages and concise round/action feedback remain available.
+
+Question data uses only `id`, `difficulty`, `prompt`, `options`, `correct_index`, and `explanation`. `QuestionData`, JSON parsing, fallback definitions, and `QuestionPanel` do not carry category/attribute metadata. `QuestionBank` pools solely by difficulty, including every topic; historical question ID prefixes have no filtering role. The panel header displays difficulty and prompt only.
+
 `translations.csv` is the source of truth. Its generated locale-specific `.translation` resources are registered through `project.godot`; `LanguageManager` only switches and saves locales and does not parse the CSV.
 
 Display names, descriptions, logs, and question text use translation keys. When adding a question with ID `example`, localization keys must follow:
@@ -308,3 +312,25 @@ Automated smoke-test scripts were removed. Developers should validate gameplay
 manually in Godot after data, scene, or rule changes. AI-assisted changes should
 prefer static checks and editor parsing only when useful, and should not run
 gameplay smoke scripts unless new ones are explicitly requested.
+
+## Locker and Level Clear Stories
+
+Level 5 is Locker in the upper-left room of map1. It contains only David with 240 HP and equally weighted copy_player_card/use_general_card abilities, with a 6 New TOEFL reward. Enemy JSON supplies separate body and magic SpriteFrames paths; EnemyStandee reuses CharacterMotion and independently plays ambient/burst magic. Only the body determines targeting. All these resources are included in the threaded level manifest.
+
+`data/story_events.json` supplies optional full-screen sequence slots and localized fallback dialogue. MapScene opens pending StoryPanel events after a victory return. The empty level-3 slot immediately shows Budding announcing Tiancaitu. The level-5 dialogue uses a clean David portrait, announces his stall, and describes permanent card unlocks. Save version 3 persists cleared levels, acknowledged events, and general-card ownership; legacy progress conservatively infers preceding clears and restores character rewards. Replayed clears do not repeat acknowledged stories.
+
+General-card features require the level-5 clear plus active level order >=5; the first David fight remains locked. After clearing, the Locker node opens VendorPanel, with an explicit replay button. It reuses ShopCardItem to display permanent unlock prices and ownership. SaveManager validates and deducts Old TOEFL once per unlock. Existing normal general cards have `initially_unlocked: true`; new cards omit it or set false, appear in the stall, and enter all normal battle pools only after purchase. Hidden cards remain excluded by available_in_pool. Victory converts remaining battle New TOEFL into saved integer Old TOEFL at 1:5.
+
+## Revised Budding and Tiancaitu Cards
+
+CardData owns hit_count, AP switch threshold, distinct extra-target count, explicit chain_damage_sequence, compact summary keys, and typed CardStatusOption entries. BattleManager dispatches multi-hit single-target skills, AP-selected patterns, and chain skills. AP is paid before skill hits. All player attack packets pass through _deal_player_hit for preexisting attack_ap marks and duplicate-safe death rewards. Each chain hit rolls its status after dealing damage.
+
+CharacterData combines active damage_reduction statuses with ordinary turn defense under the existing 85% cap. EnemyData now supplies an outgoing weakness/strength multiplier. All enemy damage goes through _resolve_enemy_hit, which resolves HP loss first, grants hurt_ap for positive actual loss, then returns that amount with counterattack. Reflection uses enemy defenses and no player amplification; a reflected kill cancels remaining group hits. Counterattack and AP-mark duration defaults are one turn, while Budding defense lasts two. Status icons support fractional AP values and reuse existing effect textures. No scene structure changes are required.
+
+## Enemy Card Actions and Currency Settlement
+
+EnemyAbilityData owns explicit card_ids for enemy-only draw pools. BattleManager chooses copied cards before presentation, then mirrors attacks onto living player targets and self-targets support. Anomaly David samples living player attack/defense cards or seven fixed general cards with equal ability weights; Tiancaitu copies use the player team AP snapshot. EnemyData supports timed reduction, immunity charges, healing, weakness, copied retaliation and capped local AP. Retaliation on either side grants actual-HP-loss AP without recursively triggering the other counter.
+
+StatusEffectData.skip_next_turn_tick protects enemy-phase casts from immediate expiration at the upcoming player boundary. Player stuns mark the next character action used; an entirely stunned team queues a generation-guarded enemy turn. Slime support grants max shields and logs only actual increases. Card question magnitudes are fixed: the only answer/difficulty reward is AP, including hard-question skills.
+
+BattleState caps New TOEFL at 120 and resets a per-battle currency_settled guard. Final victory deposits floor(remaining New TOEFL * 5) Old TOEFL through SaveManager before advancing progression. Duplicate final checks cannot deposit again. The victory panel displays the converted amount; defeat does not deposit.

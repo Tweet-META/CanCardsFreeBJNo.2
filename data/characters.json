@@ -10,7 +10,7 @@
       "display_name": "CHARACTER_BUDDING",
       "attribute": "culture",
       "description": "CHARACTER_BUDDING_DESCRIPTION",
-      "max_hp": 110,
+      "max_hp": 200,
       "portrait_path": "res://assets/characters/βudding.png",
       "battle_animation_path": "res://assets/animation/budding/sprite_frames.tres",
       "cards": [
@@ -24,7 +24,7 @@
       "display_name": "CHARACTER_RABBIT",
       "attribute": "pinyin",
       "description": "CHARACTER_RABBIT_DESCRIPTION",
-      "max_hp": 95,
+      "max_hp": 120,
       "portrait_path": "res://assets/characters/天才兔.png",
       "battle_animation_path": "res://assets/animation/rabbit/sprite_frames.tres",
       "cards": [

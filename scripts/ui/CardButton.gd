@@ -142,9 +142,12 @@ func _on_mouse_exited() -> void:
 		hover_changed.emit(card_index, false)
 
 
+## Uses concise data-owned summaries for complex cards and standard text for simple cards.
 func _update_text(card: CardData) -> void:
 	title_label.text = tr(card.display_name)
-	if card.is_skill():
+	if not card.summary.is_empty():
+		body_label.text = tr(card.summary).replace("\\n", "\n")
+	elif card.is_skill():
 		body_label.text = "%s\n%s" % [tr("CARD_SKILL_COST") % card.skill_ap_cost, tr("CARD_SKILL_BASE_EFFECT")]
 	elif card.is_general():
 		match card.effect_id:

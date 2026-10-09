@@ -9,6 +9,8 @@ class_name MapScene
 @onready var level_layer: Control = $LevelLayer
 @onready var preparation_panel: PreparationPanel = $PreparationPanel
 @onready var tutorial_guide: TutorialGuide = $TutorialGuide
+@onready var story_panel: StoryPanel = $StoryPanel
+@onready var vendor_panel: VendorPanel = $VendorPanel
 
 var maps: Array[MapData] = []
 var selected_map_index: int = 0
@@ -17,13 +19,15 @@ var tutorial: TutorialData
 var tutorial_speaker: CharacterData
 
 
-## Ready.
+## Connects map preparation, the permanent unlock stall, and pending story handoffs.
 func _ready() -> void:
 	back_button.pressed.connect(_return_to_menu)
 	map_selector.item_selected.connect(_select_map)
 	LanguageManager.language_changed.connect(_on_language_changed)
 	preparation_panel.enter_level_requested.connect(_confirm_enter_level)
 	preparation_panel.preparation_changed.connect(_refresh_tutorial_guide)
+	story_panel.completed.connect(_complete_story)
+	vendor_panel.challenge_requested.connect(_challenge_locker)
 	var first_level: LevelData = LevelDatabase.create_level(SaveManager.DEFAULT_LEVEL_ID)
 	if SaveManager.needs_first_tutorial():
 		tutorial = TutorialDatabase.create_for_level(first_level)
@@ -32,6 +36,7 @@ func _ready() -> void:
 	_collect_level_nodes()
 	_load_map_list()
 	_refresh_tutorial_guide()
+	_show_pending_story()
 
 
 ## Load map list.
@@ -126,9 +131,40 @@ func _return_to_menu() -> void:
 	get_tree().change_scene_to_file("res://scenes/MainMenu.tscn")
 
 
-## Enter level.
+## Opens the cleared Locker stall or normal level preparation.
 func _enter_level(level: LevelData) -> void:
+	if story_panel.visible or not level.unlocked:
+		return
+	var event: StoryEventData = StoryDatabase.for_level(level.id)
+	if event != null and event.unlock_general_cards and SaveManager.are_general_cards_unlocked():
+		vendor_panel.open_stall()
+		return
 	preparation_panel.open_for_level(level, _create_unlocked_characters())
+
+
+## Returns the stall's replay button to ordinary battle preparation.
+func _challenge_locker() -> void:
+	for level_id: String in LevelDatabase.get_mainline_ids():
+		var event: StoryEventData = StoryDatabase.for_level(level_id)
+		if event != null and event.unlock_general_cards:
+			preparation_panel.open_for_level(LevelDatabase.create_level(level_id), _create_unlocked_characters())
+			return
+
+
+## Opens a one-time story after returning from a cleared battle.
+func _show_pending_story() -> void:
+	var event: StoryEventData = SaveManager.get_pending_story()
+	if event != null:
+		tutorial_guide.hide()
+		story_panel.open_event(event)
+
+
+## Saves acknowledged dialogue and supports multiple migrated pending events.
+func _complete_story(event_id: String) -> void:
+	SaveManager.complete_story(event_id)
+	_refresh_map()
+	_refresh_tutorial_guide()
+	_show_pending_story()
 
 
 ## Creates the character list allowed by the active save.

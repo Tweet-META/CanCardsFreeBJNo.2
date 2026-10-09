@@ -42,6 +42,13 @@ enum TargetType {
 @export var direct_hp_loss: int = 0
 @export var art_path: String = ""
 @export var shop_price: float = 0.0
+@export var unlock_price: float = 0.0
+@export var summary: String = ""
+@export var hit_count: int = 1
+@export var ap_switch_threshold: float = 2.5
+@export var extra_target_count: int = 0
+@export var chain_damage_sequence: Array[int] = []
+var random_hit_effects: Array[CardStatusOption] = []
 
 
 ## Is skill.
@@ -79,32 +86,6 @@ func get_sell_price() -> float:
 ## Get question difficulty.
 func get_question_difficulty(default_difficulty: String) -> String:
 	return "hard" if is_skill() else default_difficulty
-
-
-## Get damage bonus for difficulty.
-func get_damage_bonus_for_difficulty(difficulty: String) -> float:
-	match difficulty:
-		"easy":
-			return 0.05
-		"medium":
-			return 0.07
-		"hard":
-			return 0.10
-		_:
-			return 0.0
-
-
-## Get block bonus for difficulty.
-func get_block_bonus_for_difficulty(difficulty: String) -> float:
-	match difficulty:
-		"easy":
-			return 0.02
-		"medium":
-			return 0.03
-		"hard":
-			return 0.05
-		_:
-			return 0.0
 
 
 ## Get correct answer ap bonus.

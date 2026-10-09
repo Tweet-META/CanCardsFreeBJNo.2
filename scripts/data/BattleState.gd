@@ -2,6 +2,8 @@ extends RefCounted
 ## Defines the BattleState script.
 class_name BattleState
 
+const MAX_NEW_TOEFL: float = 120.0
+
 enum Phase {
 	SETUP,
 	PLAYER_TURN,
@@ -39,6 +41,7 @@ var general_cards_enabled: bool = false
 var tutorial: TutorialData
 var tutorial_steps_seen: Dictionary = {}
 var tutorial_log_unread: bool = false
+var currency_settled: bool = false
 
 
 ## Initializes a battle with one optional goal that remains active for the full battle.
@@ -57,6 +60,7 @@ func setup(players: Array[CharacterData], enemies: Array[EnemyData], level: Leve
 	turn_count = 0
 	ap = 0.0
 	new_toefl = 0.0
+	currency_settled = false
 	team_general_cards.clear()
 	if general_cards_enabled:
 		team_general_cards = GameDataFactory.create_starting_general_cards(rng)
@@ -152,8 +156,9 @@ func clear_ap() -> void:
 	ap = 0.0
 
 
+## Keeps battle currency within its 120 New TOEFL cap.
 func add_new_toefl(amount: float) -> void:
-	new_toefl = minf(6.0, new_toefl + maxf(amount, 0.0))
+	new_toefl = minf(MAX_NEW_TOEFL, new_toefl + maxf(amount, 0.0))
 
 
 func spend_new_toefl(amount: float) -> bool:

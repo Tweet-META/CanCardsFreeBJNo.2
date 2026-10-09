@@ -18,6 +18,7 @@ var source_name: String = ""
 var value_text: String = ""
 var detail_text: String = ""
 var overlay_icon_path: String = ""
+var skip_next_turn_tick: bool = false
 
 
 func setup_runtime(
@@ -47,8 +48,12 @@ func is_active() -> bool:
 	return delay_turns <= 0 and remaining_turns > 0
 
 
+## Preserves newly cast enemy-phase effects through their immediate player-turn boundary.
 func advance_turn() -> bool:
 	if not advances_with_turn:
+		return false
+	if skip_next_turn_tick:
+		skip_next_turn_tick = false
 		return false
 	if delay_turns > 0:
 		delay_turns -= 1

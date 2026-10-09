@@ -42,14 +42,17 @@ func heal(amount: int) -> int:
 	return current_hp - hp_before
 
 
+## Resolves immunity, persistent reduction, and shields before applying HP loss.
 func take_damage(raw_damage: int) -> int:
 	last_damage_was_immune = false
+	if raw_damage <= 0:
+		return 0
 	if raw_damage > 0 and consume_status_effect("damage_immunity"):
 		last_damage_was_immune = true
 		return 0
 
 	var amplified_damage: int = roundi(float(raw_damage) * get_incoming_damage_multiplier())
-	var reduction: float = turn_damage_reduction
+	var reduction: float = get_damage_reduction()
 
 	var reduced_damage: int = maxi(1, roundi(float(amplified_damage) * (1.0 - clampf(reduction, 0.0, 0.85))))
 	var absorbed_damage: int = mini(current_shield, reduced_damage)
@@ -57,6 +60,15 @@ func take_damage(raw_damage: int) -> int:
 	var health_damage: int = reduced_damage - absorbed_damage
 	current_hp = maxi(0, current_hp - health_damage)
 	return health_damage
+
+
+## Combines ordinary turn defense with active multi-turn defense statuses.
+func get_damage_reduction() -> float:
+	var reduction: float = turn_damage_reduction
+	for effect: StatusEffectData in active_effects:
+		if effect.id == "damage_reduction" and effect.is_active():
+			reduction += effect.value
+	return clampf(reduction, 0.0, 0.85)
 
 
 func reset_turn_state() -> void:
@@ -78,6 +90,7 @@ func add_shield(amount: int) -> int:
 	return gained_shield
 
 
+## Applies statuses and preserves an enemy-phase refresh through its first turn boundary.
 func apply_status_effect(effect: StatusEffectData) -> void:
 	if effect == null or effect.id.is_empty():
 		return
@@ -89,6 +102,7 @@ func apply_status_effect(effect: StatusEffectData) -> void:
 	var existing: StatusEffectData = get_status_effect_from_source(effect.id, effect.source_id)
 	if existing != null:
 		existing.refresh(effect.value, effect.remaining_turns)
+		existing.skip_next_turn_tick = existing.skip_next_turn_tick or effect.skip_next_turn_tick
 		return
 	active_effects.append(effect)
 
@@ -125,6 +139,16 @@ func consume_status_effect(effect_id: String) -> bool:
 				active_effects.remove_at(i)
 			return true
 	return false
+
+
+## Consumes all active stun sources together so one skipped action does not stack into many.
+func consume_active_stuns() -> bool:
+	var consumed: bool = false
+	for index in range(active_effects.size() - 1, -1, -1):
+		if active_effects[index].id == "stun" and active_effects[index].is_active():
+			active_effects.remove_at(index)
+			consumed = true
+	return consumed
 
 
 func get_outgoing_damage_multiplier() -> float:

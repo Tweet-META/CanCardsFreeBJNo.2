@@ -8,6 +8,7 @@ class_name StatusEffectIcon
 @onready var duration_label: Label = $DurationLabel
 
 
+## Formats status values including fractional AP bonuses from data-owned descriptions.
 func setup(effect: StatusEffectData) -> void:
 	if effect == null:
 		hide()
@@ -17,6 +18,8 @@ func setup(effect: StatusEffectData) -> void:
 	var effect_description: String = tr(effect.description)
 	if effect.value_format == "percent":
 		effect_description = effect_description % roundi(effect.value * 100.0)
+	elif effect.value_format == "decimal":
+		effect_description = effect_description % effect.value
 	elif effect.value_format == "text" and effect_description.find("%s") != -1:
 		effect_description = effect_description % tr(effect.detail_text)
 	tooltip_text = tr("EFFECT_TOOLTIP_FORMAT") % [source_text, effect_description]
@@ -35,6 +38,8 @@ func setup(effect: StatusEffectData) -> void:
 			value_label.text = "%d%%" % roundi(effect.value * 100.0)
 		"integer":
 			value_label.text = str(roundi(effect.value))
+		"decimal":
+			value_label.text = "%.1f" % effect.value
 		"text":
 			value_label.text = tr(effect.value_text)
 		_:

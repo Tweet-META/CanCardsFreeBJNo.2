@@ -18,19 +18,28 @@ const STATUS_EFFECT_ICON_SCENE: PackedScene = preload("res://scenes/ui/StatusEff
 @onready var visual_root: Control = $Content/Portrait/VisualRoot
 @onready var attack_sprite: AnimatedSprite2D = $Content/Portrait/VisualRoot/AttackOrigin/AttackSprite
 @onready var attack_animation: AnimationPlayer = $AttackAnimation
+@onready var motion: CharacterMotion = $Content/Portrait/VisualRoot/Motion
+@onready var magic_ambient: AnimatedSprite2D = $Content/Portrait/VisualRoot/MagicAmbient
+@onready var magic_burst: AnimatedSprite2D = $Content/Portrait/VisualRoot/MagicBurst
 
 @export_range(0.0, 2.0, 0.05) var action_recovery_seconds: float = 0.15
 
 var enemy_index: int = -1
 var bound_enemy: EnemyData
+var _magic_path: String = ""
+var _last_hp: int = -1
 
 
-## Connects the body-only button and keeps health/status UI outside the interaction area.
+## Connects body interaction and keeps its visual transform aligned on layout changes.
 func _ready() -> void:
 	hit_button.pressed.connect(_on_pressed)
 	hit_button.add_theme_stylebox_override("hover", _style(Color(1.0, 0.82, 0.74, 0.22), 8, 2))
 	hit_button.add_theme_stylebox_override("pressed", _style(Color(1.0, 0.82, 0.74, 0.35), 8, 2))
 	portrait.resized.connect(_fit_hit_button)
+	visual_root.resized.connect(_fit_hit_button)
+	motion.hit_button.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	motion.hit_button.disabled = true
+	magic_burst.animation_finished.connect(magic_burst.hide)
 	hp_bar.add_theme_stylebox_override("background", _style(Color(0.40, 0.34, 0.27), 12, 2))
 	hp_bar.add_theme_stylebox_override("fill", _style(HP_RED, 12, 1))
 	_apply_target_highlight_style()
@@ -57,15 +66,26 @@ func setup(enemy: EnemyData, index: int, selected: bool, target_highlighted: boo
 	hp_bar.value = enemy.current_hp
 	hp_label.text = "%d / %d" % [enemy.current_hp, enemy.max_hp]
 	portrait.texture = load(enemy.portrait_path) as Texture2D
+	motion.visible = not enemy.battle_animation_path.is_empty()
+	portrait.visible = not motion.visible
+	if motion.visible:
+		motion.setup(enemy.battle_animation_path, enemy.portrait_path, enemy.is_alive())
+		if _last_hp >= 0 and enemy.current_hp < _last_hp and enemy.is_alive():
+			motion.play_action(&"hurt")
+	_last_hp = enemy.current_hp
+	_setup_magic(enemy.magic_animation_path)
 	_fit_hit_button()
-	shield_visual.setup(enemy.current_shield, enemy.damage_reduction)
+	shield_visual.setup(enemy.current_shield, enemy.get_damage_reduction())
 	_refresh_effects(enemy)
 	target_highlight.visible = target_highlighted
 
 
-## Fits native clicks and target outlines to the texture's drawn, aspect-correct body.
+## Fits body interaction beneath the same scale and mirror transform as the animation layers.
 func _fit_hit_button() -> void:
+	_apply_visual_transform()
 	var texture: Texture2D = portrait.texture
+	if motion.visible and motion.sprite.sprite_frames != null:
+		texture = motion.sprite.sprite_frames.get_frame_texture(&"idle", 0)
 	if texture == null:
 		hit_button.setup_texture(null, Rect2())
 		return
@@ -73,6 +93,31 @@ func _fit_hit_button() -> void:
 	var fit_scale: float = minf(portrait.size.x / maxf(1.0, texture_size.x), portrait.size.y / maxf(1.0, texture_size.y))
 	var draw_size: Vector2 = texture_size * fit_scale
 	hit_button.setup_texture(texture, Rect2(portrait.position + (portrait.size - draw_size) * 0.5, draw_size))
+	for sprite: AnimatedSprite2D in [magic_ambient, magic_burst]:
+		sprite.position = portrait.size * 0.5
+		sprite.scale = Vector2.ONE * fit_scale
+
+
+## Scales and mirrors body, magic, and alpha-mask interaction around their shared center.
+func _apply_visual_transform() -> void:
+	var display_scale: float = bound_enemy.battle_visual_scale if bound_enemy != null else 1.0
+	var flipped: bool = bound_enemy != null and bound_enemy.battle_flip_h
+	visual_root.pivot_offset = visual_root.size * 0.5
+	visual_root.scale = Vector2(-display_scale if flipped else display_scale, display_scale)
+
+
+## Loads the independent aura once per identity without restarting its ambient loop.
+func _setup_magic(path: String) -> void:
+	if path == _magic_path:
+		return
+	_magic_path = path
+	var frames: SpriteFrames = load(path) as SpriteFrames if not path.is_empty() else null
+	magic_ambient.sprite_frames = frames
+	magic_burst.sprite_frames = frames
+	magic_burst.hide()
+	magic_ambient.visible = frames != null
+	if frames != null:
+		magic_ambient.play(&"idle")
 
 
 ## Rejects HP bars, status icons, and transparent padding when a card is targeted.
@@ -80,10 +125,18 @@ func contains_global_point(mouse_global_position: Vector2) -> bool:
 	return hit_button.contains_global_point(mouse_global_position)
 
 
-## Uses the reserved attack sprite when supplied, otherwise plays the editor-authored lunge.
+## Plays animated enemies and magic separately, retaining the static enemy fallback.
 func play_action(is_attack: bool) -> void:
 	var frames: SpriteFrames = attack_sprite.sprite_frames
-	if is_attack and frames != null and frames.has_animation(&"attack"):
+	if is_attack and motion.visible:
+		if magic_burst.sprite_frames != null:
+			magic_burst.stop()
+			magic_burst.show()
+			magic_burst.play(&"attack")
+		var duration: float = motion.play_action(&"attack")
+		if duration > 0.0:
+			await get_tree().create_timer(duration).timeout
+	elif is_attack and frames != null and frames.has_animation(&"attack"):
 		portrait.hide()
 		attack_sprite.show()
 		attack_sprite.stop()

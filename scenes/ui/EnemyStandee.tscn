@@ -1,8 +1,9 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/EnemyStandee.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/ui/ShieldVisual.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/ui/PortraitHitButton.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/ui/CharacterMotion.tscn" id="4"]
 
 [sub_resource type="Animation" id="AttackLunge"]
 resource_name = "attack"
@@ -98,6 +99,27 @@ stretch_mode = 5
 
 [node name="AttackOrigin" type="Marker2D" parent="Content/Portrait/VisualRoot"]
 position = Vector2(100, 67.5)
+
+[node name="Motion" parent="Content/Portrait/VisualRoot" instance=ExtResource("4")]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+
+[node name="MagicAmbient" type="AnimatedSprite2D" parent="Content/Portrait/VisualRoot"]
+visible = false
+position = Vector2(100, 67.5)
+scale = Vector2(0.527344, 0.527344)
+
+[node name="MagicBurst" type="AnimatedSprite2D" parent="Content/Portrait/VisualRoot"]
+visible = false
+position = Vector2(100, 67.5)
+scale = Vector2(0.527344, 0.527344)
 
 [node name="AttackSprite" type="AnimatedSprite2D" parent="Content/Portrait/VisualRoot/AttackOrigin"]
 visible = false

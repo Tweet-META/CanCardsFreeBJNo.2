@@ -16,12 +16,18 @@ const PROTOTYPE_NIAN: String = "nian"
 @export var abilities: Array[EnemyAbilityData] = []
 @export var toefl_reward: float = 1.0
 @export var portrait_path: String = ""
+@export var battle_animation_path: String = ""
+@export var magic_animation_path: String = ""
+@export_range(0.1, 3.0, 0.05) var battle_visual_scale: float = 1.0
+@export var battle_flip_h: bool = false
 
 var current_hp: int = 80
 var current_shield: int = 0
 var damage_reduction: float = 0.0
 var rewards_collected: bool = false
 var active_effects: Array[StatusEffectData] = []
+var ap: float = 0.0
+var last_damage_was_immune: bool = false
 var charge_ability_id: String = ""
 var charge_power: int = 0
 var charge_remaining_turns: int = 0
@@ -30,12 +36,15 @@ var charge_target_name: String = ""
 var charge_target_portrait_path: String = ""
 
 
+## Resets copied-card resources, defenses and ordinary enemy state for a new battle.
 func setup_runtime() -> void:
 	current_hp = max_hp
 	current_shield = 0
 	damage_reduction = 0.0
 	rewards_collected = false
 	active_effects.clear()
+	ap = 0.0
+	last_damage_was_immune = false
 	clear_charge()
 
 
@@ -77,14 +86,54 @@ func clear_charge() -> void:
 	charge_target_portrait_path = ""
 
 
+## Resolves copied damage immunity, timed defense, and shields before HP damage.
 func take_damage(raw_damage: int) -> int:
+	last_damage_was_immune = false
+	if raw_damage > 0 and _consume_damage_immunity():
+		last_damage_was_immune = true
+		return 0
 	var incoming_damage: int = roundi(float(maxi(0, raw_damage)) * get_incoming_damage_multiplier())
-	var reduced_damage: int = roundi(float(incoming_damage) * (1.0 - clampf(damage_reduction, 0.0, 0.85)))
+	var reduced_damage: int = roundi(float(incoming_damage) * (1.0 - get_damage_reduction()))
 	var absorbed_damage: int = mini(current_shield, reduced_damage)
 	current_shield -= absorbed_damage
 	var health_damage: int = reduced_damage - absorbed_damage
 	current_hp = maxi(0, current_hp - health_damage)
 	return health_damage
+
+
+## Consumes one charge of an enemy's copied shield without expiring unused charges.
+func _consume_damage_immunity() -> bool:
+	var effect: StatusEffectData = get_status_effect("damage_immunity")
+	if effect == null or not effect.is_active():
+		return false
+	if effect.value > 1.0:
+		effect.value -= 1.0
+	else:
+		active_effects.erase(effect)
+	return true
+
+
+## Combines persistent copied defense with any existing fixed reduction.
+func get_damage_reduction() -> float:
+	var reduction: float = damage_reduction
+	for effect: StatusEffectData in active_effects:
+		if effect.id == "damage_reduction" and effect.is_active():
+			reduction += effect.value
+	return clampf(reduction, 0.0, 0.85)
+
+
+## Restores enemy HP for copied healing cards without exceeding maximum HP.
+func heal(amount: int) -> int:
+	var before: int = current_hp
+	current_hp = mini(max_hp, current_hp + maxi(0, amount))
+	return current_hp - before
+
+
+## Preserves the largest shield value instead of stacking repeated slime support.
+func grant_max_shield(amount: int) -> int:
+	var before: int = current_shield
+	current_shield = maxi(current_shield, maxi(0, amount))
+	return current_shield - before
 
 
 func add_shield(amount: int) -> int:
@@ -97,14 +146,21 @@ func add_damage_reduction(amount: float) -> void:
 	damage_reduction = clampf(damage_reduction + amount, 0.0, 0.85)
 
 
+## Applies copied statuses with immunity charge stacking and protected duration refreshes.
 func apply_status_effect(effect: StatusEffectData) -> bool:
 	if effect == null or effect.id.is_empty() or effect.remaining_turns <= 0:
 		return false
 	if effect.id == "stun" and get_status_effect("stun") != null:
 		return false
+	if effect.id == "damage_immunity":
+		var immunity: StatusEffectData = get_status_effect("damage_immunity")
+		if immunity != null:
+			immunity.value += maxf(1.0, effect.value)
+			return true
 	var existing: StatusEffectData = get_status_effect_from_source(effect.id, effect.source_id)
 	if existing != null:
 		existing.refresh(effect.value, effect.remaining_turns)
+		existing.skip_next_turn_tick = existing.skip_next_turn_tick or effect.skip_next_turn_tick
 		return true
 	active_effects.append(effect)
 	return true
@@ -140,6 +196,19 @@ func get_incoming_damage_multiplier() -> float:
 		if effect.is_active() and effect.id == "vulnerable":
 			multiplier *= 1.0 + effect.value
 	return maxf(multiplier, 0.0)
+
+
+## Applies active attack modifiers to every enemy damage ability at delivery time.
+func get_outgoing_damage_multiplier() -> float:
+	var multiplier: float = 1.0
+	for effect: StatusEffectData in active_effects:
+		if not effect.is_active():
+			continue
+		if effect.id == "weakness":
+			multiplier *= maxf(0.0, 1.0 - effect.value)
+		elif effect.id == "strength":
+			multiplier *= 1.0 + effect.value
+	return multiplier
 
 
 func advance_status_effect_turns() -> void:

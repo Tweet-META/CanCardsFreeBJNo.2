@@ -1,0 +1,56 @@
+{
+  "format": "RGBA PNG",
+  "clips": [
+    {
+      "animation": "character_idle",
+      "frame_count": 150,
+      "fps": 60,
+      "canvas": [
+        256,
+        256
+      ],
+      "bytes": 6296585
+    },
+    {
+      "animation": "character_hurt",
+      "frame_count": 150,
+      "fps": 60,
+      "canvas": [
+        256,
+        256
+      ],
+      "bytes": 6002092
+    },
+    {
+      "animation": "character_attack",
+      "frame_count": 150,
+      "fps": 60,
+      "canvas": [
+        256,
+        256
+      ],
+      "bytes": 6294826
+    },
+    {
+      "animation": "magic_ambient",
+      "frame_count": 1800,
+      "fps": 60,
+      "canvas": [
+        256,
+        256
+      ],
+      "bytes": 7159266
+    },
+    {
+      "animation": "magic_burst",
+      "frame_count": 150,
+      "fps": 60,
+      "canvas": [
+        256,
+        256
+      ],
+      "bytes": 186188
+    }
+  ],
+  "independent_magic_layer": true
+}

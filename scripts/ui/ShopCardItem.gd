@@ -29,6 +29,14 @@ func setup(card: CardData, index: int, current_ap: float, balance: float) -> voi
 	buy_button.disabled = balance + 0.001 < card.shop_price
 
 
+## Reuses the card preview for permanent unlocks with a separate Old TOEFL price.
+func setup_unlock_card(card: CardData, index: int, balance: float, unlocked: bool) -> void:
+	setup(card, index, 0.0, balance)
+	price_label.text = tr("VENDOR_UNLOCK_PRICE") % card.unlock_price
+	buy_button.text = tr("VENDOR_ALREADY_UNLOCKED" if unlocked else "VENDOR_UNLOCK_CARD")
+	buy_button.disabled = unlocked or balance + 0.001 < card.unlock_price
+
+
 func _on_buy_pressed() -> void:
 	if offer_index >= 0:
 		buy_requested.emit(offer_index)

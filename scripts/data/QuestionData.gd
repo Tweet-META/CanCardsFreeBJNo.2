@@ -3,7 +3,6 @@ extends Resource
 class_name QuestionData
 
 @export var id: String = ""
-@export var category: String = ""
 @export var difficulty: String = "easy"
 @export_multiline var prompt: String = ""
 @export var options: Array[String] = []
@@ -15,10 +14,10 @@ func is_answer_correct(index: int) -> bool:
 	return index == correct_index
 
 
+## Copies and shuffles options while preserving the source answer mapping.
 func create_shuffled_copy(rng: RandomNumberGenerator) -> QuestionData:
 	var shuffled_question: QuestionData = QuestionData.new()
 	shuffled_question.id = id
-	shuffled_question.category = category
 	shuffled_question.difficulty = difficulty
 	shuffled_question.prompt = prompt
 	shuffled_question.explanation = explanation
